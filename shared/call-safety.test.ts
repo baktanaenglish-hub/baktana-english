@@ -151,6 +151,15 @@ describe('sanitizeTurnRequest', () => {
     ).toEqual({ persona: 'friend', message: 'hi Maya', history: [{ role: 'assistant', text: 'Hey!' }] });
   });
 
+  it('keeps only a known, non-default correction level', () => {
+    const turn = (correctionLevel: unknown) =>
+      sanitizeTurnRequest({ persona: 'teacher', message: 'hi', correctionLevel });
+    expect(turn('light')?.correctionLevel).toBe('light');
+    expect(turn('full')?.correctionLevel).toBe('full');
+    expect(turn('normal')).not.toHaveProperty('correctionLevel');
+    expect(turn('strict')).not.toHaveProperty('correctionLevel');
+  });
+
   it('keeps only a slow pace', () => {
     expect(sanitizeTurnRequest({ persona: 'teacher', message: 'hi', pace: 'slow' })?.pace).toBe('slow');
     expect(sanitizeTurnRequest({ persona: 'teacher', message: 'hi', pace: 'fast' })).not.toHaveProperty('pace');

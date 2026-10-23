@@ -117,6 +117,14 @@ describe('turnRequest', () => {
     expect(retryRequest(appendUser(call, 'hi'), 'slow')?.pace).toBe('slow');
   });
 
+  it("sends the teacher's correction level only when it isn't the default", () => {
+    const teacherCall = startCall(teacher);
+    expect(turnRequest(teacherCall, 'hi', 'normal', 'normal')).not.toHaveProperty('correctionLevel');
+    expect(turnRequest(teacherCall, 'hi', 'normal', 'light').correctionLevel).toBe('light');
+    expect(retryRequest(appendUser(teacherCall, 'hi'), 'normal', 'full')?.correctionLevel).toBe('full');
+    expect(turnRequest(startCall(friend), 'hi', 'normal', 'full')).not.toHaveProperty('correctionLevel');
+  });
+
   it('turns a Hebrew word into a "how do I say" question', () => {
     expect(wordRequest(' שולחן ')).toBe('How do I say "שולחן" in English?');
   });

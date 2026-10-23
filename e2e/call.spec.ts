@@ -138,6 +138,33 @@ test('a premium learner sees the calls left, and the teacher replies and correct
   await expect(page.locator('.calls-left')).toHaveText(/נשארו לכם 7 מתוך 10 שיחות היום/);
 });
 
+test("the learner picks how picky the teacher is, and it's sent with the turn and remembered", async ({ page }) => {
+  await openSignedIn(page, premium());
+  const requests = await mockTurn(page, () => ({ reply: 'Nice! What did you do?', replyHe: 'יפה!', corrections: [] }));
+  await callPersona(page, 'Emma');
+  const levels = page.getByRole('radiogroup', { name: 'מה המורה מתקנת' });
+  await expect(levels.getByRole('radio', { name: 'דקדוק' })).toHaveAttribute('aria-checked', 'true');
+
+  await levels.getByRole('radio', { name: 'הכול, גם ניסוח' }).click();
+  await expect(levels.getByRole('radio', { name: 'הכול, גם ניסוח' })).toHaveAttribute('aria-checked', 'true');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/correction-level.png` });
+  await say(page, 'I did a photo');
+  await expect(page.locator('.caption.them')).toContainText('What did you do?');
+  expect(requests[0].correctionLevel).toBe('full');
+
+  await levels.getByRole('radio', { name: 'רק טעויות גדולות' }).click();
+  await say(page, 'It was fun');
+  await expect.poll(() => requests[1]?.correctionLevel).toBe('light');
+
+  // The next call starts with the same choice.
+  await page.getByRole('button', { name: 'ניתוק השיחה' }).click();
+  await page.locator('.call-summary').getByRole('button', { name: 'שיחה חדשה' }).click();
+  await callPersona(page, 'Emma');
+  await expect(
+    page.getByRole('radiogroup', { name: 'מה המורה מתקנת' }).getByRole('radio', { name: 'רק טעויות גדולות' }),
+  ).toHaveAttribute('aria-checked', 'true');
+});
+
 test('the friend never shows corrections', async ({ page }) => {
   await openSignedIn(page, premium());
   await mockTurn(page, (req) => ({
@@ -151,6 +178,7 @@ test('the friend never shows corrections', async ({ page }) => {
   await expect(page.locator('.caption.them')).toContainText('Tell me more.');
   await expect(page.locator('.caption.you')).toContainText('I go to party');
   await expect(page.locator('.caption-corrections')).toHaveCount(0);
+  await expect(page.locator('.call-level')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'ניתוק השיחה' }).click();
   await expect(page.locator('.call-summary')).toBeVisible();
