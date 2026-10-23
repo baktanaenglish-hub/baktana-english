@@ -758,6 +758,12 @@ function Screens() {
         gems={gems.gems}
         onGems={goShop}
         premium={premium}
+        name={account.user?.displayName ?? null}
+        avatar={avatarEmoji(gems)}
+        onProfile={() => {
+          setIntro(null);
+          setScreen({ name: 'profile' });
+        }}
       />
       <main className="content" key={screen.name}>
         {screen.name === 'path' && frozeDays > 0 && (
