@@ -9,6 +9,16 @@ export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL ?? '';
 export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
 export const USE_SUPABASE = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const ACCOUNTS_ENABLED = USE_SUPABASE || import.meta.env.VITE_ENABLE_ACCOUNTS !== 'false';
+/** "Forgot password" sends an email, which only the Supabase backend can do. */
+export const PASSWORD_RESET = USE_SUPABASE;
+
+/**
+ * True when the page was opened from a password-reset email: Supabase appends
+ * `#access_token=…&type=recovery`. Read before supabase-js starts, since it clears the hash.
+ */
+export function isPasswordRecoveryLink(hash = typeof window === 'undefined' ? '' : window.location.hash): boolean {
+  return new URLSearchParams(hash.replace(/^#/, '')).get('type') === 'recovery';
+}
 
 /**
  * The public web app, where links in Supabase emails (e.g. "confirm your account") open.

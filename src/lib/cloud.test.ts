@@ -14,6 +14,8 @@ function fakeSupabase(opts: { signedIn?: boolean; confirmEmail?: boolean; stored
   };
   let session = opts.signedIn ? { user: { id: 'u1' } } : null;
   const signUps: { options?: { emailRedirectTo?: string } }[] = [];
+  const resets: { email: string; options?: { redirectTo?: string } }[] = [];
+  const passwords: string[] = [];
   const rpcs: string[] = [];
   const user = { id: 'u1', email: 'dana@example.com', created_at: '2026-01-01T00:00:00Z', user_metadata: {} };
   const client = {
@@ -29,6 +31,17 @@ function fakeSupabase(opts: { signedIn?: boolean; confirmEmail?: boolean; stored
           ? ((session = { user: { id: 'u1' } }), { data: { user, session }, error: null })
           : { data: { user: null, session: null }, error: { message: 'Invalid login credentials', status: 400 } },
       signOut: async () => ((session = null), { error: null }),
+      resetPasswordForEmail: async (email: string, options?: { redirectTo?: string }) => (
+        resets.push({ email, options }),
+        { data: {}, error: null }
+      ),
+      updateUser: async ({ password }: { password: string }) =>
+        password === 'correct-horse'
+          ? {
+              data: { user: null },
+              error: { message: 'New password should be different from the old password.', code: 'same_password' },
+            }
+          : (passwords.push(password), { data: { user }, error: null }),
     },
     from: (table: keyof typeof db) => ({
       select: () => ({
@@ -56,7 +69,7 @@ function fakeSupabase(opts: { signedIn?: boolean; confirmEmail?: boolean; stored
       }
     ),
   };
-  return { db, signUps, rpcs, api: createCloudApi(async () => client as unknown as SupabaseClient) };
+  return { db, signUps, resets, passwords, rpcs, api: createCloudApi(async () => client as unknown as SupabaseClient) };
 }
 
 const [first, second] = allLessons;
@@ -81,6 +94,30 @@ describe('cloud backend', () => {
     const { api, signUps } = fakeSupabase({ confirmEmail: true });
     await api.register({ email: 'a@b.co', password: 'correct-horse', displayName: 'דנה' }).catch(() => undefined);
     expect(signUps[0].options?.emailRedirectTo).toBe('https://baktanaenglish-hub.github.io/baktana-english/');
+  });
+
+  it('sends the password-reset link back to the public site', async () => {
+    const { api, resets } = fakeSupabase();
+    await api.requestPasswordReset('dana@example.com');
+    expect(resets).toEqual([
+      { email: 'dana@example.com', options: { redirectTo: 'https://baktanaenglish-hub.github.io/baktana-english/' } },
+    ]);
+  });
+
+  it('sets a new password from the reset link and signs in', async () => {
+    const { api, passwords } = fakeSupabase({ signedIn: true });
+    const res = await api.setNewPassword('new-horse-battery');
+    expect(passwords).toEqual(['new-horse-battery']);
+    expect(res.user).toMatchObject({ id: 'u1', displayName: 'דנה' });
+    const same = await api.setNewPassword('correct-horse').catch((e) => e);
+    expect(same).toMatchObject({ code: 'same_password', message: 'זו הסיסמה הנוכחית. בחרו סיסמה חדשה.' });
+  });
+
+  it('asks for a new link when the reset link has no session', async () => {
+    const { api, passwords } = fakeSupabase();
+    const err = await api.setNewPassword('new-horse-battery').catch((e) => e);
+    expect(err).toMatchObject({ status: 401, code: 'reset_link_expired' });
+    expect(passwords).toEqual([]);
   });
 
   it('rejects a wrong password with a Hebrew 401', async () => {

@@ -154,6 +154,13 @@ const restApi = {
   cancelDuel: (id: string) => request<void>('DELETE', `/duels/${encodeURIComponent(id)}`, undefined, true),
   /** Shares the learner's pet with their groups; null stops sharing. */
   setPet: (pet: PetBadge | null) => request<void>('PUT', '/me/pet', { pet } satisfies SetPetRequest, true),
+  /** Password reset needs email, which only the Supabase backend sends (PASSWORD_RESET hides the link). */
+  requestPasswordReset: async (_email: string): Promise<void> => {
+    throw new ApiRequestError(0, 'unsupported', GENERIC_MESSAGE);
+  },
+  setNewPassword: async (_password: string): Promise<AuthResponse> => {
+    throw new ApiRequestError(0, 'unsupported', GENERIC_MESSAGE);
+  },
   /** Tokens are stateless – signing out only forgets the stored one (see clearAuth). */
   signOut: async () => {},
 };

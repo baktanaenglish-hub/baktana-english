@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { validateAuth } from './AuthScreen';
+import { validateNewPassword } from './ResetPassword';
+import { isPasswordRecoveryLink } from '../lib/config';
 import { reviewButtonState } from './LearningPath';
 import { itemAnswers, lessonResult } from './LessonScreen';
 import { parseRichTip } from './RichTip';
@@ -24,6 +26,11 @@ describe('validateAuth', () => {
   });
 
   // Regression: the form accepted 6–7 character passwords that the server rejects (US-A1 AC1/AC3).
+  it('asks only for a valid email when requesting a password reset', () => {
+    expect(validateAuth('forgot', 'a@b.co', '', '')).toBeNull();
+    expect(validateAuth('forgot', 'not-an-email', '', '')).not.toBeNull();
+  });
+
   it('requires the same 8-character minimum as the server', () => {
     expect(validateAuth('register', 'a@b.co', '1234567', 'רון')).toMatch(/8/);
     expect(validateAuth('register', 'a@b.co', '12345678', 'רון')).toBeNull();
@@ -114,5 +121,19 @@ describe('parseRichTip (US-I1 AC4)', () => {
     expect(parseRichTip('רק עברית')).toEqual([{ text: 'רק עברית', en: false }]);
     expect(parseRichTip('פתוח [[oops')).toEqual([{ text: 'פתוח [[oops', en: false }]);
     expect(parseRichTip('')).toEqual([]);
+  });
+});
+
+describe('password reset', () => {
+  it('checks the new password and its confirmation', () => {
+    expect(validateNewPassword('12345678', '12345678')).toBeNull();
+    expect(validateNewPassword('1234567', '1234567')).toMatch(/8/);
+    expect(validateNewPassword('12345678', '12345679')).toMatch(/לא זהות/);
+  });
+
+  it('recognizes the link from the reset email', () => {
+    expect(isPasswordRecoveryLink('#access_token=x&expires_in=3600&type=recovery')).toBe(true);
+    expect(isPasswordRecoveryLink('#access_token=x&type=signup')).toBe(false);
+    expect(isPasswordRecoveryLink('')).toBe(false);
   });
 });

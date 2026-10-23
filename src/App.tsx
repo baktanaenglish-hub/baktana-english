@@ -5,6 +5,7 @@ import type { CallStatusResponse, Persona } from '../shared/call';
 import { REVIEW_XP } from '../shared/srs';
 import { course, findLesson } from './data/course';
 import { AuthScreen, type Mode as AuthMode } from './components/AuthScreen';
+import { ResetPassword } from './components/ResetPassword';
 import { CallPicker } from './components/call/CallPicker';
 import { CallScreen } from './components/call/CallScreen';
 import { CallSummary, type CallResult } from './components/call/CallSummary';
@@ -24,7 +25,7 @@ import { api } from './lib/api';
 import { identify, setAnalyticsEnabled, track } from './lib/analytics';
 import { PREMIUM_ON_SALE, subscriptionText, syncBillingUser } from './lib/billing';
 import { CALLS_ENABLED, CALLS_LOCKED, getCallStatus } from './lib/call-api';
-import { ACCOUNTS_ENABLED } from './lib/config';
+import { ACCOUNTS_ENABLED, PASSWORD_RESET, isPasswordRecoveryLink } from './lib/config';
 import { generateExercises, withoutSpeaking } from './lib/exercises';
 import { canListen } from './lib/listen';
 import { takeDuelCode, useDuels } from './lib/duels';
@@ -120,6 +121,8 @@ type Screen =
   | { name: 'unit-test'; unit: Unit; exercises: Exercise[] }
   | { name: 'unit-test-done'; unit: Unit; right: number; passed: boolean; rewards: Reward[] }
   | { name: 'auth'; back: Tab | 'onboarding'; mode?: AuthMode; from: AuthFrom }
+  /** Opened from the password-reset email. */
+  | { name: 'reset-password' }
   /** `lessonId` is null for a review session. */
   | {
       name: 'lesson';
@@ -206,7 +209,9 @@ function Screens() {
   const { pet, update: updatePet } = usePet();
   /** Days a streak freeze covered since the app opened (shown once on the path). */
   const [frozeDays, setFrozeDays] = useState(0);
-  const [screen, setScreen] = useState<Screen>({ name: 'path' });
+  const [screen, setScreen] = useState<Screen>(() =>
+    PASSWORD_RESET && isPasswordRecoveryLink() ? { name: 'reset-password' } : { name: 'path' },
+  );
   const [intro, setIntro] = useState<IntroState | null>(null);
   /** An invite code from a `?join=` link, until the learner joins (or signs in to join). */
   const [joinCode, setJoinCode] = useState<string | null>(null);
@@ -392,6 +397,20 @@ function Screens() {
         initialMode={screen.mode}
         onSignedIn={(res, mode) => signedIn(res, mode, from, back)}
         onCancel={() => setScreen({ name: screen.back === 'onboarding' ? 'path' : screen.back })}
+      />
+    );
+  }
+
+  if (screen.name === 'reset-password') {
+    return (
+      <ResetPassword
+        onDone={(res) => signedIn(res, 'login', 'profile', 'path')}
+        onCancel={() => {
+          // The link signed supabase-js in; without a new password the learner stays a guest.
+          void api.signOut();
+          setScreen({ name: 'path' });
+        }}
+        onNewLink={() => setScreen({ name: 'auth', back: 'path', mode: 'forgot', from: 'profile' })}
       />
     );
   }

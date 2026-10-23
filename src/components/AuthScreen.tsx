@@ -1,16 +1,18 @@
 import { useState, type FormEvent } from 'react';
 import type { AuthResponse } from '../../shared/api';
 import { api, errorMessage } from '../lib/api';
-import { PRIVACY_URL, TERMS_URL } from '../lib/config';
+import { PASSWORD_RESET, PRIVACY_URL, TERMS_URL } from '../lib/config';
 
 interface Props {
   /** `mode` tells a new account ('register') from a login. */
-  onSignedIn: (res: AuthResponse, mode: Mode) => void;
+  onSignedIn: (res: AuthResponse, mode: SignInMode) => void;
   onCancel: () => void;
   initialMode?: Mode;
 }
 
-export type Mode = 'register' | 'login';
+export type SignInMode = 'register' | 'login';
+/** 'forgot' asks for a password-reset email. */
+export type Mode = SignInMode | 'forgot';
 
 export const MIN_PASSWORD = 8;
 
@@ -18,6 +20,7 @@ export const MIN_PASSWORD = 8;
 export function validateAuth(mode: Mode, email: string, password: string, displayName: string): string | null {
   if (mode === 'register' && displayName.trim().length < 2) return 'השם צריך להכיל לפחות 2 תווים.';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'כתובת האימייל לא תקינה.';
+  if (mode === 'forgot') return null;
   if (mode === 'login' && !password) return 'יש להזין סיסמה.';
   // Same minimum as the server (server/src/routes/auth.ts).
   if (mode === 'register' && password.length < MIN_PASSWORD) return `הסיסמה צריכה להכיל לפחות ${MIN_PASSWORD} תווים.`;
@@ -32,6 +35,14 @@ export function AuthScreen({ onSignedIn, onCancel, initialMode = 'register' }: P
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** The reset email went out (only in 'forgot' mode). */
+  const [sent, setSent] = useState(false);
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setSent(false);
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -43,6 +54,12 @@ export function AuthScreen({ onSignedIn, onCancel, initialMode = 'register' }: P
     setBusy(true);
     setError(null);
     try {
+      if (mode === 'forgot') {
+        await api.requestPasswordReset(email.trim());
+        setSent(true);
+        setBusy(false);
+        return;
+      }
       const res =
         mode === 'register'
           ? await api.register({ email: email.trim(), password, displayName: displayName.trim() })
@@ -62,11 +79,13 @@ export function AuthScreen({ onSignedIn, onCancel, initialMode = 'register' }: P
         </button>
       </header>
       <form className="auth-form" onSubmit={submit} noValidate>
-        <h1>{mode === 'register' ? 'יצירת פרופיל' : 'התחברות'}</h1>
+        <h1>{mode === 'register' ? 'יצירת פרופיל' : mode === 'login' ? 'התחברות' : 'שכחתי סיסמה'}</h1>
         <p className="lead">
           {mode === 'register'
             ? 'שמרו את ההתקדמות, למדו מכל מכשיר והתחרו בליגה השבועית.'
-            : 'ברוכים השבים! ההתקדמות מהמכשיר הזה תתמזג עם החשבון.'}
+            : mode === 'login'
+              ? 'ברוכים השבים! ההתקדמות מהמכשיר הזה תתמזג עם החשבון.'
+              : 'הזינו את האימייל של החשבון, ונשלח אליו קישור לבחירת סיסמה חדשה.'}
         </p>
         {mode === 'register' && (
           <label className="field">
@@ -92,23 +111,43 @@ export function AuthScreen({ onSignedIn, onCancel, initialMode = 'register' }: P
             required
           />
         </label>
-        <label className="field">
-          <span>סיסמה</span>
-          <input
-            type="password"
-            dir="ltr"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-            required
-          />
-        </label>
+        {mode !== 'forgot' && (
+          <label className="field">
+            <span>סיסמה</span>
+            <input
+              type="password"
+              dir="ltr"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+              required
+            />
+          </label>
+        )}
+        {sent && (
+          <p className="form-success" role="status">
+            אם יש חשבון עם האימייל הזה, שלחנו אליו קישור לבחירת סיסמה חדשה. בדקו גם בתיקיית הספאם.
+          </p>
+        )}
         <div className="form-error" role="alert" aria-live="polite">
           {error}
         </div>
         <button type="submit" className="btn primary wide" disabled={busy}>
-          {busy ? 'רגע…' : mode === 'register' ? 'יצירת חשבון' : 'כניסה'}
+          {busy
+            ? 'רגע…'
+            : mode === 'register'
+              ? 'יצירת חשבון'
+              : mode === 'login'
+                ? 'כניסה'
+                : sent
+                  ? 'שליחה חוזרת'
+                  : 'שליחת קישור'}
         </button>
+        {mode === 'login' && PASSWORD_RESET && (
+          <button type="button" className="link-btn" onClick={() => switchMode('forgot')}>
+            שכחתי סיסמה
+          </button>
+        )}
         {mode === 'register' && (
           <p className="legal-note">
             ביצירת חשבון את/ה מסכים/ה ל
@@ -122,15 +161,12 @@ export function AuthScreen({ onSignedIn, onCancel, initialMode = 'register' }: P
             .
           </p>
         )}
-        <button
-          type="button"
-          className="link-btn"
-          onClick={() => {
-            setMode(mode === 'register' ? 'login' : 'register');
-            setError(null);
-          }}
-        >
-          {mode === 'register' ? 'כבר יש לי חשבון – התחברות' : 'אין לי חשבון – הרשמה'}
+        <button type="button" className="link-btn" onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}>
+          {mode === 'register'
+            ? 'כבר יש לי חשבון – התחברות'
+            : mode === 'login'
+              ? 'אין לי חשבון – הרשמה'
+              : 'חזרה להתחברות'}
         </button>
       </form>
     </div>

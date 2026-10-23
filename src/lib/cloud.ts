@@ -101,6 +101,9 @@ export function cloudError(
   if (code === 'email_not_confirmed' || /email not confirmed/i.test(message)) {
     return new ApiRequestError(403, 'email_not_confirmed', 'צריך לאשר את כתובת האימייל – בדקו את תיבת הדואר.');
   }
+  if (code === 'same_password') {
+    return new ApiRequestError(422, 'same_password', 'זו הסיסמה הנוכחית. בחרו סיסמה חדשה.');
+  }
   if (code === 'weak_password' || /password/i.test(message)) {
     return new ApiRequestError(400, 'weak_password', 'הסיסמה חלשה מדי. בחרו סיסמה ארוכה יותר.');
   }
@@ -332,6 +335,35 @@ export function createCloudApi(getClient: () => Promise<SupabaseClient>) {
     async signOut(): Promise<void> {
       const client = await getClient();
       await client.auth.signOut().catch(() => undefined);
+    },
+
+    /**
+     * Emails a link for choosing a new password. Supabase answers the same whether or not the
+     * address has an account, so the form can't be used to find out who is registered.
+     */
+    async requestPasswordReset(email: string): Promise<void> {
+      const client = await getClient();
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: authRedirectUrl() });
+      if (error) throw cloudError(error);
+    },
+
+    /**
+     * Sets a new password after the reset link was opened: supabase-js reads the link's session
+     * from the URL when the client starts, so the learner is signed in once this returns.
+     */
+    async setNewPassword(password: string): Promise<AuthResponse> {
+      const client = await getClient();
+      try {
+        await userId(client);
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.unauthorized) {
+          throw new ApiRequestError(401, 'reset_link_expired', 'הקישור לא בתוקף יותר. בקשו קישור חדש.');
+        }
+        throw err;
+      }
+      const { data, error } = await client.auth.updateUser({ password });
+      if (error) throw cloudError(error);
+      return toAuthResponse(client, data.user);
     },
 
     /**
