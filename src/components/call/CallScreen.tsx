@@ -12,10 +12,12 @@ import {
   retryRequest,
   startCall,
   turnRequest,
+  wordRequest,
   type CallLine,
   type CallState,
 } from '../../lib/call';
 import { isCallBlocked, sendTurn } from '../../lib/call-api';
+import { judgeTurn, paceFor, speechRate, type PaceSignal } from '../../lib/call-pace';
 import type { ApiRequestError } from '../../lib/api-error';
 import { canListen, listen, type ListenError, type Listening } from '../../lib/listen';
 import { speakAsync, stopSpeaking } from '../../lib/speech';
@@ -37,6 +39,8 @@ interface Props {
 
 type Phase = 'connecting' | 'ready' | 'speaking' | 'listening' | 'thinking' | 'error' | 'blocked';
 type Camera = 'off' | 'starting' | 'on' | 'denied' | 'unavailable';
+/** What the microphone listens for: an English sentence, or a Hebrew word to ask "how do you say…?". */
+type ListenFor = 'sentence' | 'word';
 
 /** How long the "calling…" ring shows before the character picks up. */
 const RING_MS = 1200;
@@ -72,6 +76,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   const [keyboard, setKeyboard] = useState(!canListen);
   const [draft, setDraft] = useState('');
   const [camera, setCamera] = useState<Camera>('off');
+  const [listenFor, setListenFor] = useState<ListenFor>('sentence');
 
   const callRef = useRef(call);
   const mutedRef = useRef(false);
@@ -84,6 +89,8 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   const ended = useRef(false);
   const micBtn = useRef<HTMLButtonElement>(null);
   const input = useRef<HTMLInputElement>(null);
+  /** How the learner coped on each turn so far; slows the character down when they struggle (call-pace.ts). */
+  const paceSignals = useRef<PaceSignal[]>([]);
 
   const setCall = useCallback((next: CallState) => {
     callRef.current = next;
@@ -128,7 +135,8 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
       return;
     }
     setPhase('speaking');
-    await speakAsync(text, slow);
+    // A correction gets the slow "listen again" speed; otherwise the pace follows how the learner is coping.
+    await speakAsync(text, slow ? true : speechRate(paceFor(paceSignals.current)));
     if (alive.current && speechToken.current === token) setPhase((p) => (p === 'speaking' ? 'ready' : p));
   }, []);
 
@@ -208,29 +216,33 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     [finish, say, setCall, onCallsToday, onBlocked],
   );
 
-  function send(text: string) {
+  /** `spokenMs`: how long the microphone listened, when the learner said it rather than typed it. */
+  function send(text: string, spokenMs?: number) {
     const message = cleanMessage(text);
     const state = callRef.current;
     if (!message || !canTalk(state) || phase === 'thinking' || phase === 'connecting' || phase === 'blocked') return;
     interrupt();
+    paceSignals.current = [...paceSignals.current, judgeTurn({ text: message, spokenMs })];
     setCall(appendUser(state, message));
-    request(turnRequest(state, message));
+    request(turnRequest(state, message, paceFor(paceSignals.current)));
   }
 
   function retry() {
-    const req = retryRequest(callRef.current);
+    const req = retryRequest(callRef.current, paceFor(paceSignals.current));
     if (req) request(req);
   }
 
-  async function toggleMic() {
+  async function toggleMic(target: ListenFor = 'sentence') {
     if (listening.current) {
       listening.current.stop();
       return;
     }
     interrupt();
     setMicNote(null);
-    const current = listen();
+    const startedAt = Date.now();
+    const current = listen(target === 'word' ? 'he-IL' : 'en-US');
     listening.current = current;
+    setListenFor(target);
     setPhase('listening');
     try {
       const heard = await current.result;
@@ -238,13 +250,19 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
       listening.current = null;
       setPhase('ready');
       const text = heard[0]?.trim() ?? '';
-      if (text) send(text);
+      if (text)
+        send(target === 'word' ? wordRequest(text) : text, target === 'word' ? undefined : Date.now() - startedAt);
       else setMicNote(MIC_ERRORS['no-speech']);
     } catch (e) {
       if (listening.current !== current) return;
       listening.current = null;
       setPhase('ready');
-      setMicNote(MIC_ERRORS[(e as ListenError) in MIC_ERRORS ? (e as ListenError) : 'error']);
+      const code: ListenError = (e as ListenError) in MIC_ERRORS ? (e as ListenError) : 'error';
+      // The learner opened the microphone for a sentence and nothing came out: they may be stuck.
+      if (code === 'no-speech' && target === 'sentence') {
+        paceSignals.current = [...paceSignals.current, judgeTurn({ text: '' })];
+      }
+      setMicNote(MIC_ERRORS[code]);
     }
   }
 
@@ -306,6 +324,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   else if (connecting) status = `מתקשרים ל${persona.name}…`;
   else if (call.ended) status = 'השיחה הסתיימה.';
   else if (!canTalk(call)) status = 'הגעתם למספר ההודעות המרבי בשיחה – עוד רגע נראה סיכום.';
+  else if (isListening && listenFor === 'word') status = 'אמרו את המילה בעברית… לחצו שוב כשסיימתם';
   else if (isListening) status = 'מקשיבים… לחצו שוב כשסיימתם';
   else if (phase === 'thinking') status = 'מחכים לתשובה…';
   else if (phase === 'speaking') status = `🔊 ${persona.name} עונה`;
@@ -423,6 +442,18 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
         {status}
       </div>
 
+      {canListen && (
+        <button
+          type="button"
+          className={`call-word${isListening && listenFor === 'word' ? ' listening' : ''}`}
+          onClick={() => void toggleMic('word')}
+          disabled={!talkable || busy || (isListening && listenFor !== 'word')}
+          aria-pressed={isListening && listenFor === 'word'}
+        >
+          {isListening && listenFor === 'word' ? '✋ סיימתי' : '🤔 איך אומרים באנגלית? אמרו מילה בעברית'}
+        </button>
+      )}
+
       {keyboard && (
         <form className="call-type" dir="ltr" onSubmit={submit}>
           <input
@@ -469,11 +500,11 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
           <button
             ref={micBtn}
             type="button"
-            className={`call-mic${isListening ? ' listening' : ''}`}
+            className={`call-mic${isListening && listenFor === 'sentence' ? ' listening' : ''}`}
             onClick={() => void toggleMic()}
-            disabled={!talkable || busy}
-            aria-pressed={isListening}
-            aria-label={isListening ? 'סיום הדיבור' : 'לחצו ודברו'}
+            disabled={!talkable || busy || (isListening && listenFor === 'word')}
+            aria-pressed={isListening && listenFor === 'sentence'}
+            aria-label={isListening && listenFor === 'sentence' ? 'סיום הדיבור' : 'לחצו ודברו'}
           >
             <span aria-hidden="true">🎤</span>
           </button>

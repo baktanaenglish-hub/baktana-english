@@ -9,7 +9,7 @@ import { canListen } from '../lib/listen';
 import { MAX_HEARTS, msUntilNextHeart, type Progress } from '../lib/progress';
 import type { Settings, ThemeChoice } from '../lib/settings';
 import { ReminderSettings } from './ReminderSettings';
-import { PremiumBadge } from './TopBar';
+import { PremiumBadge, avatarFace } from './TopBar';
 
 interface Props {
   progress: Progress;
@@ -63,7 +63,7 @@ export function Profile(props: Props) {
     <div className="profile">
       <section className="account-card">
         <div className={`avatar${props.avatar ? ' bought' : ''}`} aria-hidden="true">
-          {props.avatar ?? (user ? user.displayName.trim().charAt(0).toUpperCase() || '🙂' : '🙂')}
+          {avatarFace(user?.displayName ?? null, props.avatar)}
         </div>
         <div className="account-info">
           <h2 dir="auto">{user ? user.displayName : 'אורח/ת'}</h2>

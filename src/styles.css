@@ -218,12 +218,47 @@ button:disabled {
   border-bottom: 2px solid var(--border);
 }
 
-/* The logo with the premium badge (if any) under it. */
-.brand-mark {
+/* A small copy of the profile card: avatar, name and premium badge. */
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 50%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.profile-chip .avatar {
+  width: 40px;
+  height: 40px;
+  border-width: 2px;
+  font-size: 1.1rem;
+}
+
+.profile-chip .avatar.bought {
+  font-size: 1.5rem;
+}
+
+.profile-chip-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-chip-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
 }
 
 /* The app name gets its own centered row under the logo and stats. */
@@ -231,6 +266,7 @@ button:disabled {
   flex-basis: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 10px;
   font-size: 1.7rem;
   color: var(--brand);
@@ -2678,6 +2714,7 @@ button:disabled {
 
 .call-screen > .call-top,
 .call-screen > .call-status,
+.call-screen > .call-word,
 .call-screen > .call-type,
 .call-screen > .call-controls {
   flex: none;
@@ -2821,6 +2858,27 @@ button:disabled {
   color: var(--call-muted);
   text-align: center;
   font-size: 0.95rem;
+}
+
+.call-word {
+  align-self: center;
+  max-width: 100%;
+  padding: 7px 14px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  background: var(--call-panel);
+  color: var(--call-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.call-word.listening {
+  background: rgb(255 255 255 / 28%);
+  border-color: var(--call-text);
+}
+
+.call-word:disabled {
+  opacity: 0.5;
 }
 
 .call-type {

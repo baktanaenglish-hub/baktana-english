@@ -179,11 +179,11 @@ function sanitizeHistoryEntry(value: unknown): CallMessage | null {
 /**
  * Validates a POST /api/call/turn body: a known persona, a non-empty message of at most
  * CALL_LIMITS.maxMessageChars, and a history of valid lines (invalid ones dropped, each truncated, only the last
- * CALL_LIMITS.maxHistory kept). Returns null when the body is unusable.
+ * CALL_LIMITS.maxHistory kept). `pace` is kept only when it is 'slow'. Returns null when the body is unusable.
  */
 export function sanitizeTurnRequest(body: unknown): CallTurnRequest | null {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
-  const { persona, message, history } = body as Record<string, unknown>;
+  const { persona, message, history, pace } = body as Record<string, unknown>;
   if (typeof persona !== 'string' || !findPersona(persona)) return null;
   if (typeof message !== 'string') return null;
   const text = cleanText(message);
@@ -194,5 +194,7 @@ export function sanitizeTurnRequest(body: unknown): CallTurnRequest | null {
         .filter((m): m is CallMessage => m !== null)
         .slice(-CALL_LIMITS.maxHistory)
     : [];
-  return { persona: persona as PersonaId, message: text, history: lines };
+  const req: CallTurnRequest = { persona: persona as PersonaId, message: text, history: lines };
+  if (pace === 'slow') req.pace = 'slow';
+  return req;
 }

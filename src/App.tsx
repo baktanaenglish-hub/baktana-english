@@ -758,6 +758,12 @@ function Screens() {
         gems={gems.gems}
         onGems={goShop}
         premium={premium}
+        name={account.user?.displayName ?? null}
+        avatar={avatarEmoji(gems)}
+        onProfile={() => {
+          setIntro(null);
+          setScreen({ name: 'profile' });
+        }}
       />
       <main className="content" key={screen.name}>
         {screen.name === 'path' && frozeDays > 0 && (
@@ -820,7 +826,7 @@ function Screens() {
               🎮
             </span>
             <span className="arcade-card-text">
-              <strong>ארקייד</strong>
+              <strong>משחקים</strong>
               <span className="muted">משחקי מילים שנפתחים בהתקדמות וביהלומים</span>
             </span>
             <span className="arcade-card-go" aria-hidden="true">
