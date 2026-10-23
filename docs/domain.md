@@ -42,6 +42,7 @@
 ב־Supabase: ‏Authentication ← URL Configuration:
 - **Site URL:** `https://baktanaenglish.co.il/`
 - **Redirect URLs** ← Add URL: `https://baktanaenglish.co.il/**`. משאירים גם את הכתובת הישנה של github.io, כי מיילים שכבר נשלחו מפנים אליה.
+- הלוגו במיילים (`supabase/templates/*.html`) נטען מכתובת קבועה ב־github.io, שממשיכה לעבוד אחרי המעבר (GitHub מפנה לדומיין). אפשר להחליף אותה ל־`https://baktanaenglish.co.il/icons/apple-touch-icon.png`.
 
 ## 6. לבנות מחדש
 ב־repo: ‏Actions ← **Android APK** ← Run workflow (על `main`). בסיומה רץ אוטומטית גם **Deploy to GitHub Pages**.
