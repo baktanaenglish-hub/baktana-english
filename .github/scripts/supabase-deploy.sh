@@ -22,10 +22,15 @@ jq -Rs '{query: .}' < supabase/schema.sql | curl -sS --fail-with-body -X POST "$
 echo "✓ schema"
 
 # ---------- 2. Auth emails ----------
-# The password-reset email, in Hebrew and branded, instead of Supabase's English default.
+# The sign-up confirmation and password-reset emails, in Hebrew and branded, instead of
+# Supabase's English defaults.
 # A refusal only warns: the rest (secrets, functions) must still deploy.
 echo "▶ auth email templates"
-if answer=$(jq -n --rawfile recovery supabase/templates/recovery.html '{
+if answer=$(jq -n \
+  --rawfile confirmation supabase/templates/confirmation.html \
+  --rawfile recovery supabase/templates/recovery.html '{
+  mailer_subjects_confirmation: "אישור ההרשמה ל־Baktana English",
+  mailer_templates_confirmation_content: $confirmation,
   mailer_subjects_recovery: "איפוס הסיסמה שלך ב־Baktana English",
   mailer_templates_recovery_content: $recovery
 }' | curl -sS --fail-with-body -X PATCH "$API/config/auth" \
