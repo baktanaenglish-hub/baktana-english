@@ -315,7 +315,11 @@ async function callTurn(body: unknown, user: SignedInUser, limits: Limits): Prom
     return { ...safeReply(check.flagged, persona), corrections: [], flagged: check.flagged, callsToday };
   }
 
-  const raw = await callModel(apiKey, buildSystemPrompt(persona), toAnthropicMessages(req.history, req.message));
+  const raw = await callModel(
+    apiKey,
+    buildSystemPrompt(persona, req.pace),
+    toAnthropicMessages(req.history, req.message),
+  );
   if (raw === null) return { ...safeReply('inappropriate', persona), corrections: [], callsToday };
   const parsed = parseModelOutput(raw, persona);
   if (!parsed) return { ...FALLBACK, corrections: [], callsToday };

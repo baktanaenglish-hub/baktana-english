@@ -47,11 +47,11 @@ function webErrorCode(error: string): ListenError {
   return 'error';
 }
 
-/** Listens for one English sentence through the microphone. */
-export function listen(): Listening {
+/** Listens for one sentence through the microphone – English, unless `lang` says otherwise (e.g. 'he-IL'). */
+export function listen(lang = 'en-US'): Listening {
   if (native) {
     return {
-      result: SpeechRecognizer.listen({ lang: 'en-US' }).then(
+      result: SpeechRecognizer.listen({ lang }).then(
         ({ matches }) => {
           if (matches.length === 0) throw 'no-speech';
           return matches;
@@ -67,7 +67,7 @@ export function listen(): Listening {
   const Recognition = webRecognition();
   if (!Recognition) return { result: Promise.reject<string[]>('unavailable'), stop: () => {} };
   const recognition = new Recognition();
-  recognition.lang = 'en-US';
+  recognition.lang = lang;
   recognition.interimResults = false;
   recognition.maxAlternatives = 5;
   const result = new Promise<string[]>((resolve, reject) => {

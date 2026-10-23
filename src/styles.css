@@ -2678,6 +2678,7 @@ button:disabled {
 
 .call-screen > .call-top,
 .call-screen > .call-status,
+.call-screen > .call-word,
 .call-screen > .call-type,
 .call-screen > .call-controls {
   flex: none;
@@ -2821,6 +2822,27 @@ button:disabled {
   color: var(--call-muted);
   text-align: center;
   font-size: 0.95rem;
+}
+
+.call-word {
+  align-self: center;
+  max-width: 100%;
+  padding: 7px 14px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  background: var(--call-panel);
+  color: var(--call-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.call-word.listening {
+  background: rgb(255 255 255 / 28%);
+  border-color: var(--call-text);
+}
+
+.call-word:disabled {
+  opacity: 0.5;
 }
 
 .call-type {

@@ -1,6 +1,7 @@
 import {
   CALL_LIMITS,
   type CallMessage,
+  type CallPace,
   type CallStatusResponse,
   type CallTurnRequest,
   type CallTurnResponse,
@@ -61,21 +62,28 @@ export function appendReply(state: CallState, res: CallTurnResponse): CallState 
 
 /**
  * The request for the learner's `message`: the latest CALL_LIMITS.maxHistory lines of the
- * conversation before it (plain role/text only), oldest first.
+ * conversation before it (plain role/text only), oldest first. `pace` is sent only when slow.
  */
-export function turnRequest(state: CallState, message: string): CallTurnRequest {
-  return {
+export function turnRequest(state: CallState, message: string, pace: CallPace = 'normal'): CallTurnRequest {
+  const req: CallTurnRequest = {
     persona: state.persona.id,
     history: state.lines.slice(-CALL_LIMITS.maxHistory).map(({ role, text }) => ({ role, text })),
     message,
   };
+  if (pace === 'slow') req.pace = 'slow';
+  return req;
 }
 
 /** The request for a learner line that is already on the call (sending it again after an error). */
-export function retryRequest(state: CallState): CallTurnRequest | null {
+export function retryRequest(state: CallState, pace: CallPace = 'normal'): CallTurnRequest | null {
   const last = state.lines.at(-1);
   if (last?.role !== 'user') return null;
-  return turnRequest({ ...state, lines: state.lines.slice(0, -1) }, last.text);
+  return turnRequest({ ...state, lines: state.lines.slice(0, -1) }, last.text, pace);
+}
+
+/** What the learner sends when they say a Hebrew word into the "how do you say…?" microphone. */
+export function wordRequest(hebrew: string): string {
+  return `How do I say "${hebrew.trim()}" in English?`;
 }
 
 export function learnerTurns(state: CallState): number {

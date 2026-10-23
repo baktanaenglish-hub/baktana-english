@@ -151,6 +151,12 @@ describe('sanitizeTurnRequest', () => {
     ).toEqual({ persona: 'friend', message: 'hi Maya', history: [{ role: 'assistant', text: 'Hey!' }] });
   });
 
+  it('keeps only a slow pace', () => {
+    expect(sanitizeTurnRequest({ persona: 'teacher', message: 'hi', pace: 'slow' })?.pace).toBe('slow');
+    expect(sanitizeTurnRequest({ persona: 'teacher', message: 'hi', pace: 'fast' })).not.toHaveProperty('pace');
+    expect(sanitizeTurnRequest({ persona: 'teacher', message: 'hi', pace: 'normal' })).not.toHaveProperty('pace');
+  });
+
   it('rejects bad bodies', () => {
     for (const bad of [
       null,

@@ -13,6 +13,7 @@ import {
   retryRequest,
   startCall,
   turnRequest,
+  wordRequest,
   type CallState,
 } from './call';
 
@@ -107,6 +108,17 @@ describe('turnRequest', () => {
       message: 'Hi Maya',
     });
     expect(retryRequest(startCall(friend))).toBeNull();
+  });
+
+  it('sends the pace only when slow', () => {
+    const call = startCall(friend);
+    expect(turnRequest(call, 'hi', 'normal')).not.toHaveProperty('pace');
+    expect(turnRequest(call, 'hi', 'slow').pace).toBe('slow');
+    expect(retryRequest(appendUser(call, 'hi'), 'slow')?.pace).toBe('slow');
+  });
+
+  it('turns a Hebrew word into a "how do I say" question', () => {
+    expect(wordRequest(' שולחן ')).toBe('How do I say "שולחן" in English?');
   });
 });
 
