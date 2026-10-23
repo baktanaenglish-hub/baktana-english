@@ -169,10 +169,27 @@ export interface CallTurnRequest {
    * the character then says less, in shorter and simpler sentences. See src/lib/call-pace.ts.
    */
   pace?: CallPace;
+  /** How picky the teacher is, chosen by the learner on the call; omitted = 'normal'. Ignored for other characters. */
+  correctionLevel?: CorrectionLevel;
 }
 
 /** How the character should pace itself: `slow` = fewer, shorter, simpler sentences. */
 export type CallPace = 'normal' | 'slow';
+
+/**
+ * What the teacher corrects: `light` only big mistakes (tenses, verb forms, meaning), `normal` grammar too,
+ * `full` also word choice (a more natural word than a synonym the learner used).
+ */
+export type CorrectionLevel = 'light' | 'normal' | 'full';
+
+export const CORRECTION_LEVELS: readonly CorrectionLevel[] = ['light', 'normal', 'full'];
+
+/** Hebrew labels for the level picker on the teacher's call. */
+export const CORRECTION_LEVEL_LABELS: Record<CorrectionLevel, string> = {
+  light: 'רק טעויות גדולות',
+  normal: 'דקדוק',
+  full: 'הכול, גם ניסוח',
+};
 
 export interface CallTurnResponse {
   /** The character's spoken English reply (1–3 short sentences). */

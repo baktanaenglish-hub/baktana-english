@@ -2713,6 +2713,7 @@ button:disabled {
 }
 
 .call-screen > .call-top,
+.call-screen > .call-level,
 .call-screen > .call-status,
 .call-screen > .call-word,
 .call-screen > .call-type,
@@ -2858,6 +2859,35 @@ button:disabled {
   color: var(--call-muted);
   text-align: center;
   font-size: 0.95rem;
+}
+
+.call-level {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.call-level-title {
+  color: var(--call-muted);
+}
+
+.call-level-option {
+  padding: 4px 11px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 999px;
+  background: var(--call-panel);
+  color: var(--call-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.call-level-option.selected {
+  background: rgb(255 255 255 / 28%);
+  border-color: var(--call-text);
+  font-weight: 600;
 }
 
 .call-word {

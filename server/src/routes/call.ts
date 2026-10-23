@@ -189,7 +189,7 @@ export async function callTurn(
       fetch: model.fetch ?? fetch,
       timeoutMs: model.timeoutMs ?? TIMEOUT_MS,
     },
-    buildSystemPrompt(persona, req.pace),
+    buildSystemPrompt(persona, req.pace, req.correctionLevel),
     toAnthropicMessages(req.history, req.message),
   );
   if (raw === null) return { ...safeReply('inappropriate', persona), corrections: [], ...usage };

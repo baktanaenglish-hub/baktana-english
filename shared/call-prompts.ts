@@ -6,7 +6,7 @@
  * The model must answer with a single JSON object (see OUTPUT_FORMAT); parseModelOutput reads
  * it tolerantly. Deterministic keyword guards live in shared/call-safety.ts.
  */
-import type { CallPace, Correction, Persona, PersonaId } from './call';
+import type { CallPace, Correction, CorrectionLevel, Persona, PersonaId } from './call';
 
 /** Longest `reply` kept from the model (the UI speaks it aloud). */
 export const MAX_REPLY_CHARS = 600;
@@ -88,8 +88,9 @@ const PERSONA_RULES: Record<PersonaId, string> = {
 # Corrections (only you, the teacher, give them)
 - Fill "corrections" with real grammar or wording mistakes from the learner's LAST message only — never from older
   messages. At most ${MAX_CORRECTIONS}, most important first.
-- Skip punctuation, capitalization and spelling that speech-to-text could have caused. Skip tiny style
-  preferences. If the last message is correct or good enough, "corrections" must be [].
+- Skip punctuation, capitalization and spelling that speech-to-text could have caused. What else to correct depends
+  on the correction level the learner chose (see "Correction level" below). If the last message has nothing to fix
+  at that level, "corrections" must be [].
 - "original": only the learner's wrong words – the smallest part that shows the mistake (one word or a few words,
   exactly as written), not the whole sentence.
 - "corrected": the natural, correct English for that same part, just as short.
@@ -184,12 +185,45 @@ const SLOW_PACE_RULES = `
 - Teacher only: give at most ONE correction, the most important one, or none if the meaning is clear.
 `.trim();
 
-/** The full system prompt for one character; `pace` 'slow' asks for shorter, simpler turns. */
-export function buildSystemPrompt(persona: Persona, pace: CallPace = 'normal'): string {
+/** What the teacher corrects at each level the learner can pick on the call. */
+const CORRECTION_LEVEL_RULES: Record<CorrectionLevel, string> = {
+  light: `
+# Correction level: big mistakes only (the learner chose this)
+- Correct ONLY big mistakes: a wrong tense (for example present instead of past), a wrong or missing verb form
+  ("he go", "I am agree", "she don't"), or a mistake that makes the meaning unclear or wrong.
+- Do NOT correct small things: articles (a/the), prepositions, plural s, word order that is still clear, or word
+  choice. Let the learner talk; most turns should have no correction.
+`.trim(),
+  normal: `
+# Correction level: grammar (the default)
+- Correct real grammar mistakes: tenses, verb forms, he/she/it + s, word order, articles, prepositions, plurals.
+- Do NOT correct word choice: if the learner used a synonym or a less common word and the meaning is clear, let it
+  be. Skip tiny style preferences.
+`.trim(),
+  full: `
+# Correction level: everything, including wording (the learner chose this)
+- Correct grammar mistakes as above (tenses, verb forms, he/she/it + s, word order, articles, prepositions).
+- ALSO correct word choice: when the learner used a word or phrase that is understandable but not what a native
+  speaker would naturally say (a synonym that does not fit, a literal translation from Hebrew), give the more
+  natural word (for example "I did a photo" → "I took a photo", "open the TV" → "turn on the TV").
+- Still skip pure style preferences when the learner's version is already natural.
+`.trim(),
+};
+
+/**
+ * The full system prompt for one character; `pace` 'slow' asks for shorter, simpler turns and `correctionLevel`
+ * sets how picky the teacher is (other characters never correct).
+ */
+export function buildSystemPrompt(
+  persona: Persona,
+  pace: CallPace = 'normal',
+  correctionLevel: CorrectionLevel = 'normal',
+): string {
   return [
     `You are ${persona.name}, an AI character in Baktana English, an app where Hebrew speakers practise spoken English in a "video call".`,
     `Your first line in this call was: "${persona.greeting}"`,
     PERSONA_RULES[persona.id],
+    ...(persona.corrects ? [CORRECTION_LEVEL_RULES[correctionLevel]] : []),
     COMMON_RULES,
     ...(pace === 'slow' ? [SLOW_PACE_RULES] : []),
     outputFormat(persona),

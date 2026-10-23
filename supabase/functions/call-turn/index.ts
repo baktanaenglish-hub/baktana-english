@@ -317,7 +317,7 @@ async function callTurn(body: unknown, user: SignedInUser, limits: Limits): Prom
 
   const raw = await callModel(
     apiKey,
-    buildSystemPrompt(persona, req.pace),
+    buildSystemPrompt(persona, req.pace, req.correctionLevel),
     toAnthropicMessages(req.history, req.message),
   );
   if (raw === null) return { ...safeReply('inappropriate', persona), corrections: [], callsToday };

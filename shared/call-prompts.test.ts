@@ -43,6 +43,13 @@ describe('buildSystemPrompt extras', () => {
     expect(buildSystemPrompt(teacher, 'normal')).not.toMatch(/finding it hard right now/);
     expect(buildSystemPrompt(teacher, 'slow')).toMatch(/finding it hard right now/);
   });
+
+  it("sets the teacher's correction level, grammar by default", () => {
+    expect(buildSystemPrompt(teacher)).toMatch(/Correction level: grammar/);
+    expect(buildSystemPrompt(teacher, 'normal', 'light')).toMatch(/Correction level: big mistakes only/);
+    expect(buildSystemPrompt(teacher, 'normal', 'full')).toMatch(/ALSO correct word choice/);
+    expect(buildSystemPrompt(friend, 'normal', 'full')).not.toMatch(/Correction level/);
+  });
 });
 
 describe('parseModelOutput', () => {

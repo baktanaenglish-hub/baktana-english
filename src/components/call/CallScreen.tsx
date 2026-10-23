@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import type { CallTurnRequest, CallTurnResponse, Persona } from '../../../shared/call';
+import {
+  CORRECTION_LEVELS,
+  CORRECTION_LEVEL_LABELS,
+  type CallTurnRequest,
+  type CallTurnResponse,
+  type CorrectionLevel,
+  type Persona,
+} from '../../../shared/call';
 import { errorMessage } from '../../lib/api';
 import {
   allCorrections,
@@ -9,7 +16,9 @@ import {
   cleanMessage,
   formatDuration,
   learnerTurns,
+  loadCorrectionLevel,
   retryRequest,
+  saveCorrectionLevel,
   startCall,
   turnRequest,
   wordRequest,
@@ -77,6 +86,8 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   const [draft, setDraft] = useState('');
   const [camera, setCamera] = useState<Camera>('off');
   const [listenFor, setListenFor] = useState<ListenFor>('sentence');
+  /** How picky the teacher is; the learner can change it any time during the call (sent with every turn). */
+  const [level, setLevel] = useState<CorrectionLevel>(loadCorrectionLevel);
 
   const callRef = useRef(call);
   const mutedRef = useRef(false);
@@ -224,11 +235,11 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     interrupt();
     paceSignals.current = [...paceSignals.current, judgeTurn({ text: message, spokenMs })];
     setCall(appendUser(state, message));
-    request(turnRequest(state, message, paceFor(paceSignals.current)));
+    request(turnRequest(state, message, paceFor(paceSignals.current), level));
   }
 
   function retry() {
-    const req = retryRequest(callRef.current, paceFor(paceSignals.current));
+    const req = retryRequest(callRef.current, paceFor(paceSignals.current), level);
     if (req) request(req);
   }
 
@@ -347,6 +358,29 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
           {connecting || connectedAt === null ? 'מתקשר...' : formatDuration(now - connectedAt)}
         </div>
       </header>
+
+      {persona.corrects && (
+        <div className="call-level" role="radiogroup" aria-label="מה המורה מתקנת">
+          <span className="call-level-title" aria-hidden="true">
+            תיקונים:
+          </span>
+          {CORRECTION_LEVELS.map((l) => (
+            <button
+              key={l}
+              type="button"
+              role="radio"
+              aria-checked={level === l}
+              className={`call-level-option${level === l ? ' selected' : ''}`}
+              onClick={() => {
+                setLevel(l);
+                saveCorrectionLevel(l);
+              }}
+            >
+              {CORRECTION_LEVEL_LABELS[l]}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="call-stage">
         <Avatar persona={persona} talking={phase === 'speaking'} ringing={connecting} />

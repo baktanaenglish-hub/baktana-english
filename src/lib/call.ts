@@ -2,6 +2,7 @@ import {
   CALL_LIMITS,
   type CallMessage,
   type CallPace,
+  type CorrectionLevel,
   type CallStatusResponse,
   type CallTurnRequest,
   type CallTurnResponse,
@@ -62,23 +63,54 @@ export function appendReply(state: CallState, res: CallTurnResponse): CallState 
 
 /**
  * The request for the learner's `message`: the latest CALL_LIMITS.maxHistory lines of the
- * conversation before it (plain role/text only), oldest first. `pace` is sent only when slow.
+ * conversation before it (plain role/text only), oldest first. `pace` is sent only when slow, `level` (the teacher's
+ * correction level) only when it isn't the default.
  */
-export function turnRequest(state: CallState, message: string, pace: CallPace = 'normal'): CallTurnRequest {
+export function turnRequest(
+  state: CallState,
+  message: string,
+  pace: CallPace = 'normal',
+  level: CorrectionLevel = 'normal',
+): CallTurnRequest {
   const req: CallTurnRequest = {
     persona: state.persona.id,
     history: state.lines.slice(-CALL_LIMITS.maxHistory).map(({ role, text }) => ({ role, text })),
     message,
   };
   if (pace === 'slow') req.pace = 'slow';
+  if (level !== 'normal' && state.persona.corrects) req.correctionLevel = level;
   return req;
 }
 
 /** The request for a learner line that is already on the call (sending it again after an error). */
-export function retryRequest(state: CallState, pace: CallPace = 'normal'): CallTurnRequest | null {
+export function retryRequest(
+  state: CallState,
+  pace: CallPace = 'normal',
+  level: CorrectionLevel = 'normal',
+): CallTurnRequest | null {
   const last = state.lines.at(-1);
   if (last?.role !== 'user') return null;
-  return turnRequest({ ...state, lines: state.lines.slice(0, -1) }, last.text, pace);
+  return turnRequest({ ...state, lines: state.lines.slice(0, -1) }, last.text, pace, level);
+}
+
+const CORRECTION_LEVEL_KEY = 'baktana-english:call-correction-level:v1';
+
+/** The teacher's correction level the learner picked last time on this device ('normal' if none). */
+export function loadCorrectionLevel(): CorrectionLevel {
+  try {
+    const saved = localStorage.getItem(CORRECTION_LEVEL_KEY);
+    return saved === 'light' || saved === 'full' ? saved : 'normal';
+  } catch {
+    return 'normal';
+  }
+}
+
+export function saveCorrectionLevel(level: CorrectionLevel) {
+  try {
+    localStorage.setItem(CORRECTION_LEVEL_KEY, level);
+  } catch {
+    // Private mode or storage blocked: the choice just lasts for this call.
+  }
 }
 
 /** What the learner sends when they say a Hebrew word into the "how do you say…?" microphone. */
