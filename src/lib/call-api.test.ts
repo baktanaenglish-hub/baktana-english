@@ -30,11 +30,17 @@ const SUPABASE = { VITE_SUPABASE_URL: 'https://x.supabase.co/', VITE_SUPABASE_AN
 
 /** The Supabase session the mocked client returns (null = signed out). */
 let session: { access_token: string } | null = null;
+/** When true, the mocked getSession never settles (supabase-js stuck refreshing the session). */
+let stallSession = false;
 
 async function load(env: Record<string, string> = EXPRESS) {
   vi.resetModules();
   vi.doMock('./supabase', () => ({
-    getSupabase: () => ({ auth: { getSession: async () => ({ data: { session }, error: null }) } }),
+    getSupabase: () => ({
+      auth: {
+        getSession: () => (stallSession ? new Promise(() => {}) : Promise.resolve({ data: { session }, error: null })),
+      },
+    }),
   }));
   for (const [k, v] of Object.entries(env)) vi.stubEnv(k, v);
   return import('./call-api');
@@ -50,9 +56,11 @@ beforeEach(() => {
   fetchMock = vi.fn();
   vi.stubGlobal('fetch', fetchMock);
   session = { access_token: 'user-jwt' };
+  stallSession = false;
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   vi.doUnmock('./supabase');
@@ -141,6 +149,34 @@ describe('sendTurn', () => {
     const { sendTurn, CALL_TIMEOUT_MESSAGE } = await load();
     fetchMock.mockRejectedValueOnce(Object.assign(new Error('timed out'), { name: 'TimeoutError' }));
     await expect(sendTurn(req)).rejects.toMatchObject({ code: 'timeout', message: CALL_TIMEOUT_MESSAGE });
+  });
+
+  it('times out when the server never answers', async () => {
+    const { sendTurn, CALL_TIMEOUT_MESSAGE } = await load();
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+    const result = sendTurn(req).catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(25_000);
+    expect(await result).toMatchObject({ code: 'timeout', message: CALL_TIMEOUT_MESSAGE });
+  });
+
+  it('times out when the Supabase session never arrives', async () => {
+    const { sendTurn, CALL_TIMEOUT_MESSAGE } = await load(SUPABASE);
+    vi.useFakeTimers();
+    stallSession = true;
+    const result = sendTurn(req).catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(25_000);
+    expect(await result).toMatchObject({ code: 'timeout', message: CALL_TIMEOUT_MESSAGE });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('stops when the caller aborts', async () => {
+    const { sendTurn } = await load();
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+    const controller = new AbortController();
+    const result = sendTurn(req, controller.signal).catch((e: unknown) => e);
+    controller.abort();
+    expect(await result).toMatchObject({ code: 'aborted' });
   });
 
   it('rejects a response without a reply', async () => {
