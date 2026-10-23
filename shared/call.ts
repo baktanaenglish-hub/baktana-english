@@ -164,7 +164,15 @@ export interface CallTurnRequest {
   persona: PersonaId;
   history: CallMessage[];
   message: string;
+  /**
+   * Set by the client when the learner seems to struggle (speaks slowly, gets stuck, falls back to Hebrew):
+   * the character then says less, in shorter and simpler sentences. See src/lib/call-pace.ts.
+   */
+  pace?: CallPace;
 }
+
+/** How the character should pace itself: `slow` = fewer, shorter, simpler sentences. */
+export type CallPace = 'normal' | 'slow';
 
 export interface CallTurnResponse {
   /** The character's spoken English reply (1–3 short sentences). */

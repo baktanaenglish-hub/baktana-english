@@ -31,6 +31,18 @@ describe('buildSystemPrompt', () => {
   });
 });
 
+describe('buildSystemPrompt extras', () => {
+  it('tells every character how to answer "how do I say…"', () => {
+    for (const persona of PERSONAS) expect(buildSystemPrompt(persona)).toMatch(/how do I say shulchan/);
+  });
+
+  it('asks for shorter, simpler turns only when the pace is slow', () => {
+    expect(buildSystemPrompt(teacher)).not.toMatch(/finding it hard right now/);
+    expect(buildSystemPrompt(teacher, 'normal')).not.toMatch(/finding it hard right now/);
+    expect(buildSystemPrompt(teacher, 'slow')).toMatch(/finding it hard right now/);
+  });
+});
+
 describe('parseModelOutput', () => {
   const correction = { original: 'he go', corrected: 'he goes', explanationHe: 'מוסיפים s' };
 
