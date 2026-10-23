@@ -19,7 +19,7 @@ export function Arcade({ gems, progress, today, onPlay, onUnlock }: Props) {
           🎮
         </span>
         <div>
-          <h2>ארקייד</h2>
+          <h2>משחקים</h2>
           <span className="muted">
             משחקים עם המילים שכבר למדתם. {REWARDED_PLAYS} המשחקים הראשונים בכל יום מכל סוג נותנים יהלומים 💎
           </span>

@@ -47,7 +47,7 @@ export function GameResult({ title, score, best, record, rewards, onAgain, onBac
         🔁 עוד סיבוב
       </button>
       <button type="button" className="btn primary" onClick={onBack} autoFocus>
-        לארקייד
+        חזרה למשחקים
       </button>
     </div>
   );

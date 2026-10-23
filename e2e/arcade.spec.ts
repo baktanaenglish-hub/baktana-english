@@ -29,7 +29,7 @@ async function openArcade(page: Page, completed: Record<string, number>, gems: n
     [GEMS_KEY, JSON.stringify({ gems })] as const,
   );
   await page.goto('/');
-  await page.getByRole('button', { name: /ארקייד/ }).click();
+  await page.locator('.arcade-card', { hasText: 'משחקי מילים' }).click();
   await expect(page.locator('.arcade')).toBeVisible();
 }
 
