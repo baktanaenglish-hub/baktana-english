@@ -1,0 +1,72 @@
+# Publishes the web app to GitHub Pages on every push to main.
+# Pages has no API server: sign-in and the league run on Supabase when the repository
+# variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set (docs/supabase.md);
+# without them the build is guest-only.
+# With a custom domain set in Settings → Pages (docs/domain.md), configure-pages reports it, so the
+# build serves from the domain root and links (privacy page, emails) use it.
+# The site also serves the latest Android APK (BaktanaEnglish.apk) from the "android-latest"
+# release, so it can be downloaded without going through GitHub; it redeploys after each APK build.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [Android APK]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A push deploys right away and the APK build redeploys a minute later. Queue the second deploy
+# instead of cancelling the first, so main doesn't show a cancelled (red) run after every merge.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_SERVER_INSTALL: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm run build
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL || format('{0}/', steps.pages.outputs.base_url) }}
+          VITE_ENABLE_ACCOUNTS: 'false'
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          # Set once premium is on sale: the site then offers the premium screen (docs/subscriptions.md).
+          VITE_REVENUECAT_ANDROID_KEY: ${{ vars.VITE_REVENUECAT_ANDROID_KEY }}
+          # The call tab is open: premium learners and testers (TESTER_EMAILS) can call (src/lib/call-api.ts).
+          VITE_CALLS_UNLOCKED: 'true'
+      - name: Add the Android APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download android-latest --repo "$GITHUB_REPOSITORY" --pattern BaktanaEnglish.apk --dir dist || echo "No APK release yet"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

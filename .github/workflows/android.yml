@@ -1,0 +1,96 @@
+# Builds the Android app (APK). Pull requests only build it (and keep it as an artifact);
+# pushes to main also publish it as the "android-latest" GitHub release, so it can be
+# downloaded straight to a phone.
+# When the upload-key secrets are set (docs/store-release.md), it also builds the signed
+# Google Play bundle (.aab, "play" flavor) and keeps it as an artifact to upload to Play Console.
+# Like GitHub Pages, sign-in and the league use Supabase when the repository variables
+# VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set (docs/supabase.md); otherwise guest-only.
+# The variable VITE_REVENUECAT_ANDROID_KEY turns on buying premium in the Play edition
+# (docs/subscriptions.md).
+# The variable VITE_SITE_URL points the app's links (privacy page, emails) at the site's own
+# domain once it has one (docs/domain.md).
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_SERVER_INSTALL: '1'
+      HAS_UPLOAD_KEY: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_ENABLE_ACCOUNTS: 'false'
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          # RevenueCat's public Android SDK key (goog_…); only the Google Play edition sells premium.
+          VITE_REVENUECAT_ANDROID_KEY: ${{ vars.VITE_REVENUECAT_ANDROID_KEY }}
+          # The call tab is open: premium learners and testers (TESTER_EMAILS) can call (src/lib/call-api.ts).
+          VITE_CALLS_UNLOCKED: 'true'
+      - run: npx cap sync android
+      - name: Build APK
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: ./gradlew assembleSideloadDebug --no-daemon
+      - run: cp android/app/build/outputs/apk/sideload/debug/app-sideload-debug.apk BaktanaEnglish.apk
+      # The installed app reads this to offer in-app updates (src/lib/update.ts).
+      - run: echo '{"versionCode":${{ github.run_number }},"versionName":"1.0.${{ github.run_number }}"}' > version.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BaktanaEnglish-apk
+          path: BaktanaEnglish.apk
+      - name: Build Google Play bundle
+        if: env.HAS_UPLOAD_KEY == 'true'
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$ANDROID_KEYSTORE_PATH"
+          ./gradlew bundlePlayRelease --no-daemon
+          rm -f "$ANDROID_KEYSTORE_PATH"
+      - uses: actions/upload-artifact@v4
+        if: env.HAS_UPLOAD_KEY == 'true'
+        with:
+          name: BaktanaEnglish-play-bundle
+          path: android/app/build/outputs/bundle/playRelease/app-play-release.aab
+      - name: Publish release
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest BaktanaEnglish.apk version.json \
+            --target "$GITHUB_SHA" \
+            --title "Baktana English לאנדרואיד (גרסה 1.0.${{ github.run_number }})" \
+            --notes "להתקנה: מורידים את BaktanaEnglish.apk בטלפון, פותחים אותו ומאשרים התקנה ממקור לא ידוע. גרסה חדשה מותקנת מעל הישנה וההתקדמות נשמרת. מגרסה זו והלאה האפליקציה מציעה עדכון בעצמה כשיוצאת גרסה חדשה."

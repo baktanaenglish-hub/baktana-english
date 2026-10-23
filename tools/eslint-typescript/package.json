@@ -1,0 +1,10 @@
+{
+  "name": "eslint-typescript",
+  "private": true,
+  "version": "0.0.0",
+  "description": "TypeScript 6 compiler API for typescript-eslint (TypeScript 7 ships no JS API). Loaded only by eslint.config.js.",
+  "main": "index.cjs",
+  "dependencies": {
+    "typescript": "~6.0.3"
+  }
+}

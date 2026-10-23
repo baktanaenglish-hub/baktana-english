@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src", "vitest.config.ts", "../shared/api.ts", "../shared/groups.ts", "../shared/progress-merge.ts", "../shared/call.ts", "../shared/call-prompts.ts", "../shared/call-safety.ts", "../src/lib/progress.ts", "../src/data/course.ts", "../src/types.ts"]
+}

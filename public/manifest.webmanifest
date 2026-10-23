@@ -1,0 +1,19 @@
+{
+  "name": "Baktana English – לומדים אנגלית",
+  "short_name": "Baktana English",
+  "description": "לומדים אנגלית בכיף – שיעורים קצרים, נקודות ורצף יומי.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1f7cf2",
+  "categories": ["education"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" },
+    { "src": "icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

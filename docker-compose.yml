@@ -1,0 +1,20 @@
+# Production-like local run:  JWT_SECRET=$(openssl rand -hex 32) docker compose up --build
+# Then open http://localhost:3001
+services:
+  app:
+    build: .
+    image: baktana-english
+    init: true
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3001}:3001'
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_PATH: /app/data/baktana.db
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (see .env.example)}
+    volumes:
+      - baktana-data:/app/data
+
+volumes:
+  baktana-data:

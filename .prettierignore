@@ -1,0 +1,11 @@
+dist
+coverage
+node_modules
+package-lock.json
+server/package-lock.json
+data
+*.db
+.claude/worktrees
+test-results
+playwright-report
+android

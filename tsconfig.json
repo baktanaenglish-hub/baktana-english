@@ -1,0 +1,6 @@
+{
+  // Root typecheck: the web app + shared contract, and the Node-side config files.
+  // server/ has its own tsconfig.json and is checked by `npm --prefix server run typecheck`.
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,87 @@
+{
+  "name": "baktana-english",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.15"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail -n web,api -c green,blue \"npm:dev:web\" \"npm:dev:server\"",
+    "dev:web": "vite",
+    "dev:server": "node tools/if-server.mjs run dev",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "android:sync": "VITE_ENABLE_ACCOUNTS=false npm run build && cap sync android",
+    "start": "node tools/if-server.mjs start",
+    "test": "vitest run && node tools/if-server.mjs test",
+    "test:web": "vitest run",
+    "test:server": "node tools/if-server.mjs test",
+    "test:e2e": "playwright test",
+    "test:supabase": "sh supabase/tests/run.sh",
+    "typecheck": "tsc -b && node tools/if-server.mjs run typecheck --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "postinstall": "node tools/if-server.mjs install"
+  },
+  "dependencies": {
+    "@capacitor-community/text-to-speech": "^8.0.2",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/local-notifications": "^8.3.1",
+    "@revenuecat/purchases-capacitor": "^13.7.4",
+    "@supabase/supabase-js": "^2.118.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-typescript": "file:tools/eslint-typescript",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.71.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "typescript-eslint": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/eslint-plugin": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/parser": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/project-service": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/tsconfig-utils": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/type-utils": {
+      "typescript": "$typescript"
+    },
+    "@typescript-eslint/utils": {
+      "typescript": "$typescript"
+    },
+    "ts-api-utils": {
+      "typescript": "$typescript"
+    }
+  }
+}
