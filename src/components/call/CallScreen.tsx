@@ -127,15 +127,16 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     });
   }, [onEnd, stopCamera]);
 
-  /** The character says `text` (unless the speaker is muted); resolves when done. */
-  const say = useCallback(async (text: string) => {
+  /** The character says `text` (slowly for a correction, unless the speaker is muted); resolves when done. */
+  const say = useCallback(async (text: string, slow = false) => {
     const token = ++speechToken.current;
     if (mutedRef.current) {
       setPhase('ready');
       return;
     }
     setPhase('speaking');
-    await speakAsync(text, speechRate(paceFor(paceSignals.current)));
+    // A correction gets the slow "listen again" speed; otherwise the pace follows how the learner is coping.
+    await speakAsync(text, slow ? true : speechRate(paceFor(paceSignals.current)));
     if (alive.current && speechToken.current === token) setPhase((p) => (p === 'speaking' ? 'ready' : p));
   }, []);
 
@@ -191,7 +192,9 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
           const next = appendReply(callRef.current, res);
           setCall(next);
           setShowHe(false);
-          void say(res.reply).then(() => {
+          // A teacher's correction turn is only the correction: say it slowly so it's easy to catch.
+          const correcting = callRef.current.persona.corrects && (res.corrections?.length ?? 0) > 0;
+          void say(res.reply, correcting).then(() => {
             // The character hung up, or this was the last turn allowed (CALL_LIMITS.maxTurns).
             if (!canTalk(next) && alive.current) setTimeout(() => alive.current && finish(), GOODBYE_MS);
           });

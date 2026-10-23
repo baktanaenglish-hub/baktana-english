@@ -23,6 +23,8 @@ describe('buildSystemPrompt', () => {
 
   it('only lets the teacher correct', () => {
     expect(buildSystemPrompt(teacher)).toMatch(/LAST message only/);
+    expect(buildSystemPrompt(teacher)).toMatch(/the whole "reply" is ONLY the correction/);
+    expect(buildSystemPrompt(friend)).not.toMatch(/How you say a correction/);
     expect(buildSystemPrompt(friend)).toMatch(/NEVER correct/);
     expect(buildSystemPrompt(friend)).toContain('"corrections": [] (always empty');
     expect(buildSystemPrompt(findPersona('barista') as Persona)).toMatch(/Sunny Café.*London/);
