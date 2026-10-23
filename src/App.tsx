@@ -826,7 +826,7 @@ function Screens() {
               🎮
             </span>
             <span className="arcade-card-text">
-              <strong>ארקייד</strong>
+              <strong>משחקים</strong>
               <span className="muted">משחקי מילים שנפתחים בהתקדמות וביהלומים</span>
             </span>
             <span className="arcade-card-go" aria-hidden="true">
