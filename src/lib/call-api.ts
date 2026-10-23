@@ -137,42 +137,77 @@ function httpError(status: number, data: unknown): ApiRequestError {
   return new ApiRequestError(unreachable ? 0 : status, 'http', unreachable ? CALL_OFFLINE_MESSAGE : GENERIC_MESSAGE);
 }
 
+/** Rejects with `reason()` as soon as `signal` aborts, so a promise that never settles can't hold a request. */
+function untilAborted<T>(promise: Promise<T>, signal: AbortSignal, reason: () => unknown): Promise<T> {
+  if (signal.aborted) return Promise.reject(reason());
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(reason());
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
+  });
+}
+
+/**
+ * One request to the call backend. `timeoutMs` bounds ALL of it – getting the learner's token (supabase-js
+ * can stall there while it refreshes the session), the fetch and reading the body – so a turn always ends
+ * in a reply or an error, never in an endless "thinking…".
+ */
 async function call(
   path: Path,
   init: { method: 'GET' | 'POST'; body?: unknown; timeoutMs: number; signal?: AbortSignal },
 ): Promise<unknown> {
-  const { url, headers } = await endpoint(path);
-  if (init.body !== undefined) headers['Content-Type'] = 'application/json';
   const { signal } = init;
-  const timeout =
-    typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(init.timeoutMs) : undefined;
-  const signals = [timeout, signal].filter((s): s is AbortSignal => s !== undefined);
-  const combined = signals.length > 1 && 'any' in AbortSignal ? AbortSignal.any(signals) : signals[0];
-
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: init.method,
-      headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
-      signal: combined,
-    });
-  } catch (e) {
-    if (signal?.aborted) throw new ApiRequestError(0, 'aborted', GENERIC_MESSAGE);
-    const timedOut = timeout?.aborted || (e instanceof Error && e.name === 'TimeoutError');
-    throw timedOut
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, init.timeoutMs);
+  const onAbort = () => controller.abort();
+  signal?.addEventListener('abort', onAbort, { once: true });
+  if (signal?.aborted) controller.abort();
+  const stopped = () =>
+    timedOut
       ? new ApiRequestError(0, 'timeout', CALL_TIMEOUT_MESSAGE)
-      : new ApiRequestError(0, 'network', CALL_OFFLINE_MESSAGE);
-  }
+      : new ApiRequestError(0, 'aborted', GENERIC_MESSAGE);
 
-  let data: unknown = null;
   try {
-    data = await res.json();
-  } catch {
-    // Not JSON – e.g. the dev proxy's error page when no server is running.
+    const { url, headers } = await untilAborted(endpoint(path), controller.signal, stopped);
+    if (init.body !== undefined) headers['Content-Type'] = 'application/json';
+
+    let res: Response;
+    try {
+      res = await untilAborted(
+        fetch(url, {
+          method: init.method,
+          headers,
+          body: init.body === undefined ? undefined : JSON.stringify(init.body),
+          signal: controller.signal,
+        }),
+        controller.signal,
+        stopped,
+      );
+    } catch (e) {
+      if (e instanceof ApiRequestError) throw e;
+      const timeout = timedOut || (e instanceof Error && e.name === 'TimeoutError');
+      throw timeout
+        ? new ApiRequestError(0, 'timeout', CALL_TIMEOUT_MESSAGE)
+        : new ApiRequestError(0, 'network', CALL_OFFLINE_MESSAGE);
+    }
+
+    let data: unknown = null;
+    try {
+      data = await untilAborted(res.json(), controller.signal, stopped);
+    } catch {
+      if (controller.signal.aborted) throw stopped();
+      // Not JSON – e.g. the dev proxy's error page when no server is running.
+    }
+    if (!res.ok) throw httpError(res.status, data);
+    return data;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', onAbort);
   }
-  if (!res.ok) throw httpError(res.status, data);
-  return data;
 }
 
 /** Sends what the learner said and returns the character's reply. Throws ApiRequestError (Hebrew message). */
