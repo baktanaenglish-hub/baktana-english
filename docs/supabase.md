@@ -129,8 +129,9 @@ supabase functions deploy billing-webhook --no-verify-jwt   # RevenueCat לא ש
 ה־workflow ‏`.github/workflows/supabase.yml` מעדכן את Supabase לבד, בכל דחיפה ל־`main` שמשנה את `supabase/` או את הקבצים המשותפים של השיחות. אפשר להריץ אותו גם ידנית מ־**Actions** ← **Supabase** ← **Run workflow**. הוא:
 
 1. מריץ את `supabase/schema.sql` (בטוח להריץ שוב ושוב).
-2. מעתיק ל־Edge Functions את הסודות `ANTHROPIC_API_KEY`, ‏`PREMIUM_EMAILS`, ‏`TESTER_EMAILS`, ‏`REVENUECAT_WEBHOOK_SECRET` ו־`REVENUECAT_API_KEY`, אם הם מוגדרים ב־GitHub.
-3. פורס את כל הפונקציות ב־`supabase/functions` (את `billing-webhook` עם `--no-verify-jwt`), בודק ש־`call-turn` עונה 401 לבקשה בלי משתמש, ושה־`billing-webhook` דוחה בקשה בלי הסוד (401, או 503 כל עוד הסודות לא הוגדרו).
+2. מעדכן את מייל איפוס הסיסמה (נושא ותוכן בעברית, מ־`supabase/templates/recovery.html`). שינוי שעושים בלוח הבקרה של Supabase נדרס בהרצה הבאה, ולכן משנים את הקובץ.
+3. מעתיק ל־Edge Functions את הסודות `ANTHROPIC_API_KEY`, ‏`PREMIUM_EMAILS`, ‏`TESTER_EMAILS`, ‏`REVENUECAT_WEBHOOK_SECRET` ו־`REVENUECAT_API_KEY`, אם הם מוגדרים ב־GitHub.
+4. פורס את כל הפונקציות ב־`supabase/functions` (את `billing-webhook` עם `--no-verify-jwt`), בודק ש־`call-turn` עונה 401 לבקשה בלי משתמש, ושה־`billing-webhook` דוחה בקשה בלי הסוד (401, או 503 כל עוד הסודות לא הוגדרו).
 
 הגדרה, פעם אחת: ב־repo ← **Settings** ← **Secrets and variables** ← **Actions** ← **New repository secret**:
 

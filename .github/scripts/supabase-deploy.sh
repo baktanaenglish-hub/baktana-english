@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Updates the Supabase project from the repo (see docs/supabase.md):
 #   1. Runs supabase/schema.sql – it is safe to re-run (if not exists / or replace / drop if exists).
-#   2. Sets the Edge Function secrets that are present in GitHub (never printed).
+#   2. Sets the Hebrew auth emails (supabase/templates) and the Edge Function secrets that are present in GitHub (never printed).
 #   3. Deploys every function under supabase/functions and checks that call-turn and billing-webhook answer.
 # Works through the Supabase Management API with SUPABASE_ACCESS_TOKEN (a personal access token).
 set -euo pipefail
@@ -21,7 +21,17 @@ jq -Rs '{query: .}' < supabase/schema.sql | curl -sS --fail-with-body -X POST "$
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" --data-binary @- >/dev/null
 echo "✓ schema"
 
-# ---------- 2. Secrets ----------
+# ---------- 2. Auth emails ----------
+# The password-reset email, in Hebrew and branded, instead of Supabase's English default.
+echo "▶ auth email templates"
+jq -n --rawfile recovery supabase/templates/recovery.html '{
+  mailer_subjects_recovery: "איפוס הסיסמה שלך ב־Baktana English",
+  mailer_templates_recovery_content: $recovery
+}' | curl -sS --fail-with-body -X PATCH "$API/config/auth" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" --data-binary @- >/dev/null
+echo "✓ email templates"
+
+# ---------- 3. Secrets ----------
 secrets=()
 [ -n "${ANTHROPIC_API_KEY:-}" ] && secrets+=("ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY")
 [ -n "${PREMIUM_EMAILS:-}" ] && secrets+=("PREMIUM_EMAILS=$PREMIUM_EMAILS")
@@ -38,7 +48,7 @@ fi
 [ -z "${REVENUECAT_WEBHOOK_SECRET:-}" ] || [ -z "${REVENUECAT_API_KEY:-}" ] &&
   echo "::notice::REVENUECAT_WEBHOOK_SECRET / REVENUECAT_API_KEY not set – billing-webhook answers 503 (docs/subscriptions.md)"
 
-# ---------- 3. Functions ----------
+# ---------- 4. Functions ----------
 for fn in supabase/functions/*/; do
   name=$(basename "$fn")
   echo "▶ deploying $name"

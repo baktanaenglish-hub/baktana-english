@@ -311,6 +311,13 @@ function Screens() {
   const duels = useDuels(ACCOUNTS_ENABLED ? userId : null);
   const leagueBadge = groups.unread + duels.unread + duels.unclaimed;
 
+  // The window scrolls, not each screen, so a new screen would open where the last one was
+  // scrolled to (the long path left the profile at its bottom). The path centers itself on the
+  // current lesson.
+  useEffect(() => {
+    if (screen.name !== 'path') window.scrollTo(0, 0);
+  }, [screen.name]);
+
   // A shared invite link opens "my groups" with the code filled in.
   useEffect(() => {
     const code = ACCOUNTS_ENABLED ? takeJoinCode() : null;
