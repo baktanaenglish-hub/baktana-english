@@ -31,6 +31,14 @@ describe('buildSystemPrompt', () => {
     expect(buildSystemPrompt(findPersona('barista') as Persona)).toContain('£');
     expect(buildSystemPrompt(findPersona('interviewer') as Persona)).toMatch(/about 6 questions/);
   });
+
+  it('lets the interviewer follow the job and work topics the learner chooses', () => {
+    const prompt = buildSystemPrompt(findPersona('interviewer') as Persona);
+    expect(prompt).toMatch(/interview them for THAT job/);
+    expect(prompt).toMatch(/Never ask a question the learner already answered/);
+    expect(prompt).toMatch(/Follow the learner's lead on anything connected to work/);
+    expect(prompt).not.toMatch(/for a teenager/);
+  });
 });
 
 describe('buildSystemPrompt extras', () => {
