@@ -51,7 +51,7 @@ export function reminderText(streak: number, day: number): { title: string; body
   const bodies = [
     'הגיע הזמן לשיעור קצר באנגלית 📚',
     'חמש דקות ביום עושות את ההבדל. נתרגל?',
-    'יש לך כמה מילים לחזור עליהן 🧠',
+    'יש לכם כמה מילים לחזור עליהן 🧠',
   ];
   return { title: 'Baktana English', body: bodies[day % bodies.length] };
 }

@@ -79,7 +79,7 @@ test.describe('v2 review (US-R1, US-R5, US-R6)', () => {
     await page.goto('/');
 
     const card = page.locator('.review-card');
-    await expect(card).toContainText('יש לך 3 מילים ומשפטים לחזרה');
+    await expect(card).toContainText('יש לכם 3 מילים ומשפטים לחזרה');
     await expect(page.locator('.practice-btn')).toHaveText('🧠 חזרה (3)');
     await card.getByRole('button', { name: 'לחזרה' }).click();
     await expect(page.locator('.lesson-header .practice-badge')).toBeVisible();
@@ -247,6 +247,7 @@ test.describe('v2 review (US-R1, US-R5, US-R6)', () => {
     await page.getByRole('button', { name: 'איפוס התקדמות' }).click();
     await page.getByRole('button', { name: 'בואו נתחיל' }).click();
     await page.getByRole('button', { name: 'המשך' }).click();
+    await page.getByRole('button', { name: /מתחילים מאפס/ }).click();
     await tab(page, 'לימוד');
     await expect(page.locator('.path')).toBeVisible();
     // US-R1 AC4 after a reset: it used to offer "🧠 חזרה (5)" for words of a lesson that is no longer done.

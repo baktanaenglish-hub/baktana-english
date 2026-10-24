@@ -97,6 +97,8 @@ export type Exercise =
       answer: string;
       /** Spaced-repetition / analytics key of the word asked about (`w:<wordId>`). */
       itemKey?: string;
+      /** The learner meets this word for the first time: the screen shows it with its translation first. */
+      newWord?: boolean;
     }
   | {
       kind: 'build';

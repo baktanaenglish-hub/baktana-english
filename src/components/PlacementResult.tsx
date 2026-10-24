@@ -17,10 +17,10 @@ export function PlacementResult({ units, onContinue }: Props) {
       <h2>{units > 0 ? 'כל הכבוד!' : 'מתחילים מההתחלה'}</h2>
       <p className="lead">
         {units === 0 && 'נבנה יחד בסיס חזק – נתחיל מיחידה 1.'}
-        {units > 0 && next && `דילגת על ${units === 1 ? 'יחידה אחת' : `${units} יחידות`}. ממשיכים מ${next.title}.`}
-        {units > 0 && !next && 'עברת את כל היחידות! אפשר לחזור על כל שיעור ולהמשיך לתרגל.'}
+        {units > 0 && next && `דילגתם על ${units === 1 ? 'יחידה אחת' : `${units} יחידות`}. ממשיכים מ${next.title}.`}
+        {units > 0 && !next && 'עברתם את כל היחידות! אפשר לחזור על כל שיעור ולהמשיך לתרגל.'}
       </p>
-      {units > 0 && <p className="muted">המילים מהיחידות שדילגת עליהן יופיעו בחזרה החכמה 🧠</p>}
+      {units > 0 && <p className="muted">המילים מהיחידות שדילגתם עליהן יופיעו בחזרה החכמה 🧠</p>}
       <button type="button" className="btn primary" onClick={onContinue} autoFocus>
         למסלול
       </button>

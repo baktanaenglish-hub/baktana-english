@@ -369,7 +369,7 @@ export const GROUP_ERRORS = {
   group_not_found: 'לא מצאנו קבוצה עם הקוד הזה',
   group_full: `הקבוצה מלאה (עד ${MAX_GROUP_MEMBERS} חברים)`,
   too_many_groups: `אפשר להיות בעד ${MAX_GROUPS_PER_USER} קבוצות בבת אחת`,
-  already_member: 'כבר הצטרפת לקבוצה הזאת',
+  already_member: 'כבר הצטרפתם לקבוצה הזאת',
   not_member: 'הקבוצה לא נמצאה, או שכבר לא חברים בה',
   invalid_period: 'תקופת הדירוג אינה תקינה',
 } as const;

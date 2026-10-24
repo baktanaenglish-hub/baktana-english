@@ -109,7 +109,7 @@ export function Profile(props: Props) {
           <div>
             <h3>{props.premium ? '👑 מנוי פרימיום' : '👑 פרימיום'}</h3>
             <p className="muted">
-              {props.premium ? props.subscription || 'המנוי שלך פעיל' : 'שיחות וידאו באנגלית עם דמויות AI'}
+              {props.premium ? props.subscription || 'המנוי שלכם פעיל' : 'שיחות וידאו באנגלית עם דמויות AI'}
             </p>
           </div>
           <button
@@ -321,12 +321,12 @@ function DeleteAccount({
       </p>
       {subscriptions && (
         <p>
-          <strong>יש לך מנוי פרימיום?</strong> מחיקת החשבון לא מבטלת אותו. כדי שלא תחויבו שוב, בטלו אותו קודם ב־Google
+          <strong>יש לכם מנוי פרימיום?</strong> מחיקת החשבון לא מבטלת אותו. כדי שלא תחויבו שוב, בטלו אותו קודם ב־Google
           Play ← תשלומים ומינויים.
         </p>
       )}
       <label className="field">
-        <span>הסיסמה שלך, לאישור</span>
+        <span>הסיסמה שלכם, לאישור</span>
         <input
           type="password"
           dir="ltr"

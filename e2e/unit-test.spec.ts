@@ -45,7 +45,7 @@ test('passing earns a crown and 20 XP', async ({ page }) => {
     await next(page);
   }
   await expect(page.locator('.lesson-complete')).toContainText('9 מתוך 10');
-  await expect(page.locator('.lesson-complete')).toContainText('עברת את מבחן היחידה');
+  await expect(page.locator('.lesson-complete')).toContainText('עברתם את מבחן היחידה');
   await page.getByRole('button', { name: 'למסלול' }).click();
   expect((await localProgress(page)).completed.u1cp).toBe(1);
   expect((await localProgress(page)).xp).toBe(20);

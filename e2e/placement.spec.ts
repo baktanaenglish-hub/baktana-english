@@ -31,7 +31,7 @@ test('two known units skip ahead to unit 3', async ({ page }) => {
     await answerAny(page, correct);
     await next(page);
   }
-  await expect(page.locator('.lesson-complete')).toContainText('דילגת על 2 יחידות');
+  await expect(page.locator('.lesson-complete')).toContainText('דילגתם על 2 יחידות');
   await page.getByRole('button', { name: 'למסלול' }).click();
   const progress = await localProgress(page);
   for (const l of [...course[0].lessons, ...course[1].lessons]) expect(progress.completed[l.id]).toBe(1);

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { REVIEW_PIN_THRESHOLD } from '../../shared/srs';
-import { course } from '../data/course';
+import { allLessons, course } from '../data/course';
 import { dailyGoalOf } from '../lib/goals';
 import { canPractice } from '../lib/practice';
 import { currentLessonId, isCatchUp, isUnlocked, type Progress } from '../lib/progress';
@@ -49,6 +49,17 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
   const goalPercent = Math.min(100, (progress.xpToday / goal) * 100);
   const review = reviewButtonState(due, canPractice(progress));
   const currentRef = useRef<HTMLDivElement>(null);
+  /** What a tap on a locked bubble explains, for a few seconds. */
+  const [lockedNote, setLockedNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (!lockedNote) return;
+    const id = window.setTimeout(() => setLockedNote(null), 3000);
+    return () => window.clearTimeout(id);
+  }, [lockedNote]);
+  const currentTitle = allLessons.find((l) => l.id === current)?.title;
+  const lockedLessonNote = currentTitle
+    ? `🔒 השיעור הזה עוד נעול. סיימו קודם את "${currentTitle}".`
+    : '🔒 השיעור הזה עוד נעול.';
 
   // Bring the lesson to continue with into view when the path opens.
   useEffect(() => {
@@ -106,7 +117,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
               <h2>
                 {unit.title}
                 {unitTestPassed(progress, unit) && (
-                  <span className="unit-crown" title="עברת את מבחן היחידה">
+                  <span className="unit-crown" title="עברתם את מבחן היחידה">
                     {' '}
                     👑
                   </span>
@@ -151,8 +162,8 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                     type="button"
                     className={`node-btn${done ? ' done' : ''}${isCurrent ? ' current' : ''}`}
                     style={open ? { background: unit.color } : undefined}
-                    disabled={!open}
-                    onClick={() => onStart(lesson.id)}
+                    aria-disabled={!open}
+                    onClick={() => (open ? onStart(lesson.id) : setLockedNote(lockedLessonNote))}
                     data-lesson-id={lesson.id}
                     aria-label={`${lesson.title}${done ? ' (הושלם)' : open ? '' : ' (נעול)'}${catchUp ? ' (חדש!)' : ''}`}
                   >
@@ -173,11 +184,17 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                 open={unitTestOpen(progress, unit)}
                 color={unit.color}
                 onStart={() => onUnitTest(unit)}
+                onLocked={() => setLockedNote('🔒 המבחן נפתח אחרי שמסיימים את כל השיעורים ביחידה.')}
               />
             )}
           </div>
         </section>
       ))}
+      {lockedNote && (
+        <p className="path-toast" role="status">
+          {lockedNote}
+        </p>
+      )}
     </div>
   );
 }
@@ -187,19 +204,20 @@ interface UnitTestNodeProps {
   open: boolean;
   color: string;
   onStart: () => void;
+  onLocked: () => void;
 }
 
 /** The end-of-unit test at the bottom of each unit: locked, open (🏆) or passed (👑, retakable). */
-function UnitTestNode({ passed, open, color, onStart }: UnitTestNodeProps) {
+function UnitTestNode({ passed, open, color, onStart, onLocked }: UnitTestNodeProps) {
   return (
     <div className="lesson-node unit-test-node">
       <button
         type="button"
         className={`node-btn test-btn${passed ? ' done' : ''}`}
         style={open ? { background: color } : undefined}
-        disabled={!open}
-        onClick={onStart}
-        aria-label={`מבחן יחידה${passed ? ' (עברת)' : open ? '' : ' (נעול – סיימו את כל השיעורים)'}`}
+        aria-disabled={!open}
+        onClick={open ? onStart : onLocked}
+        aria-label={`מבחן יחידה${passed ? ' (עברתם)' : open ? '' : ' (נעול – סיימו את כל השיעורים)'}`}
       >
         {passed ? '👑' : open ? '🏆' : '🔒'}
       </button>

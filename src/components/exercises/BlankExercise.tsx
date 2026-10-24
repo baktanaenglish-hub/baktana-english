@@ -37,7 +37,17 @@ export function BlankExercise({ exercise, locked, onCheck }: Props) {
             <button
               key={option}
               type="button"
-              className={`tile${chosen === option ? ' selected' : ''}`}
+              className={`tile${
+                locked && chosen !== null
+                  ? option === exercise.answer
+                    ? ' correct'
+                    : option === chosen
+                      ? ' wrong'
+                      : ''
+                  : chosen === option
+                    ? ' selected'
+                    : ''
+              }`}
               onClick={() => choose(option)}
               disabled={locked}
             >

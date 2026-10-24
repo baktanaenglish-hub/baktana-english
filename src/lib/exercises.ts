@@ -75,6 +75,24 @@ export function buildSentence(
   };
 }
 
+let lowerCaseWords: Set<string> | null = null;
+
+/**
+ * How an English bank tile is shown: a capital that only marks the start of the sentence
+ * ("Thanks") would give away the first word, so a word the course also writes in lower case
+ * is shown that way. Names and "I" keep their capital. Answers are checked without case.
+ */
+export function tileLabel(tile: string): string {
+  const lower = tile.toLowerCase();
+  if (tile === lower) return tile;
+  lowerCaseWords ??= new Set(
+    allLessons
+      .flatMap((l) => [...l.sentences.flatMap((s) => tokenize(s.en)), ...l.words.flatMap((w) => tokenize(w.en))])
+      .filter((t) => t === t.toLowerCase()),
+  );
+  return lowerCaseWords.has(lower) ? lower : tile;
+}
+
 /** Typing: translate one of the lesson's sentences into English, or type it after hearing it. */
 export function typeSentence(lesson: Lesson, index: number, listen = false): Exercise {
   const sentence = lesson.sentences[index];
@@ -106,6 +124,14 @@ export function speakSentence(lesson: Lesson, index: number): Exercise {
 /** Drops the speaking exercises – for devices without speech recognition, or when the learner turned them off. */
 export function withoutSpeaking(exercises: Exercise[]): Exercise[] {
   return exercises.filter((e) => e.kind !== 'speak');
+}
+
+/**
+ * Marks the word questions about words the learner has never answered (`known` is false for
+ * their item key), so the lesson introduces them instead of asking the learner to guess.
+ */
+export function markNewWords(exercises: Exercise[], known: (itemKey: string) => boolean): Exercise[] {
+  return exercises.map((e) => (e.kind === 'choice' && e.itemKey && !known(e.itemKey) ? { ...e, newWord: true } : e));
 }
 
 /** The exercise type reported to analytics (docs/spec/v2.md §6.1). */

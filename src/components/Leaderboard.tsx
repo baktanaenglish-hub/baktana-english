@@ -8,6 +8,8 @@ import { PeriodPicker } from './PeriodPicker';
 interface Props {
   user: User | null;
   onSignIn: () => void;
+  /** A guest's own XP, so the invitation shows where they would start. */
+  guestXp?: number;
 }
 
 type State =
@@ -30,7 +32,7 @@ const SUBTITLES: Record<Period, string> = {
 };
 
 /** The personal XP league by week, month or all time. Guests can look and get an invitation to join. */
-export function Leaderboard({ user, onSignIn }: Props) {
+export function Leaderboard({ user, onSignIn, guestXp = 0 }: Props) {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [period, setPeriod] = useState<Period>('week');
 
@@ -60,7 +62,12 @@ export function Leaderboard({ user, onSignIn }: Props) {
 
       {!user && (
         <div className="panel center">
-          <p>צרו פרופיל כדי להתחרות עם לומדים אחרים ולראות כמה XP צברתם השבוע.</p>
+          {guestXp > 0 && (
+            <p className="guest-xp">
+              כבר צברתם <bdi dir="ltr">⭐ {guestXp} XP</bdi>!
+            </p>
+          )}
+          <p>צרו פרופיל כדי להיכנס לליגה, להתחרות עם לומדים אחרים ולראות כמה XP צברתם השבוע.</p>
           <button type="button" className="btn primary" onClick={onSignIn}>
             יצירת פרופיל
           </button>
@@ -84,7 +91,7 @@ export function Leaderboard({ user, onSignIn }: Props) {
         </div>
       )}
 
-      {state.kind === 'ready' && state.entries.length === 0 && (
+      {state.kind === 'ready' && state.entries.length === 0 && user && (
         <div className="panel center">
           <p>עדיין אין אף אחד בדירוג הזה. סיימו שיעור ותהיו הראשונים!</p>
         </div>

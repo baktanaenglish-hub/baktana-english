@@ -11,7 +11,7 @@ export function ReviewCard({ due, onReview }: Props) {
         🧠
       </span>
       <p id="review-card-title">
-        יש לך <strong>{due}</strong> מילים ומשפטים לחזרה
+        יש לכם <strong>{due}</strong> מילים ומשפטים לחזרה
       </p>
       <button type="button" className="btn primary review-go" onClick={onReview}>
         לחזרה

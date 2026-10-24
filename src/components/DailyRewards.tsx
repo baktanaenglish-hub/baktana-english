@@ -11,9 +11,12 @@ interface Props {
 /** The daily chest and today's quests, at the top of the path. */
 export function DailyRewards({ gems, today, onOpenChest }: Props) {
   const [opened, setOpened] = useState<number | null>(null);
+  /** The quest list folds into one line, so the path's first lesson isn't pushed off the screen. */
+  const [showQuests, setShowQuests] = useState(false);
   const available = chestAvailable(gems, today);
   const quests = gems.questDate === today ? gems.quests : { lessons: 0, perfect: 0, review: 0 };
   const claimed = gems.questDate === today ? gems.claimed : [];
+  const doneCount = QUESTS.filter((q) => claimed.includes(q.id)).length;
 
   return (
     <section className="daily-rewards" aria-label="פרסים יומיים">
@@ -49,8 +52,21 @@ export function DailyRewards({ gems, today, onOpenChest }: Props) {
           )}
         </div>
       </div>
-      <h3 className="quests-title">⚡ משימות יומיות</h3>
-      <ul className="quests">
+      <h3 className="quests-title">
+        <button
+          type="button"
+          className="quests-toggle"
+          aria-expanded={showQuests}
+          aria-controls="daily-quests"
+          onClick={() => setShowQuests((v) => !v)}
+        >
+          <span>⚡ משימות יומיות</span>
+          <span className="quests-count">
+            {doneCount}/{QUESTS.length} {showQuests ? '▴' : '▾'}
+          </span>
+        </button>
+      </h3>
+      <ul className="quests" id="daily-quests" hidden={!showQuests}>
         {QUESTS.map((quest) => {
           const done = claimed.includes(quest.id);
           const value = Math.min(quest.goal, quests[quest.id]);

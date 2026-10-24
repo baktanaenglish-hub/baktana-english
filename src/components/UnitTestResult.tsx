@@ -20,7 +20,7 @@ export function UnitTestResult({ unit, right, passed, rewards = [], onRetry, onC
       <div className="big-emoji pop" aria-hidden="true">
         {passed ? '👑' : '💪'}
       </div>
-      <h2>{passed ? 'עברת את מבחן היחידה!' : 'כמעט!'}</h2>
+      <h2>{passed ? 'עברתם את מבחן היחידה!' : 'כמעט!'}</h2>
       <p className="lead">
         {right} מתוך {UNIT_TEST_QUESTIONS} נכונות
         {passed ? ` · +${UNIT_TEST_XP} XP` : ` – צריך ${UNIT_TEST_PASS} כדי לעבור.`}

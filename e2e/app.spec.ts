@@ -67,6 +67,7 @@ test('US-G1, US-L6, US-L7, US-G2, US-D2: a guest finishes the first lesson and t
   await expect(page.getByRole('button', { name: 'בואו נתחיל' })).toBeVisible();
   await page.getByRole('button', { name: 'בואו נתחיל' }).click();
   await page.getByRole('button', { name: 'המשך' }).click();
+  await page.getByRole('button', { name: /מתחילים מאפס/ }).click();
 
   // US-G1 AC1/AC2/AC4
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
@@ -153,6 +154,10 @@ test('US-H3: running out of hearts shows the out-of-hearts screen', async ({ pag
   await expect(page.getByRole('heading', { name: 'נגמרו הלבבות' })).toBeVisible();
   await expect(page.locator('.out-of-hearts')).toContainText('💔');
   await expect(page.locator('.out-of-hearts')).toContainText('לב חדש מתמלא כל 30 דקות');
+  // A countdown and a way to the shop; nothing was learned yet, so there is no review to offer.
+  await expect(page.getByRole('timer')).toHaveText(/לב חדש בעוד (29|30) דקות/);
+  await expect(page.getByRole('button', { name: '💎 לבבות בחנות' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '🧠 לחזרה בלי לבבות' })).toHaveCount(0);
   await page.getByRole('button', { name: 'חזרה למסלול' }).click();
 
   // AC3: nothing from the interrupted lesson is saved.
@@ -244,12 +249,12 @@ test('store requirement: a learner deletes their account from the profile', asyn
   const email = await register(page, 'למחיקה');
 
   await page.getByRole('button', { name: 'מחיקת החשבון' }).click();
-  await page.getByLabel('הסיסמה שלך, לאישור').fill('wrong-password');
+  await page.getByLabel('הסיסמה שלכם, לאישור').fill('wrong-password');
   await page.getByRole('button', { name: 'מחיקה לצמיתות' }).click();
   await expect(page.getByRole('alert')).toContainText('הסיסמה שגויה');
   expect(await token(page)).not.toBeNull();
 
-  await page.getByLabel('הסיסמה שלך, לאישור').fill('password123');
+  await page.getByLabel('הסיסמה שלכם, לאישור').fill('password123');
   await page.getByRole('button', { name: 'מחיקה לצמיתות' }).click();
   await expect(page.locator('.account-info h2')).toHaveText('אורח/ת');
   expect(await token(page)).toBeNull();

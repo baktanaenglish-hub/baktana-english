@@ -249,7 +249,7 @@ test('a subscriber sees when premium renews on the profile and the premium scree
   const card = page.locator('.premium-card');
   await expect(card).toContainText('מתחדש ב־21 בנובמבר 2026');
   await card.getByRole('button', { name: 'פרטי המנוי' }).click();
-  await expect(page.getByText('המנוי שלך פעיל.')).toBeVisible();
+  await expect(page.getByText('המנוי שלכם פעיל.')).toBeVisible();
   await expect(page.getByText('מתחדש ב־21 בנובמבר 2026')).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/paywall-subscriber.png`, fullPage: true });
   await page.getByRole('button', { name: 'לשיחות 📞' }).click();
