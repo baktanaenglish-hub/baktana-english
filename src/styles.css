@@ -211,9 +211,8 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 8px 12px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background: var(--bg);
   border-bottom: 2px solid var(--border);
 }
@@ -261,14 +260,15 @@ button:disabled {
   font-weight: 800;
 }
 
-/* The app name gets its own centered row under the logo and stats. */
+/* The app name sits between the profile chip and the stats, in the same row, so the bar stays
+   one line high; on a phone only the logo shows. */
 .brand-name {
-  flex-basis: 100%;
+  order: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  font-size: 1.7rem;
+  gap: 8px;
+  font-size: 1.25rem;
   color: var(--brand);
   font-weight: 800;
 }
@@ -276,6 +276,12 @@ button:disabled {
 .brand-logo {
   width: 28px;
   height: 28px;
+}
+
+@media (max-width: 560px) {
+  .brand-name > span {
+    display: none;
+  }
 }
 
 .brand-name b {
@@ -299,6 +305,7 @@ button:disabled {
 }
 
 .top-stats {
+  order: 2;
   display: flex;
   gap: 8px;
   font-weight: 700;
@@ -461,14 +468,32 @@ button:disabled {
   transition: transform 0.08s;
 }
 
-.node-btn:disabled {
+.node-btn:disabled,
+.node-btn[aria-disabled='true'] {
   color: var(--faint);
   box-shadow: 0 6px 0 var(--locked-shadow);
 }
 
-.node-btn:active:not(:disabled) {
+.node-btn:active:not(:disabled):not([aria-disabled='true']) {
   transform: translateY(4px);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Tapping a locked bubble says what opens it. */
+.path-toast {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 20;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 700;
+  text-align: center;
+  animation: slide-up 0.2s ease-out;
 }
 
 .node-btn.done {
@@ -590,6 +615,60 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* A word met for the first time, shown with its translation above the question. */
+.new-word {
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border: 2px solid var(--select-border);
+  border-radius: 16px;
+  background: var(--select-bg);
+}
+
+.new-word-badge {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: var(--select-text);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.new-word-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.new-word-en {
+  color: var(--select-text);
+}
+
+/* Leaving a lesson half-way. */
+.quit-confirm {
+  text-align: center;
+}
+
+.quit-confirm .big-emoji {
+  font-size: 3rem;
+}
+
+.quit-confirm h2 {
+  margin: 4px 0 6px;
+}
+
+.quit-confirm p {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.quit-confirm .btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
 }
 
 .prompt-word {
@@ -759,6 +838,31 @@ button:disabled {
   color: var(--select-text);
 }
 
+/* After checking: the right answer turns green, a wrong pick red. */
+.option.correct,
+.tile.correct {
+  border-color: var(--good-text);
+  background: var(--good-bg);
+  color: var(--good-text);
+}
+
+.option.wrong,
+.tile.wrong {
+  border-color: var(--bad-text);
+  background: var(--bad-bg);
+  color: var(--bad-text);
+}
+
+.option.correct .option-key {
+  border-color: var(--good-text);
+  color: var(--good-text);
+}
+
+.option.wrong .option-key {
+  border-color: var(--bad-text);
+  color: var(--bad-text);
+}
+
 .answer-line {
   min-height: 64px;
   display: flex;
@@ -893,6 +997,20 @@ button:disabled {
 
 .bad .feedback-icon {
   background: var(--bad-text);
+}
+
+.out-of-hearts-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.next-heart {
+  margin: 0;
+  color: var(--red-dark);
+  font-weight: 800;
 }
 
 .out-of-hearts,
@@ -1437,13 +1555,41 @@ button:disabled {
 .league-tabs button {
   position: relative;
   flex: 1;
-  padding: 8px 4px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
   border: 2px solid transparent;
   border-radius: 10px;
   background: none;
   color: var(--muted);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+}
+
+.guest-xp {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gold-dark);
+}
+
+.league-tab-icon {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.league-tab-label {
+  white-space: nowrap;
+}
+
+.league-tabs .badge {
+  position: absolute;
+  top: 2px;
+  inset-inline-end: 2px;
+  margin: 0;
 }
 
 .league-tabs button.active {
@@ -3465,8 +3611,31 @@ button:disabled {
 }
 
 .quests-title {
-  margin: 14px 0 8px;
+  margin: 12px 0 0;
   font-size: 1rem;
+}
+
+.quests-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.quests-count {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.quests[hidden] {
+  display: none;
 }
 
 .quests {

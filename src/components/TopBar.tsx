@@ -45,8 +45,8 @@ export function TopBar({ streak, xp, hearts, gems, onGems, premium, name, avatar
           <span>💎</span> {gems}
         </button>
       </div>
-      <span className="brand-name" dir="ltr">
-        <img className="brand-logo" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" />
+      <span className="brand-name" dir="ltr" title="Baktana English">
+        <img className="brand-logo" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="Baktana English" />
         <span>
           Baktana<b>English</b>
         </span>

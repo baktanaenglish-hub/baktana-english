@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { GOAL_OPTIONS } from '../lib/goals';
 import { DAILY_GOAL_XP } from '../lib/progress';
 
+/** How much English the learner says they know: 'some' goes on to the placement test. */
+export type StartLevel = 'new' | 'some';
+
 interface Props {
-  onDone: (dailyGoal: number) => void;
+  onDone: (dailyGoal: number, level: StartLevel) => void;
   /** Omitted when accounts are disabled (static deploy). */
   onSignIn?: () => void;
 }
 
-/** First-run flow: a welcome screen, then picking a daily XP goal. */
+/** First-run flow: a welcome screen, picking a daily XP goal, then where to start. */
 export function Onboarding({ onDone, onSignIn }: Props) {
-  const [step, setStep] = useState<'welcome' | 'goal'>('welcome');
+  const [step, setStep] = useState<'welcome' | 'goal' | 'level'>('welcome');
   const [goal, setGoal] = useState(DAILY_GOAL_XP);
 
   if (step === 'welcome') {
@@ -41,6 +44,25 @@ export function Onboarding({ onDone, onSignIn }: Props) {
     );
   }
 
+  if (step === 'level') {
+    return (
+      <div className="onboarding">
+        <h1>כמה אנגלית אתם כבר יודעים?</h1>
+        <p className="lead">כדי שנתחיל מהמקום הנכון.</p>
+        <div className="goal-options">
+          <button type="button" className="goal-option level-option" onClick={() => onDone(goal, 'new')} autoFocus>
+            <span className="goal-label">🌱 מתחילים מאפס</span>
+            <span className="goal-hint">מתחילים מהשיעור הראשון</span>
+          </button>
+          <button type="button" className="goal-option level-option" onClick={() => onDone(goal, 'some')}>
+            <span className="goal-label">📚 כבר יודעים קצת</span>
+            <span className="goal-hint">מבחן מיקום קצר מדלג על מה שכבר יודעים</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="onboarding">
       <h1>מה היעד היומי שלכם?</h1>
@@ -64,7 +86,7 @@ export function Onboarding({ onDone, onSignIn }: Props) {
         ))}
       </div>
       <div className="onboarding-actions">
-        <button type="button" className="btn primary" onClick={() => onDone(goal)}>
+        <button type="button" className="btn primary" onClick={() => setStep('level')}>
           המשך
         </button>
       </div>

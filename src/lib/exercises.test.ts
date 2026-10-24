@@ -4,7 +4,7 @@ import { isItemKey, sentenceKey, wordKey } from '../../shared/item-keys';
 import { allLessons, course } from '../data/course';
 import type { Exercise, Lesson } from '../types';
 import { isCorrect, tokenize } from './answer';
-import { buildSentence, exerciseType, generateExercises, withoutSpeaking } from './exercises';
+import { buildSentence, exerciseType, generateExercises, markNewWords, tileLabel, withoutSpeaking } from './exercises';
 import { seededRng } from './random';
 
 /** True when `answer` can be laid out from the bank's tiles (each tile used once). */
@@ -159,5 +159,36 @@ describe('item keys and heAlt (v2 §7.5)', () => {
       [{ kind: 'speak', prompt: 'x', he: 'x', answers: ['x'] }, 'speak'],
     ];
     for (const [ex, type] of cases) expect(exerciseType(ex)).toBe(type);
+  });
+});
+
+describe('markNewWords', () => {
+  it('marks only the word questions about words the learner never answered', () => {
+    const lesson = allLessons[0];
+    const exercises = generateExercises(lesson, seededRng(3));
+    const known = wordKey(lesson.words[0]);
+    const marked = markNewWords(exercises, (key) => key === known);
+    const choices = marked.filter((e) => e.kind === 'choice');
+    expect(choices.length).toBe(lesson.words.length);
+    for (const e of choices) expect(e.newWord ?? false).toBe(e.itemKey !== known);
+    expect(marked.filter((e) => e.kind !== 'choice')).toEqual(exercises.filter((e) => e.kind !== 'choice'));
+  });
+
+  it('marks nothing once every word is known', () => {
+    const exercises = generateExercises(allLessons[0], seededRng(3));
+    expect(markNewWords(exercises, () => true)).toEqual(exercises);
+  });
+});
+
+describe('tileLabel', () => {
+  it('hides a capital that only starts the sentence', () => {
+    expect(tileLabel('Thanks')).toBe('thanks');
+    expect(tileLabel('Yes')).toBe('yes');
+    expect(tileLabel('hello')).toBe('hello');
+  });
+
+  it('keeps "I" and names', () => {
+    expect(tileLabel('I')).toBe('I');
+    expect(tileLabel('Xylophonia')).toBe('Xylophonia');
   });
 });

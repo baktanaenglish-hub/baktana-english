@@ -74,6 +74,7 @@ export async function openFresh(page: Page) {
   await page.goto('/');
   await page.getByRole('button', { name: 'בואו נתחיל' }).click();
   await page.getByRole('button', { name: 'המשך' }).click();
+  await page.getByRole('button', { name: /מתחילים מאפס/ }).click();
   await expect(page.locator('.path')).toBeVisible();
 }
 
@@ -168,12 +169,9 @@ async function current(page: Page): Promise<{ kind: Kind; prompt: string }> {
 
 async function clickTiles(page: Page, words: string[]) {
   for (const word of words) {
-    await page
-      .locator('.bank')
-      .getByRole('button', { name: word, exact: true })
-      .and(page.locator(':enabled'))
-      .first()
-      .click();
+    // Tiles may show a sentence-start capital in lower case ("Thanks" → "thanks").
+    const name = new RegExp(`^${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+    await page.locator('.bank').getByRole('button', { name }).and(page.locator(':enabled')).first().click();
   }
 }
 

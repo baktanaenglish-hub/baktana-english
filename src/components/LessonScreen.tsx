@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ErrorCode, Exercise, ItemAnswer } from '../types';
 import { track } from '../lib/analytics';
 import { exerciseType } from '../lib/exercises';
+import { useBackButton } from '../lib/back';
 import { MAX_HEARTS } from '../lib/progress';
 import { sounds } from '../lib/sound';
 import { useEnterKey } from '../lib/useEnterKey';
@@ -47,6 +48,12 @@ interface Props {
   tipTitle?: string;
   /** Review only: the SRS box of an item before this session (analytics `props.box`). */
   boxOf?: (itemKey: string) => number | undefined;
+  /** When the next heart refills (ms), shown when the hearts run out. */
+  nextHeartAt?: number;
+  /** Out of hearts: start a review instead (absent when there is nothing to review). */
+  onReview?: () => void;
+  /** Out of hearts: the gem shop, for bonus hearts. */
+  onShop?: () => void;
 }
 
 interface Feedback {
@@ -54,6 +61,13 @@ interface Feedback {
   solution: string;
   /** Shown with a correct answer, together with the solution (e.g. a spelling slip). */
   note?: string;
+}
+
+/** "The next heart in N minutes" for the out-of-hearts screen. */
+export function heartCountdown(ms: number): string {
+  const minutes = Math.ceil(ms / 60_000);
+  if (minutes <= 1) return 'לב חדש בעוד פחות מדקה';
+  return `לב חדש בעוד ${minutes} דקות`;
 }
 
 const PRAISE = ['מצוין!', 'כל הכבוד!', 'נהדר!', 'מעולה!', 'יפה מאוד!'];
@@ -96,6 +110,9 @@ export function LessonScreen({
   tip,
   tipTitle = 'טיפ לשיעור',
   boxOf,
+  nextHeartAt,
+  onReview,
+  onShop,
 }: Props) {
   const [queue, setQueue] = useState<Exercise[]>(exercises);
   /** How many of the original exercises are still in the session (speaking ones can be skipped). */
@@ -105,6 +122,8 @@ export function LessonScreen({
   const [mistakes, setMistakes] = useState(0);
   const [solved, setSolved] = useState(0);
   const [showTip, setShowTip] = useState(Boolean(tip));
+  /** "Leave the lesson?" is open (✕ or the back button after answering something). */
+  const [confirmQuit, setConfirmQuit] = useState(false);
   const [startedAt] = useState(() => Date.now());
   const answers = useRef<ItemAnswer[]>([]);
   const firstTry = useRef({ answered: 0, correct: 0 });
@@ -202,20 +221,59 @@ export function LessonScreen({
     onQuit();
   }
 
-  useEnterKey(next, feedback !== null);
+  /** ✕: leaving right away loses nothing, later the learner is asked first. */
+  function requestQuit() {
+    if (firstTry.current.answered > 0) setConfirmQuit(true);
+    else quit();
+  }
 
-  if (hearts === 0 && !feedback) {
+  const outOfHearts = hearts === 0 && !feedback;
+
+  useBackButton(() => {
+    if (confirmQuit) setConfirmQuit(false);
+    else if (outOfHearts) onQuit();
+    else requestQuit();
+  });
+
+  useEnterKey(next, feedback !== null && !confirmQuit);
+
+  // The countdown to the next heart, refreshed while the learner waits.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!outOfHearts) return;
+    const id = window.setInterval(() => setNow(Date.now()), 15_000);
+    return () => window.clearInterval(id);
+  }, [outOfHearts]);
+
+  if (outOfHearts) {
     return (
       <div className="lesson out-of-hearts">
         <div className="big-emoji pop">💔</div>
         <h2>נגמרו הלבבות</h2>
+        {nextHeartAt !== undefined && (
+          <p className="next-heart" role="timer">
+            ❤️ {heartCountdown(nextHeartAt - now)}
+          </p>
+        )}
         <p>
           לב חדש מתמלא כל 30 דקות. בינתיים אפשר לעשות חזרה על מה שלמדתם – בחזרה אין הורדת לבבות. ובחנות 💎 אפשר לקנות
           לבבות בונוס.
         </p>
-        <button type="button" className="btn primary" onClick={onQuit} autoFocus>
-          חזרה למסלול
-        </button>
+        <div className="out-of-hearts-actions">
+          {onReview && (
+            <button type="button" className="btn primary" onClick={onReview} autoFocus>
+              🧠 לחזרה בלי לבבות
+            </button>
+          )}
+          {onShop && (
+            <button type="button" className="btn secondary" onClick={onShop}>
+              💎 לבבות בחנות
+            </button>
+          )}
+          <button type="button" className="btn ghost" onClick={onQuit} autoFocus={!onReview}>
+            חזרה למסלול
+          </button>
+        </div>
       </div>
     );
   }
@@ -232,7 +290,7 @@ export function LessonScreen({
         <button
           type="button"
           className="icon-btn"
-          onClick={quit}
+          onClick={requestQuit}
           aria-label={review ? 'יציאה מהחזרה' : 'יציאה מהשיעור'}
         >
           ✕
@@ -305,6 +363,35 @@ export function LessonScreen({
             המשך
           </button>
         </footer>
+      )}
+
+      {confirmQuit && (
+        <div className="sheet-backdrop" onClick={() => setConfirmQuit(false)}>
+          <div
+            className="sheet quit-confirm"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="quit-title"
+            aria-describedby="quit-text"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="big-emoji" aria-hidden="true">
+              🥺
+            </div>
+            <h2 id="quit-title">{review ? 'לצאת מהחזרה?' : 'לצאת מהשיעור?'}</h2>
+            <p id="quit-text">
+              {review
+                ? 'ההתקדמות בחזרה הזאת לא תישמר.'
+                : 'ההתקדמות בשיעור הזה לא תישמר, ובפעם הבאה תתחילו אותו מההתחלה.'}
+            </p>
+            <button type="button" className="btn primary" onClick={() => setConfirmQuit(false)} autoFocus>
+              {review ? 'ממשיכים בחזרה' : 'ממשיכים ללמוד'}
+            </button>
+            <button type="button" className="btn ghost" onClick={quit}>
+              יציאה
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

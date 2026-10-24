@@ -47,6 +47,7 @@ test('a learner creates a group, a friend joins with the invite link, and their 
   // A first visit starts with onboarding, then lands on "my groups" with the invite.
   await friend.getByRole('button', { name: 'בואו נתחיל' }).click();
   await friend.getByRole('button', { name: 'המשך' }).click();
+  await friend.getByRole('button', { name: /מתחילים מאפס/ }).click();
   await expect(friend.locator('.my-groups')).toContainText(`קוד ${code}`);
   expect(friend.url()).not.toContain('join=');
   await friend.locator('.my-groups').getByRole('button', { name: 'יצירת פרופיל' }).click();

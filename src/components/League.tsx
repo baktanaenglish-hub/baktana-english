@@ -24,13 +24,16 @@ interface Props {
   onDuelPrize: (result: DuelResult, gems: number) => string | null | void;
   duelCode: string | null;
   onDuelCodeUsed: () => void;
+  /** A guest's own XP, shown in the league's invitation. */
+  guestXp?: number;
 }
 
-const VIEWS: { view: LeagueView; label: string }[] = [
-  { view: 'me', label: '🏆 אישי' },
-  { view: 'groups', label: '🏟️ קבוצות' },
-  { view: 'mine', label: '👥 הקבוצות שלי' },
-  { view: 'duels', label: '⚔️ ראש בראש' },
+/** The icon goes above the label, so four tabs fit a phone without breaking a label in two. */
+const VIEWS: { view: LeagueView; icon: string; label: string }[] = [
+  { view: 'me', icon: '🏆', label: 'אישי' },
+  { view: 'groups', icon: '🏟️', label: 'קבוצות' },
+  { view: 'mine', icon: '👥', label: 'הקבוצות שלי' },
+  { view: 'duels', icon: '⚔️', label: 'ראש בראש' },
 ];
 
 /** The league tab: the personal league, the group league, the learner's own groups and head-to-head duels. */
@@ -46,12 +49,13 @@ export function League({
   onDuelPrize,
   duelCode,
   onDuelCodeUsed,
+  guestXp = 0,
 }: Props) {
   const [view, setView] = useState<LeagueView>(initialView);
   return (
     <div className="league">
       <div className="league-tabs" role="tablist" aria-label="סוג הדירוג">
-        {VIEWS.map(({ view: v, label }) => (
+        {VIEWS.map(({ view: v, icon, label }) => (
           <button
             key={v}
             type="button"
@@ -60,7 +64,7 @@ export function League({
             className={view === v ? 'active' : ''}
             onClick={() => setView(v)}
           >
-            {label}
+            <span className="league-tab-icon">{icon}</span> <span className="league-tab-label">{label}</span>
             {v === 'mine' && groups.unread > 0 && view !== 'mine' && (
               <span className="badge" aria-label={`${groups.unread} התראות חדשות`}>
                 {groups.unread}
@@ -74,7 +78,7 @@ export function League({
           </button>
         ))}
       </div>
-      {view === 'me' && <Leaderboard user={user} onSignIn={onSignIn} />}
+      {view === 'me' && <Leaderboard user={user} onSignIn={onSignIn} guestXp={guestXp} />}
       {view === 'groups' && <GroupBoard user={user} />}
       {view === 'mine' && (
         <MyGroups

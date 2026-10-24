@@ -268,8 +268,9 @@ export function useGroups(userId: string | null): GroupsState {
 export function endsInText(endsAt: number | null | undefined, now = Date.now()): string {
   if (!endsAt) return '';
   const hours = Math.max(0, Math.ceil((endsAt - now) / 3_600_000));
-  if (hours <= 24) return hours <= 1 ? 'מסתיים בעוד פחות משעה' : `מסתיים בעוד ${hours} שעות`;
-  const days = Math.ceil(hours / 24);
+  if (hours <= 48) return hours <= 1 ? 'מסתיים בעוד פחות משעה' : `מסתיים בעוד ${hours} שעות`;
+  // Whole days left, rounded down: a week that just began ends "in 7 days", not 8.
+  const days = Math.floor(hours / 24);
   return days === 2 ? 'מסתיים בעוד יומיים' : `מסתיים בעוד ${days} ימים`;
 }
 

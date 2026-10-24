@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Exercise } from '../../types';
 import { isCorrect } from '../../lib/answer';
+import { tileLabel } from '../../lib/exercises';
 import { speak } from '../../lib/speech';
 import { CheckFooter } from '../CheckFooter';
 import { SpeakButton } from '../SpeakButton';
@@ -32,6 +33,13 @@ export function BuildExercise({ exercise, locked, onCheck }: Props) {
   }
 
   const answer = chosen.map((i) => exercise.bank[i]).join(' ');
+  const english = exercise.answerLang === 'en';
+  /** English tiles hide sentence-start capitals; the answer line writes its first word with one. */
+  const label = (i: number, first = false) => {
+    if (!english) return exercise.bank[i];
+    const text = tileLabel(exercise.bank[i]);
+    return first ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+  };
 
   return (
     <>
@@ -53,14 +61,14 @@ export function BuildExercise({ exercise, locked, onCheck }: Props) {
           </div>
         )}
         <div className="answer-line" dir={dir}>
-          {chosen.map((i) => (
+          {chosen.map((i, n) => (
             <button key={i} type="button" className="tile" onClick={() => remove(i)} disabled={locked}>
-              {exercise.bank[i]}
+              {label(i, n === 0)}
             </button>
           ))}
         </div>
         <div className="bank" dir={dir}>
-          {exercise.bank.map((word, i) => (
+          {exercise.bank.map((_, i) => (
             <button
               key={i}
               type="button"
@@ -68,7 +76,7 @@ export function BuildExercise({ exercise, locked, onCheck }: Props) {
               onClick={() => add(i)}
               disabled={locked || chosen.includes(i)}
             >
-              {word}
+              {label(i)}
             </button>
           ))}
         </div>

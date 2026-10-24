@@ -13,6 +13,7 @@ async function openWithMicrophone(page: Page) {
   await page.goto('/');
   await page.getByRole('button', { name: 'בואו נתחיל' }).click();
   await page.getByRole('button', { name: 'המשך' }).click();
+  await page.getByRole('button', { name: /מתחילים מאפס/ }).click();
   await expect(page.locator('.path')).toBeVisible();
   await openLesson(page, 'u1l1');
 }
@@ -69,6 +70,7 @@ test('speaking exercises can be turned off in the profile', async ({ page }) => 
   await page.goto('/');
   await page.getByRole('button', { name: 'בואו נתחיל' }).click();
   await page.getByRole('button', { name: 'המשך' }).click();
+  await page.getByRole('button', { name: /מתחילים מאפס/ }).click();
   await page.locator('.bottom-nav').getByRole('button', { name: 'פרופיל' }).click();
   const toggle = page.getByRole('switch', { name: 'תרגילי דיבור (מיקרופון)' });
   await expect(toggle).toHaveAttribute('aria-checked', 'true');

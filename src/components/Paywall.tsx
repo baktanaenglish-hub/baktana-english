@@ -174,7 +174,7 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           <div className="panel center paywall-done" role="status">
             {phase === 'active' && <p className="call-gate-title">🎉 ברוכים הבאים לפרימיום!</p>}
             {phase !== 'active' && <PremiumBadge />}
-            {phase !== 'active' && <p>המנוי שלך פעיל.</p>}
+            {phase !== 'active' && <p>המנוי שלכם פעיל.</p>}
             {subscriptionText(status) && <p className="muted">{subscriptionText(status)}</p>}
             <button type="button" className="btn primary wide" onClick={onCalls}>
               לשיחות 📞
@@ -205,7 +205,7 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           </div>
         ) : !user ? (
           <div className="panel center call-gate">
-            <p>כדי להצטרף לפרימיום צריך קודם להתחבר, כדי שהמנוי יישמר בחשבון שלך.</p>
+            <p>כדי להצטרף לפרימיום צריך קודם להתחבר, כדי שהמנוי יישמר בחשבון שלכם.</p>
             <button type="button" className="btn primary" onClick={onSignIn}>
               התחברות
             </button>
@@ -271,7 +271,7 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
               <p className="paywall-fine">
                 {plan.trialDays > 0 &&
                   `${trialText(plan.trialDays)}, ואחר כך ${plan.price} ${plan.period === 'year' ? 'לשנה' : 'לחודש'}. `}
-                המנוי מתחדש אוטומטית {plan.period === 'year' ? 'בכל שנה' : 'בכל חודש'} ונגבה דרך חשבון Google Play שלך,
+                המנוי מתחדש אוטומטית {plan.period === 'year' ? 'בכל שנה' : 'בכל חודש'} ונגבה דרך חשבון Google Play שלכם,
                 עד שמבטלים. אפשר לבטל בכל רגע ב־Google Play, והגישה נשארת עד סוף התקופה ששולמה.
                 {plan.trialDays > 0 && ' ביטול לפני סוף תקופת הניסיון – בלי חיוב.'}
               </p>

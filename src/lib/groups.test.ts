@@ -102,7 +102,10 @@ describe('storage and text', () => {
     expect(endsInText(null, now)).toBe('');
     expect(endsInText(30 * 60_000, now)).toBe('מסתיים בעוד פחות משעה');
     expect(endsInText(5 * 3600_000, now)).toBe('מסתיים בעוד 5 שעות');
-    expect(endsInText(40 * 3600_000, now)).toBe('מסתיים בעוד יומיים');
-    expect(endsInText(100 * 3600_000, now)).toBe('מסתיים בעוד 5 ימים');
+    expect(endsInText(40 * 3600_000, now)).toBe('מסתיים בעוד 40 שעות');
+    expect(endsInText(50 * 3600_000, now)).toBe('מסתיים בעוד יומיים');
+    expect(endsInText(100 * 3600_000, now)).toBe('מסתיים בעוד 4 ימים');
+    // A week that started 44 minutes ago.
+    expect(endsInText(7 * 24 * 3600_000 - 44 * 60_000, now)).toBe('מסתיים בעוד 7 ימים');
   });
 });

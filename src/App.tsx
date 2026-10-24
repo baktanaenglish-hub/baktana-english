@@ -26,13 +26,13 @@ import { identify, setAnalyticsEnabled, track } from './lib/analytics';
 import { PREMIUM_ON_SALE, subscriptionText, syncBillingUser } from './lib/billing';
 import { CALLS_ENABLED, CALLS_LOCKED, getCallStatus } from './lib/call-api';
 import { ACCOUNTS_ENABLED, PASSWORD_RESET, isPasswordRecoveryLink } from './lib/config';
-import { generateExercises, withoutSpeaking } from './lib/exercises';
+import { generateExercises, markNewWords, withoutSpeaking } from './lib/exercises';
 import { canListen } from './lib/listen';
 import { takeDuelCode, useDuels } from './lib/duels';
 import { takeJoinCode, useGroups } from './lib/groups';
 import { needsOnboarding, reachesGoal, setDailyGoal } from './lib/goals';
 import { loadIntroSeen, markIntroSeen, shouldAutoShowIntro } from './lib/intro-seen';
-import { completePractice } from './lib/practice';
+import { canPractice, completePractice } from './lib/practice';
 import {
   applyStreakFreeze,
   avatarEmoji,
@@ -74,13 +74,16 @@ import { finishGame, gameInfo, gameUnlocked, unlockGame, wordPool } from './lib/
 import {
   completeLesson,
   dateKey,
+  HEART_REFILL_MS,
   isCatchUp,
   loseHeart,
   resetProgress,
   visibleStreak,
   type Progress,
 } from './lib/progress';
-import { syncReminders } from './lib/reminders';
+import { remindersNative, syncReminders } from './lib/reminders';
+import { loadReminderOffered, saveReminderOffered, shouldOfferReminder } from './lib/reminder-offer';
+import { ReminderOffer } from './components/ReminderOffer';
 import { applyPlacement, placementDone, placementQuestions, unitsPassed } from './lib/placement';
 import { QuizScreen } from './components/QuizScreen';
 import { PlacementResult } from './components/PlacementResult';
@@ -100,11 +103,12 @@ import {
 import { setSoundEnabled, sounds } from './lib/sound';
 import { useSettings } from './lib/settings';
 import { useSrs } from './lib/srs';
+import { useBackFallback } from './lib/back';
 import { useProgress } from './lib/store';
 import { useAppUpdate } from './lib/update';
 import type { Exercise, Unit } from './types';
 
-/** 'pet' is opened from the path, not from the bottom bar. */
+/** 'pet' is opened from the path and 'shop' from the 💎 in the top bar, not from the bottom bar. */
 type Tab = 'path' | 'arcade' | 'shop' | 'league' | 'call' | 'profile' | 'pet';
 
 /** Where a sign-up started, reported with `signup_complete`. */
@@ -155,10 +159,10 @@ interface IntroState {
   lessonId?: string;
 }
 
-const ALL_TABS: { name: Exclude<Tab, 'pet'>; icon: string; label: string }[] = [
+/** Five tabs at most; the shop opens from the 💎 in the top bar and from the profile. */
+const ALL_TABS: { name: Exclude<Tab, 'pet' | 'shop'>; icon: string; label: string }[] = [
   { name: 'path', icon: '🏠', label: 'לימוד' },
   { name: 'arcade', icon: '🎮', label: 'משחקים' },
-  { name: 'shop', icon: '💎', label: 'חנות' },
   { name: 'league', icon: '🏆', label: 'ליגה' },
   { name: 'call', icon: '📞', label: 'שיחה' },
   { name: 'profile', icon: '👤', label: 'פרופיל' },
@@ -218,6 +222,7 @@ function Screens() {
   const [duelCode, setDuelCode] = useState<string | null>(null);
   /** Premium and today's call count, as last heard from the server (the call tab refreshes it). */
   const [callStatus, setCallStatus] = useState<CallStatusResponse | null>(null);
+  const [reminderOffered, setReminderOffered] = useState(loadReminderOffered);
   const streak = visibleStreak(progress);
 
   useEffect(() => setSoundEnabled(settings.sound), [settings.sound]);
@@ -342,6 +347,39 @@ function Screens() {
     void refreshDuels();
   }, [screen.name, refreshGroups, refreshDuels]);
 
+  // The Android back button: a lesson answers it itself (src/lib/back.ts); elsewhere it closes the
+  // unit sheet or goes back one screen, and on the path it leaves the app.
+  useBackFallback(() => {
+    if (intro) {
+      setIntro(null);
+      return true;
+    }
+    switch (screen.name) {
+      case 'path':
+        return false;
+      // A call is ended with its own button, so a stray press doesn't hang up.
+      case 'call-active':
+        return true;
+      case 'game':
+      case 'game-done':
+        setScreen({ name: 'arcade' });
+        return true;
+      case 'auth':
+        setScreen({ name: screen.back === 'onboarding' ? 'path' : screen.back });
+        return true;
+      case 'premium':
+        setScreen({ name: screen.back });
+        return true;
+      case 'reset-password':
+        void api.signOut();
+        setScreen({ name: 'path' });
+        return true;
+      default:
+        setScreen({ name: 'path' });
+        return true;
+    }
+  });
+
   function signedIn(res: AuthResponse, mode: AuthMode, from: AuthFrom, back: Tab | 'onboarding') {
     account.signIn(res);
     saveSignupPrompt(retire(loadSignupPrompt()));
@@ -425,9 +463,10 @@ function Screens() {
   if (needsOnboarding(progress)) {
     return (
       <Onboarding
-        onDone={(goal) => {
+        onDone={(goal, level) => {
           update((p) => setDailyGoal(p, goal));
-          track({ name: 'onboarding_complete', props: { dailyGoal: goal } });
+          track({ name: 'onboarding_complete', props: { dailyGoal: goal, level } });
+          if (level === 'some') setScreen({ name: 'placement', exercises: placementQuestions() });
         }}
         onSignIn={
           ACCOUNTS_ENABLED
@@ -443,6 +482,8 @@ function Screens() {
     const review = lessonId === null;
     return (
       <LessonScreen
+        // A review started from the out-of-hearts screen replaces the lesson: start it fresh.
+        key={lessonId ?? 'review'}
         exercises={exercises}
         lessonId={lessonId}
         hearts={review ? null : progress.hearts + gems.bonusHearts}
@@ -451,6 +492,9 @@ function Screens() {
         tip={screen.tip}
         tipTitle={screen.tipTitle}
         boxOf={review ? (key) => srs.store.items[key]?.box : undefined}
+        nextHeartAt={progress.heartsUpdatedAt + HEART_REFILL_MS}
+        onReview={srs.due > 0 || canPractice(progress) ? startReview : undefined}
+        onShop={() => setScreen({ name: 'shop' })}
         onFinish={(raw) => {
           const durationMs = Math.min(MAX_DURATION_MS, Math.max(0, raw.durationMs));
           if (review) {
@@ -597,7 +641,7 @@ function Screens() {
         pet={pet && screen.petLine && <PetBubble pet={pet} xp={progress.xp} line={screen.petLine} />}
         onContinue={() => setScreen({ name: 'path' })}
         signupPrompt={
-          signup && (
+          signup ? (
             <SignupPrompt
               onAccept={() => {
                 track({ name: 'signup_prompt_accepted', props: { ...signup } });
@@ -609,6 +653,27 @@ function Screens() {
                 setScreen({ ...screen, signup: null });
               }}
             />
+          ) : (
+            screen.kind === 'lesson' &&
+            shouldOfferReminder({
+              native: remindersNative,
+              reminderOn: settings.reminder,
+              offered: reminderOffered,
+              lessonsCompleted: lessonsCompleted(progress),
+            }) && (
+              <ReminderOffer
+                time={settings.reminderTime}
+                onAccept={() => {
+                  changeSettings({ reminder: true });
+                  saveReminderOffered();
+                  setReminderOffered(true);
+                }}
+                onDismiss={() => {
+                  saveReminderOffered();
+                  setReminderOffered(true);
+                }}
+              />
+            )
           )
         }
       />
@@ -686,13 +751,14 @@ function Screens() {
       lessonId,
       props: { catchup: isCatchUp(progress, lessonId), attempt: (progress.completed[lessonId] ?? 0) + 1 },
     });
+    const generated = generateExercises(found.lesson);
     setScreen({
       name: 'lesson',
       lessonId,
-      exercises:
-        canListen && settings.speaking
-          ? generateExercises(found.lesson)
-          : withoutSpeaking(generateExercises(found.lesson)),
+      exercises: markNewWords(
+        canListen && settings.speaking ? generated : withoutSpeaking(generated),
+        (key) => key in srs.store.items,
+      ),
       tip: found.lesson.tip,
       tipTitle: found.lesson.title,
     });
@@ -820,20 +886,6 @@ function Screens() {
             onLeague={ACCOUNTS_ENABLED ? () => setScreen({ name: 'league', view: 'mine' }) : undefined}
           />
         )}
-        {screen.name === 'path' && (
-          <button type="button" className="arcade-card" onClick={() => setScreen({ name: 'arcade' })}>
-            <span className="arcade-card-icon" aria-hidden="true">
-              🎮
-            </span>
-            <span className="arcade-card-text">
-              <strong>משחקים</strong>
-              <span className="muted">משחקי מילים שנפתחים בהתקדמות וביהלומים</span>
-            </span>
-            <span className="arcade-card-go" aria-hidden="true">
-              ‹
-            </span>
-          </button>
-        )}
         {screen.name === 'arcade' && (
           <Arcade
             gems={gems}
@@ -890,6 +942,7 @@ function Screens() {
             }}
             duelCode={duelCode}
             onDuelCodeUsed={() => setDuelCode(null)}
+            guestXp={account.user ? 0 : progress.xp}
           />
         )}
         {screen.name === 'call' && (

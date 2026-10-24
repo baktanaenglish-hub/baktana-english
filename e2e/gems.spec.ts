@@ -35,7 +35,12 @@ test('the daily chest, a lesson and the shop', async ({ page }) => {
   await expect(page.locator('.reward-list')).toContainText('שיעור הושלם');
   await shot(page, '2-complete');
   await page.getByRole('button', { name: 'המשך' }).click();
-  await expect(page.locator('.quests li.done')).not.toHaveCount(0);
+  // The quests fold into one line on the path; it counts the done ones and opens the list.
+  const quests = page.getByRole('button', { name: /משימות יומיות/ });
+  await expect(quests).toHaveAttribute('aria-expanded', 'false');
+  await expect(quests).not.toContainText('0/3');
+  await quests.click();
+  await expect(page.locator('.quests li.done').first()).toBeVisible();
 
   // The shop: buying bonus hearts raises the hearts in the top bar.
   await page.locator('.gem-stat').click();
