@@ -231,12 +231,12 @@ test('US-A1, US-A3, US-A4, US-A2, US-P2: register → progress synced → reload
   await expect(lessonButton(device, 'u1l3')).toBeEnabled();
   await expect(topBar(device)).toContainText('⭐ 40');
 
-  // US-A2 AC5: signing out removes the token but keeps local progress.
+  // US-A2 AC5: signing out removes the token and leaves a fresh guest; the progress stays on the server.
   await tab(device, 'פרופיל');
   await device.getByRole('button', { name: 'התנתקות' }).click();
-  await expect(device.locator('.account-info h2')).toHaveText('אורח/ת');
-  expect(await device.evaluate((k) => localStorage.getItem(k), AUTH_KEY)).toBeNull();
-  expect((await localProgress(device)).xp).toBe(40);
+  await expect.poll(() => device.evaluate((k) => localStorage.getItem(k), AUTH_KEY)).toBeNull();
+  await expect.poll(async () => (await localProgress(device)).xp).toBe(0);
+  expect((await localProgress(device)).completed).toEqual({});
   await other.close();
   expect(errors).toEqual([]);
 });

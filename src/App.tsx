@@ -103,6 +103,7 @@ import {
 import { setSoundEnabled, sounds } from './lib/sound';
 import { useSettings } from './lib/settings';
 import { useSrs } from './lib/srs';
+import { stashUserData, takeUserStash } from './lib/user-stash';
 import { useBackFallback } from './lib/back';
 import { useProgress } from './lib/store';
 import { useAppUpdate } from './lib/update';
@@ -210,7 +211,7 @@ function Screens() {
   const account = useAccount(progress, update);
   const srs = useSrs(progress, account.user !== null);
   const { gems, update: updateGems, reset: resetGems } = useGems();
-  const { pet, update: updatePet } = usePet();
+  const { pet, update: updatePet, reset: resetPet } = usePet();
   /** Days a streak freeze covered since the app opened (shown once on the path). */
   const [frozeDays, setFrozeDays] = useState(0);
   const [screen, setScreen] = useState<Screen>(() =>
@@ -381,6 +382,12 @@ function Screens() {
   });
 
   function signedIn(res: AuthResponse, mode: AuthMode, from: AuthFrom, back: Tab | 'onboarding') {
+    // Gems and the pet this learner left on the device when signing out come back with them.
+    const stash = takeUserStash(res.user.id);
+    if (stash) {
+      updateGems(() => stash.gems);
+      updatePet(() => stash.pet);
+    }
     account.signIn(res);
     saveSignupPrompt(retire(loadSignupPrompt()));
     if (mode === 'register') track({ name: 'signup_complete', props: { from } });
@@ -389,6 +396,25 @@ function Screens() {
     if (joinCode) setScreen({ name: 'league', view: 'mine' });
     else if (duelCode) setScreen({ name: 'league', view: 'duels' });
     else setScreen({ name: from === 'prompt' ? 'path' : back === 'call' ? 'call' : 'profile' });
+  }
+
+  /**
+   * Signing out leaves a fresh guest on the device: the account's progress and reviews stay on the
+   * server (sent one last time first), and its device-only gems and pet are put aside for its next
+   * sign-in, so neither the guest nor the next learner to sign in here inherits them.
+   */
+  async function signOut() {
+    const user = account.user;
+    if (!user) return;
+    // A slow network doesn't hold the sign-out for long; whatever didn't get through is lost.
+    await Promise.race([Promise.all([account.sync(), srs.flush()]), new Promise((done) => setTimeout(done, 5_000))]);
+    stashUserData(user.id, { gems, pet });
+    account.signOut();
+    reset();
+    srs.clear();
+    resetGems();
+    resetPet();
+    setScreen({ name: 'path' });
   }
 
   /** The pet's part in a finished lesson or review: it grows, advances today's challenge and reacts. */
@@ -973,7 +999,7 @@ function Screens() {
             onSettings={changeSettings}
             onGoal={(xp) => update((p) => setDailyGoal(p, xp))}
             onSignIn={ACCOUNTS_ENABLED ? goAuth : undefined}
-            onSignOut={account.signOut}
+            onSignOut={() => void signOut()}
             onDeleteAccount={account.deleteAccount}
             onSync={() => void account.sync()}
             avatar={avatarEmoji(gems)}
