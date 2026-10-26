@@ -255,6 +255,10 @@ export interface SrsApi {
    * on the server too.
    */
   reset: () => void;
+  /** Forgets the review state on this device only (sign-out: the server keeps the account's copy). */
+  clear: () => void;
+  /** Sends unsent changes now (before signing out); never rejects. */
+  flush: () => Promise<void>;
 }
 
 /**
@@ -267,6 +271,8 @@ export function useSrs(progress: Progress, signedIn = false, client: SrsClient =
   const [store, setStore] = useState<SrsStore>(() => seedFromProgress(loadSrs(), progress));
   const storeRef = useRef(store);
   const pushing = useRef(false);
+  /** Bumped by clear(), so a reply to a request sent before it is dropped. */
+  const generation = useRef(0);
 
   useEffect(() => {
     storeRef.current = store;
@@ -283,9 +289,10 @@ export function useSrs(progress: Progress, signedIn = false, client: SrsClient =
     const delta = dirtyDelta(storeRef.current);
     if (pushing.current || Object.keys(delta).length === 0) return;
     pushing.current = true;
+    const sentIn = generation.current;
     try {
       const res = await client.putSrs(delta);
-      setStore((s) => afterPush(s, delta, serverItems(res)));
+      if (generation.current === sentIn) setStore((s) => afterPush(s, delta, serverItems(res)));
     } catch {
       // Offline or server error – the keys stay dirty and are sent next time.
     } finally {
@@ -329,5 +336,10 @@ export function useSrs(progress: Progress, signedIn = false, client: SrsClient =
     if (signedIn) client.deleteSrs?.().catch(() => undefined);
   }, [signedIn, client]);
 
-  return { store, due: dueCount(store), record, reset };
+  const clear = useCallback(() => {
+    generation.current += 1;
+    setStore(emptySrs());
+  }, []);
+
+  return { store, due: dueCount(store), record, reset, clear, flush: push };
 }

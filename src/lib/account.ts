@@ -34,6 +34,8 @@ export function useAccount(progress: Progress, update: (fn: (p: Progress) => Pro
 
   const adopt = useCallback(
     (server: Progress) => {
+      // A reply that arrives after signing out belongs to the account, not to the guest now here.
+      if (!loadAuth()) return;
       update((local) => mergeProgress(local, server));
       setStatus('synced');
     },
