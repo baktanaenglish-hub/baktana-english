@@ -377,6 +377,9 @@ revoke all on public.billing_events from public, anon, authenticated;
 
 ### תוכנית הטמעה, שלב אחרי שלב
 
+> **איפה עצרנו (28 באוקטובר 2026):** ב־Play Console הושלמו פרופיל התשלומים, חשבון הבנק והמינוי `premium` (שתי התוכניות ו־`trial-7d`, הכול פעיל). ב־RevenueCat נוצרו הפרויקט ואפליקציית Play, וה־JSON של חשבון השירות הועלה, אבל הבדיקה "Can validate Google Play subscription purchases" עדיין נכשלת.
+> **הצעד הבא:** לוודא שלחשבון `revenuecat@baktana-billing.iam.gserviceaccount.com` יש ב־Play Console (משתמשים והרשאות) את "View financial data, orders, and cancellation survey responses" ואת "Manage orders and subscriptions". אחרי עד 36 שעות לוחצים שוב על "Check credentials". אחר כך: Entitlement ‏`premium`, ‏Offering ‏`default`, ‏RTDN, ‏webhook והמפתחות ב־GitHub (שלב 2). במקביל: לאשר את ההפקדה הקטנה בחשבון הבנק, ולוודא ש־License testing מוגדר.
+
 **שלב 0 – החלטות ורישום (הבעלים):**
 
 - [ ] פגישה עם רואה חשבון: פטור או מורשה, מע"מ על Google, ניכוי במקור, פתיחת תיק
@@ -386,16 +389,16 @@ revoke all on public.billing_events from public, anon, authenticated;
 
 **שלב 1 – Play Console:**
 
-- [ ] ‏Setup ← Payments profile: ליצור ולקשר (מדינה: ישראל, בנק ישראלי, כתובת פיזית)
-- [ ] להעלות build עם Billing Library ‏(RevenueCat) למסלול **Internal testing**. מוצרים אפשר ליצור רק אחרי שהועלה build עם הרשאת BILLING
-- [ ] ‏Monetize ← Subscriptions: מוצר `premium`, ‏base plans `monthly` (19.90 ₪) ו־`yearly` (149 ₪), ‏offer `trial-7d` ל־new customers
-- [ ] ‏Setup ← License testing: להוסיף את חשבונות Gmail של הבעלים והבודקים
-- [ ] ‏Google Cloud: ‏service account עם גישה ל־Play Developer API, הרשאות "View financial data" ו־"Manage orders and subscriptions". מעלים את ה־JSON ל־RevenueCat
+- [x] ‏Setup ← Payments profile: ליצור ולקשר (מדינה: ישראל, בנק ישראלי, כתובת פיזית). נוצר וקושר, חשבון הבנק נוסף (28.10.2026). **לאשר את ההפקדה הקטנה** כשתגיע
+- [x] להעלות build עם Billing Library ‏(RevenueCat) למסלול **Internal testing**. מוצרים אפשר ליצור רק אחרי שהועלה build עם הרשאת BILLING
+- [x] ‏Monetize ← Subscriptions: מוצר `premium`, ‏base plans `monthly` (19.90 ₪) ו־`yearly` (149 ₪), ‏offer `trial-7d` ל־new customers. הכול פעיל ב־175 מדינות (28.10.2026). הסימון "תאימות לאחור" על `monthly` הוא ברירת המחדל של Google, ולא משנה ל־RevenueCat
+- [ ] ‏Setup ← License testing: להוסיף את חשבונות Gmail של הבעלים והבודקים (לוודא שנעשה)
+- [ ] ‏Google Cloud: ‏service account עם גישה ל־Play Developer API, הרשאות "View financial data" ו־"Manage orders and subscriptions". מעלים את ה־JSON ל־RevenueCat. **בתהליך:** פרויקט `baktana-billing`, חשבון `revenuecat@baktana-billing.iam.gserviceaccount.com`, ה־JSON הועלה. בבדיקה ב־RevenueCat שתי שורות עברו, ו־"Can validate Google Play subscription purchases" עדיין נכשלת (28.10.2026). לבדוק שוב: הרשאות החשבון ב־Play Console, ואחרי עד 36 שעות "Check credentials"
 - [ ] ‏Monetize ← Monetization setup ← RTDN: להזין את ה־topic ש־RevenueCat נותנת. לשלוח Test notification
 
 **שלב 2 – RevenueCat:**
 
-- [ ] פרויקט חדש, אפליקציית Play ‏(`com.baktana.english` – ה־applicationId של flavor ‏`play`. ‏`com.baktana.english.sideload` הוא ה־APK להורדה)
+- [x] פרויקט חדש, אפליקציית Play ‏(`com.baktana.english` – ה־applicationId של flavor ‏`play`. ‏`com.baktana.english.sideload` הוא ה־APK להורדה)
 - [ ] ‏Entitlement ‏`premium` (בדיוק בשם הזה), וחיבור שני ה־base plans אליו. ‏Offering ‏`default` (מסומן Current) עם ה־packages המובנים **Monthly** ‏(`$rc_monthly`) ו־**Annual** ‏(`$rc_annual`): מסך המנוי מזהה את המסלולים לפי סוג ה־package
 - [ ] ‏Webhook: ה־URL של `billing-webhook` ו־Authorization header סודי
 - [ ] מפתח Public SDK ‏(`goog_…`) ל־GitHub **Variables** בשם `VITE_REVENUECAT_ANDROID_KEY`. מפתח Secret API ‏(`sk_…`) ל־GitHub **Secrets** בשם `REVENUECAT_API_KEY`, ומחרוזת אקראית ל־Secrets בשם `REVENUECAT_WEBHOOK_SECRET`. ה־workflows מעבירים אותם לבד ל־Supabase ולבנייה ([supabase.md](supabase.md#מנוי-בתשלום-billing-webhook))
