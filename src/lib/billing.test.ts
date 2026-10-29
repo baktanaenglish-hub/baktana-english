@@ -138,6 +138,9 @@ describe('RevenueCat flow', () => {
           customerInfo: { entitlements: { active: { premium: {} } } },
         }),
       ),
+      // Like the Capacitor plugin proxy, which answers every property: a promise resolved with the
+      // plugin itself would wait on this forever.
+      then: vi.fn(),
     };
     vi.resetModules();
     vi.doMock('./update', () => ({ isPlayBuild: async () => true }));
