@@ -377,8 +377,8 @@ revoke all on public.billing_events from public, anon, authenticated;
 
 ### תוכנית הטמעה, שלב אחרי שלב
 
-> **איפה עצרנו (29 באוקטובר 2026):** ב־Play Console הושלמו פרופיל התשלומים, חשבון הבנק והמינוי `premium` (שתי התוכניות ו־`trial-7d`, הכול פעיל). ב־RevenueCat: אפליקציית Play עם ה־JSON של חשבון השירות, ‏Entitlement ‏`premium` עם `premium:monthly` ו־`premium:yearly`, ‏Offering ‏`default` שבו `$rc_monthly` ו־`$rc_annual` מחוברים למוצרי Google Play, ו־webhook שעונה 200. ‏`REVENUECAT_API_KEY` ו־`REVENUECAT_WEBHOOK_SECRET` הוגדרו ב־GitHub Secrets. (ה־Entitlement ‏`baktana_english_pro` שנוצר לבד לא בשימוש.)
-> **הצעד הבא:** ‏RTDN (‏topic מ־RevenueCat אל "הגדרת מונטיזציה" ב־Play Console), ואז `VITE_REVENUECAT_ANDROID_KEY` (‏`goog_…`) ב־GitHub Variables ובנייה חדשה לבדיקה. לבדוק שוב ש־"Can validate Google Play subscription purchases" ב־RevenueCat עוברת, לאשר את ההפקדה הקטנה בבנק, ולוודא ש־License testing מוגדר.
+> **איפה עצרנו (29 באוקטובר 2026):** ב־Play Console הושלמו פרופיל התשלומים, חשבון הבנק והמינוי `premium` (שתי התוכניות ו־`trial-7d`, הכול פעיל). ב־RevenueCat: אפליקציית Play עם ה־JSON של חשבון השירות (Valid credentials. לחשבון נוסף גם התפקיד Pub/Sub Admin בשביל ה־topic), ‏RTDN שמגיע ל־RevenueCat, ‏Entitlement ‏`premium` עם `premium:monthly` ו־`premium:yearly`, ‏Offering ‏`default` שבו `$rc_monthly` ו־`$rc_annual` מחוברים למוצרי Google Play, ו־webhook שעונה 200. ‏`REVENUECAT_API_KEY` ו־`REVENUECAT_WEBHOOK_SECRET` הוגדרו ב־GitHub Secrets. (ה־Entitlement ‏`baktana_english_pro` שנוצר לבד לא בשימוש.)
+> **הצעד הבא:** ‏`VITE_REVENUECAT_ANDROID_KEY` (‏`goog_…`) ב־GitHub Variables ובנייה חדשה לבדיקה. לאשר את ההפקדה הקטנה בבנק, ולוודא ש־License testing מוגדר.
 
 **שלב 0 – החלטות ורישום (הבעלים):**
 
@@ -393,8 +393,8 @@ revoke all on public.billing_events from public, anon, authenticated;
 - [x] להעלות build עם Billing Library ‏(RevenueCat) למסלול **Internal testing**. מוצרים אפשר ליצור רק אחרי שהועלה build עם הרשאת BILLING
 - [x] ‏Monetize ← Subscriptions: מוצר `premium`, ‏base plans `monthly` (19.90 ₪) ו־`yearly` (149 ₪), ‏offer `trial-7d` ל־new customers. הכול פעיל ב־175 מדינות (28.10.2026). הסימון "תאימות לאחור" על `monthly` הוא ברירת המחדל של Google, ולא משנה ל־RevenueCat
 - [ ] ‏Setup ← License testing: להוסיף את חשבונות Gmail של הבעלים והבודקים (לוודא שנעשה)
-- [ ] ‏Google Cloud: ‏service account עם גישה ל־Play Developer API, הרשאות "View financial data" ו־"Manage orders and subscriptions". מעלים את ה־JSON ל־RevenueCat. **בתהליך:** פרויקט `baktana-billing`, חשבון `revenuecat@baktana-billing.iam.gserviceaccount.com`, ה־JSON הועלה. בבדיקה ב־RevenueCat שתי שורות עברו, ו־"Can validate Google Play subscription purchases" עדיין נכשלת (28.10.2026). לבדוק שוב: הרשאות החשבון ב־Play Console, ואחרי עד 36 שעות "Check credentials"
-- [ ] ‏Monetize ← Monetization setup ← RTDN: להזין את ה־topic ש־RevenueCat נותנת. לשלוח Test notification
+- [x] ‏Google Cloud: ‏service account עם גישה ל־Play Developer API, הרשאות "View financial data" ו־"Manage orders and subscriptions". מעלים את ה־JSON ל־RevenueCat. **בתהליך:** פרויקט `baktana-billing`, חשבון `revenuecat@baktana-billing.iam.gserviceaccount.com`, ה־JSON הועלה. בבדיקה ב־RevenueCat שתי שורות עברו, ו־"Can validate Google Play subscription purchases" עדיין נכשלת (28.10.2026). לבדוק שוב: הרשאות החשבון ב־Play Console, ואחרי עד 36 שעות "Check credentials"
+- [x] ‏Monetize ← Monetization setup ← RTDN: להזין את ה־topic ש־RevenueCat נותנת. לשלוח Test notification
 
 **שלב 2 – RevenueCat:**
 
