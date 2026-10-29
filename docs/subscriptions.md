@@ -3,7 +3,7 @@
 המסמך מרכז את מה שצריך כדי למכור מנוי "פרימיום" ב־Baktana English: המנוי פותח את שיחות הווידאו עם ה־AI (עד 10 שיחות ביום, `CALL_LIMITS.callsPerDay` ב־`shared/call.ts`).
 פרימיום נקבע בצד השרת: אימייל ברשימה `PREMIUM_EMAILS` (`shared/premium.ts`), **או** מנוי בתוקף בטבלה `entitlements` ב־Supabase.
 
-> **מצב ב־21 באוקטובר 2026: הקוד מוכן ומחכה להגדרות.** הטבלאות, ה־webhook (`billing-webhook`), הבדיקה ב־`call-turn`, החיבור ל־RevenueCat באפליקציה ומסך המנוי ממומשים (שלב 3 למטה). כל עוד המשתנה `VITE_REVENUECAT_ANDROID_KEY` לא הוגדר, שום דבר לא נמכר והאפליקציה נראית כמו קודם: בלשונית השיחות "בקרוב! שיחות וידאו יהיו חלק מפרימיום", בלי מסך מנוי ובלי כרטיס פרימיום בפרופיל (`PREMIUM_ON_SALE` ב־`src/lib/billing.ts`). כשמגדירים אותו, האפליקציה מ־Google Play מוכרת, והאתר וה־APK להורדה מסבירים שמצטרפים דרך האפליקציה מ־Google Play. הסעיפים על המנוי בתנאי השימוש ובמדיניות הפרטיות מחכים ב־[legal-premium-draft.md](legal-premium-draft.md). מה שנשאר הוא בעיקר שלבים 0–2 ו־4–5, ו[פרק 7](#7-מה-צריך-ממך-רק-הבעלים-יכולה).
+> **מצב ב־21 באוקטובר 2026: הקוד מוכן ומחכה להגדרות.** הטבלאות, ה־webhook (`billing-webhook`), הבדיקה ב־`call-turn`, החיבור ל־RevenueCat באפליקציה ומסך המנוי ממומשים (שלב 3 למטה). כל עוד המשתנה `VITE_REVENUECAT_ANDROID_KEY` לא הוגדר, שום דבר לא נמכר והאפליקציה נראית כמו קודם: בלשונית השיחות "בקרוב! שיחות וידאו יהיו חלק מפרימיום", בלי מסך מנוי ובלי כרטיס פרימיום בפרופיל (`PREMIUM_ON_SALE` ב־`src/lib/billing.ts`). כשמגדירים אותו, האפליקציה מ־Google Play מוכרת. האתר וה־APK להורדה ממשיכים להציג "בקרוב" עד שמגדירים גם את המשתנה `VITE_PREMIUM_PUBLIC=true` בהשקה הציבורית, ורק אז הם מסבירים שמצטרפים דרך האפליקציה מ־Google Play (`premiumOffered` ב־`src/lib/billing.ts`). כך הבודקים בבדיקה הסגורה יכולים לקנות, בלי שהאתר יפנה לדף בחנות שעוד לא ציבורי. הסעיפים על המנוי בתנאי השימוש ובמדיניות הפרטיות מחכים ב־[legal-premium-draft.md](legal-premium-draft.md). מה שנשאר הוא בעיקר שלבים 0–2 ו־4–5, ו[פרק 7](#7-מה-צריך-ממך-רק-הבעלים-יכולה).
 
 > **נבדק ב־19 באוקטובר 2026.** עמלות ומדיניות של Google ו־Apple השתנו כמה פעמים ב־2025–2026, בעיקר בעקבות תביעות Epic. כל טענה על עמלה או מדיניות מגיעה עם קישור. סימון ⚠️ מציין דבר שלא הצלחתי לאמת במקור רשמי, או שהמקורות סותרים בו. **זה לא ייעוץ משפטי או ייעוץ מס.** את פרק 5 צריך לאשר מול רואה חשבון.
 >
@@ -377,6 +377,9 @@ revoke all on public.billing_events from public, anon, authenticated;
 
 ### תוכנית הטמעה, שלב אחרי שלב
 
+> **איפה עצרנו (29 באוקטובר 2026):** ב־Play Console הושלמו פרופיל התשלומים, חשבון הבנק והמינוי `premium` (שתי התוכניות ו־`trial-7d`, הכול פעיל). ב־RevenueCat: אפליקציית Play עם ה־JSON של חשבון השירות (Valid credentials. לחשבון נוסף גם התפקיד Pub/Sub Admin בשביל ה־topic), ‏RTDN שמגיע ל־RevenueCat, ‏Entitlement ‏`premium` עם `premium:monthly` ו־`premium:yearly`, ‏Offering ‏`default` שבו `$rc_monthly` ו־`$rc_annual` מחוברים למוצרי Google Play, ו־webhook שעונה 200. ‏`REVENUECAT_API_KEY` ו־`REVENUECAT_WEBHOOK_SECRET` הוגדרו ב־GitHub Secrets. (ה־Entitlement ‏`baktana_english_pro` שנוצר לבד לא בשימוש.)
+> **הצעד הבא:** ‏`VITE_REVENUECAT_ANDROID_KEY` (‏`goog_…`) ב־GitHub Variables ובנייה חדשה לבדיקה. לאשר את ההפקדה הקטנה בבנק, ולוודא ש־License testing מוגדר.
+
 **שלב 0 – החלטות ורישום (הבעלים):**
 
 - [ ] פגישה עם רואה חשבון: פטור או מורשה, מע"מ על Google, ניכוי במקור, פתיחת תיק
@@ -386,18 +389,18 @@ revoke all on public.billing_events from public, anon, authenticated;
 
 **שלב 1 – Play Console:**
 
-- [ ] ‏Setup ← Payments profile: ליצור ולקשר (מדינה: ישראל, בנק ישראלי, כתובת פיזית)
-- [ ] להעלות build עם Billing Library ‏(RevenueCat) למסלול **Internal testing**. מוצרים אפשר ליצור רק אחרי שהועלה build עם הרשאת BILLING
-- [ ] ‏Monetize ← Subscriptions: מוצר `premium`, ‏base plans `monthly` (19.90 ₪) ו־`yearly` (149 ₪), ‏offer `trial-7d` ל־new customers
-- [ ] ‏Setup ← License testing: להוסיף את חשבונות Gmail של הבעלים והבודקים
-- [ ] ‏Google Cloud: ‏service account עם גישה ל־Play Developer API, הרשאות "View financial data" ו־"Manage orders and subscriptions". מעלים את ה־JSON ל־RevenueCat
-- [ ] ‏Monetize ← Monetization setup ← RTDN: להזין את ה־topic ש־RevenueCat נותנת. לשלוח Test notification
+- [x] ‏Setup ← Payments profile: ליצור ולקשר (מדינה: ישראל, בנק ישראלי, כתובת פיזית). נוצר וקושר, חשבון הבנק נוסף (28.10.2026). **לאשר את ההפקדה הקטנה** כשתגיע
+- [x] להעלות build עם Billing Library ‏(RevenueCat) למסלול **Internal testing**. מוצרים אפשר ליצור רק אחרי שהועלה build עם הרשאת BILLING
+- [x] ‏Monetize ← Subscriptions: מוצר `premium`, ‏base plans `monthly` (19.90 ₪) ו־`yearly` (149 ₪), ‏offer `trial-7d` ל־new customers. הכול פעיל ב־175 מדינות (28.10.2026). הסימון "תאימות לאחור" על `monthly` הוא ברירת המחדל של Google, ולא משנה ל־RevenueCat
+- [ ] ‏Setup ← License testing: להוסיף את חשבונות Gmail של הבעלים והבודקים (לוודא שנעשה)
+- [x] ‏Google Cloud: ‏service account עם גישה ל־Play Developer API, הרשאות "View financial data" ו־"Manage orders and subscriptions". מעלים את ה־JSON ל־RevenueCat. **בתהליך:** פרויקט `baktana-billing`, חשבון `revenuecat@baktana-billing.iam.gserviceaccount.com`, ה־JSON הועלה. בבדיקה ב־RevenueCat שתי שורות עברו, ו־"Can validate Google Play subscription purchases" עדיין נכשלת (28.10.2026). לבדוק שוב: הרשאות החשבון ב־Play Console, ואחרי עד 36 שעות "Check credentials"
+- [x] ‏Monetize ← Monetization setup ← RTDN: להזין את ה־topic ש־RevenueCat נותנת. לשלוח Test notification
 
 **שלב 2 – RevenueCat:**
 
-- [ ] פרויקט חדש, אפליקציית Play ‏(`com.baktana.english` – ה־applicationId של flavor ‏`play`. ‏`com.baktana.english.sideload` הוא ה־APK להורדה)
-- [ ] ‏Entitlement ‏`premium` (בדיוק בשם הזה), וחיבור שני ה־base plans אליו. ‏Offering ‏`default` (מסומן Current) עם ה־packages המובנים **Monthly** ‏(`$rc_monthly`) ו־**Annual** ‏(`$rc_annual`): מסך המנוי מזהה את המסלולים לפי סוג ה־package
-- [ ] ‏Webhook: ה־URL של `billing-webhook` ו־Authorization header סודי
+- [x] פרויקט חדש, אפליקציית Play ‏(`com.baktana.english` – ה־applicationId של flavor ‏`play`. ‏`com.baktana.english.sideload` הוא ה־APK להורדה)
+- [x] ‏Entitlement ‏`premium` (בדיוק בשם הזה), וחיבור שני ה־base plans אליו. ‏Offering ‏`default` (מסומן Current) עם ה־packages המובנים **Monthly** ‏(`$rc_monthly`) ו־**Annual** ‏(`$rc_annual`): מסך המנוי מזהה את המסלולים לפי סוג ה־package
+- [x] ‏Webhook: ה־URL של `billing-webhook` ו־Authorization header סודי. ‏Test event החזיר 200 (29.10.2026)
 - [ ] מפתח Public SDK ‏(`goog_…`) ל־GitHub **Variables** בשם `VITE_REVENUECAT_ANDROID_KEY`. מפתח Secret API ‏(`sk_…`) ל־GitHub **Secrets** בשם `REVENUECAT_API_KEY`, ומחרוזת אקראית ל־Secrets בשם `REVENUECAT_WEBHOOK_SECRET`. ה־workflows מעבירים אותם לבד ל־Supabase ולבנייה ([supabase.md](supabase.md#מנוי-בתשלום-billing-webhook))
 
 **שלב 3 – קוד (בוצע):**
@@ -428,7 +431,8 @@ revoke all on public.billing_events from public, anon, authenticated;
 **שלב 5 – השקה:**
 
 - [ ] להחזיר את סעיפי המנוי לתנאים ולפרטיות ([legal-premium-draft.md](legal-premium-draft.md)), אחרי עורך דין
-- [ ] להגדיר את `VITE_REVENUECAT_ANDROID_KEY` ב־GitHub Variables: זה מה ש"פותח את המכירה" באפליקציה ובאתר
+- [ ] להגדיר את `VITE_REVENUECAT_ANDROID_KEY` ב־GitHub Variables: זה מה ש"פותח את המכירה" באפליקציה מ־Google Play (אפשר כבר בבדיקה הסגורה)
+- [ ] בהשקה הציבורית: להגדיר `VITE_PREMIUM_PUBLIC` = `true` ב־GitHub Variables, כדי שגם האתר וה־APK להורדה יציגו את פרימיום
 - [ ] ‏Closed testing של 14 יום עם 12 בודקים (חובה בחשבון אישי, ‏[store-release.md](store-release.md))
 - [ ] ‏Production. לעקוב בשבוע הראשון אחרי עלות AI לתור, אחוז ההמרה מניסיון, ושגיאות ב־webhook
 - [ ] בהמשך: מכירה באתר (Paddle או סולק ישראלי), ואחר כך iOS עם אותו entitlement

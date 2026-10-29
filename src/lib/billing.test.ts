@@ -94,6 +94,25 @@ describe('billingSupport', () => {
     expect(await support(true, { ...supabase, VITE_REVENUECAT_ANDROID_KEY: '' })).toBe('unconfigured');
     expect(await support(false, { ...supabase, VITE_REVENUECAT_ANDROID_KEY: 'goog_x' })).toBe('elsewhere');
   });
+
+  async function offered(play: boolean, env: Record<string, string>) {
+    vi.resetModules();
+    vi.doMock('./update', () => ({ isPlayBuild: async () => play }));
+    for (const [k, v] of Object.entries(env)) vi.stubEnv(k, v);
+    const { premiumOffered } = await import('./billing');
+    return premiumOffered();
+  }
+
+  it('offers premium only in the Play build until the public launch', async () => {
+    const onSale = { ...supabase, VITE_REVENUECAT_ANDROID_KEY: 'goog_x', VITE_PREMIUM_PUBLIC: '' };
+    expect(await offered(true, onSale)).toBe(true);
+    expect(await offered(false, onSale)).toBe(false);
+    expect(await offered(false, { ...onSale, VITE_PREMIUM_PUBLIC: 'true' })).toBe(true);
+    expect(await offered(true, { ...onSale, VITE_REVENUECAT_ANDROID_KEY: '' })).toBe(false);
+    expect(await offered(false, { ...onSale, VITE_REVENUECAT_ANDROID_KEY: '', VITE_PREMIUM_PUBLIC: 'true' })).toBe(
+      false,
+    );
+  });
 });
 
 describe('RevenueCat flow', () => {

@@ -21,6 +21,13 @@ export const REVENUECAT_ANDROID_KEY: string = import.meta.env.VITE_REVENUECAT_AN
  */
 export const PREMIUM_ON_SALE = Boolean(REVENUECAT_ANDROID_KEY);
 
+/**
+ * Whether the website and the sideloaded APK advertise premium too (VITE_PREMIUM_PUBLIC=true, set at
+ * the public launch). Before that only the Play edition offers it, so closed testers can buy while
+ * the other builds keep saying "coming soon" instead of linking to a Play listing that isn't public.
+ */
+const PREMIUM_PUBLIC = import.meta.env.VITE_PREMIUM_PUBLIC === 'true';
+
 /** The Play edition's application id (android/app/build.gradle, flavor "play"). */
 export const PLAY_PACKAGE = 'com.baktana.english';
 /** The subscription's product id in Play Console → Monetize → Subscriptions. */
@@ -52,6 +59,13 @@ export function billingSupport(): Promise<BillingSupport> {
     !play ? 'elsewhere' : REVENUECAT_ANDROID_KEY && USE_SUPABASE ? 'store' : 'unconfigured',
   );
   return support;
+}
+
+/** Whether this build offers the premium screen: see PREMIUM_ON_SALE and PREMIUM_PUBLIC. */
+export async function premiumOffered(): Promise<boolean> {
+  if (!PREMIUM_ON_SALE) return false;
+  const s = await billingSupport();
+  return s === 'store' || (s === 'elsewhere' && PREMIUM_PUBLIC);
 }
 
 // ---------- Plans (pure, tested) ----------

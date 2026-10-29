@@ -23,7 +23,7 @@ import { UpdatePrompt } from './components/UpdatePrompt';
 import { useAccount } from './lib/account';
 import { api } from './lib/api';
 import { identify, setAnalyticsEnabled, track } from './lib/analytics';
-import { PREMIUM_ON_SALE, subscriptionText, syncBillingUser } from './lib/billing';
+import { premiumOffered, subscriptionText, syncBillingUser } from './lib/billing';
 import { CALLS_ENABLED, CALLS_LOCKED, getCallStatus } from './lib/call-api';
 import { ACCOUNTS_ENABLED, PASSWORD_RESET, isPasswordRecoveryLink } from './lib/config';
 import { generateExercises, markNewWords, withoutSpeaking } from './lib/exercises';
@@ -223,10 +223,15 @@ function Screens() {
   const [duelCode, setDuelCode] = useState<string | null>(null);
   /** Premium and today's call count, as last heard from the server (the call tab refreshes it). */
   const [callStatus, setCallStatus] = useState<CallStatusResponse | null>(null);
+  /** Whether this build offers the premium screen (src/lib/billing.ts premiumOffered). */
+  const [premiumOnSale, setPremiumOnSale] = useState(false);
   const [reminderOffered, setReminderOffered] = useState(loadReminderOffered);
   const streak = visibleStreak(progress);
 
   useEffect(() => setSoundEnabled(settings.sound), [settings.sound]);
+  useEffect(() => {
+    void premiumOffered().then(setPremiumOnSale);
+  }, []);
   // Declared before app_open so an opted-out learner sends nothing.
   useEffect(() => setAnalyticsEnabled(settings.analytics), [settings.analytics]);
 
@@ -905,7 +910,7 @@ function Screens() {
             onToggleAccessory={(id) => updatePet((p) => p && toggleAccessory(p, id))}
             onDesign={(design) => updatePet((p) => p && applyDesign(p, design))}
             onPremium={
-              CALLS_ENABLED && PREMIUM_ON_SALE && !CALLS_LOCKED
+              CALLS_ENABLED && premiumOnSale && !CALLS_LOCKED
                 ? () => setScreen({ name: 'premium', back: 'pet' })
                 : undefined
             }
@@ -978,7 +983,7 @@ function Screens() {
             onStatus={setCallStatus}
             onSignIn={goAuth}
             onCall={(persona) => setScreen({ name: 'call-active', persona })}
-            onPremium={PREMIUM_ON_SALE ? () => setScreen({ name: 'premium', back: 'call' }) : undefined}
+            onPremium={premiumOnSale ? () => setScreen({ name: 'premium', back: 'call' }) : undefined}
           />
         )}
         {screen.name === 'profile' && (
@@ -990,7 +995,7 @@ function Screens() {
             subscription={premium ? subscriptionText(callStatus) : ''}
             onPremium={
               // Premium is the calls, so it isn't offered while the call tab is locked.
-              CALLS_ENABLED && PREMIUM_ON_SALE && !CALLS_LOCKED
+              CALLS_ENABLED && premiumOnSale && !CALLS_LOCKED
                 ? () => setScreen({ name: 'premium', back: 'profile' })
                 : undefined
             }
