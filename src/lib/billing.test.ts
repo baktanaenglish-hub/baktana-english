@@ -188,4 +188,18 @@ describe('RevenueCat flow', () => {
     Purchases.getOfferings.mockResolvedValueOnce({ current: null } as never);
     await expect(billing.loadPlans(A)).rejects.toThrow(billing.BILLING_PLANS_MESSAGE);
   });
+
+  it('gives up on plans that never arrive, so the screen can offer to try again', async () => {
+    const { Purchases, billing } = await setup();
+    vi.useFakeTimers();
+    try {
+      Purchases.getOfferings.mockReturnValueOnce(new Promise(() => {}) as never);
+      const plans = billing.loadPlans(A);
+      const result = expect(plans).rejects.toThrow(billing.BILLING_PLANS_MESSAGE);
+      await vi.advanceTimersByTimeAsync(billing.PLANS_TIMEOUT_MS);
+      await result;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
