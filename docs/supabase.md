@@ -144,7 +144,7 @@ supabase functions deploy billing-webhook --no-verify-jwt   # RevenueCat לא ש
 | `REVENUECAT_WEBHOOK_SECRET` | מחרוזת אקראית ארוכה; אותה מחרוזת בשדה Authorization של ה־webhook ב־RevenueCat |
 | `REVENUECAT_API_KEY` | מפתח **Secret** מ־RevenueCat ← Project settings ← API keys (מתחיל ב־`sk_`) |
 
-את מזהה הפרויקט ה־workflow לוקח מהמשתנה `VITE_SUPABASE_URL` שכבר קיים. משתנה אופציונלי: `CALL_MODEL` (בלשונית Variables). למכירת המנוי באפליקציה צריך גם את המשתנה `VITE_REVENUECAT_ANDROID_KEY` (בלשונית Variables) – מפתח ה־**Public** SDK של אפליקציית ה־Play ב־RevenueCat (מתחיל ב־`goog_`). הוא ציבורי ונכנס לאפליקציה; ה־workflow ‏`android.yml` מעביר אותו לבנייה.
+את מזהה הפרויקט ה־workflow לוקח מהמשתנה `VITE_SUPABASE_URL` שכבר קיים. משתנה אופציונלי: `CALL_MODEL` (בלשונית Variables). למכירת המנוי באפליקציה צריך גם את המשתנה `VITE_REVENUECAT_ANDROID_KEY` (בלשונית Variables) – מפתח ה־**Public** SDK של אפליקציית ה־Play ב־RevenueCat (מתחיל ב־`goog_`). הוא ציבורי ונכנס לאפליקציה; ה־workflow ‏`android.yml` מעביר אותו לבנייה. עד שמגדירים גם את המשתנה `VITE_PREMIUM_PUBLIC` = `true` (בהשקה הציבורית), רק האפליקציה מ־Google Play מציעה את פרימיום. האתר וה־APK להורדה מציגים "בקרוב".
 
 ## פיתוח מקומי מול Supabase
 

@@ -50,6 +50,8 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           # RevenueCat's public Android SDK key (goog_…); only the Google Play edition sells premium.
           VITE_REVENUECAT_ANDROID_KEY: ${{ vars.VITE_REVENUECAT_ANDROID_KEY }}
+          # Set at the public launch: the website and the sideloaded APK then advertise premium too.
+          VITE_PREMIUM_PUBLIC: ${{ vars.VITE_PREMIUM_PUBLIC }}
           # The call tab is open: premium learners and testers (TESTER_EMAILS) can call (src/lib/call-api.ts).
           VITE_CALLS_UNLOCKED: 'true'
       - run: npx cap sync android
