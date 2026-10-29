@@ -377,8 +377,8 @@ revoke all on public.billing_events from public, anon, authenticated;
 
 ### תוכנית הטמעה, שלב אחרי שלב
 
-> **איפה עצרנו (28 באוקטובר 2026):** ב־Play Console הושלמו פרופיל התשלומים, חשבון הבנק והמינוי `premium` (שתי התוכניות ו־`trial-7d`, הכול פעיל). ב־RevenueCat נוצרו הפרויקט ואפליקציית Play, וה־JSON של חשבון השירות הועלה, אבל הבדיקה "Can validate Google Play subscription purchases" עדיין נכשלת.
-> **הצעד הבא:** לוודא שלחשבון `revenuecat@baktana-billing.iam.gserviceaccount.com` יש ב־Play Console (משתמשים והרשאות) את "View financial data, orders, and cancellation survey responses" ואת "Manage orders and subscriptions". אחרי עד 36 שעות לוחצים שוב על "Check credentials". אחר כך: Entitlement ‏`premium`, ‏Offering ‏`default`, ‏RTDN, ‏webhook והמפתחות ב־GitHub (שלב 2). במקביל: לאשר את ההפקדה הקטנה בחשבון הבנק, ולוודא ש־License testing מוגדר.
+> **איפה עצרנו (29 באוקטובר 2026):** ב־Play Console הושלמו פרופיל התשלומים, חשבון הבנק והמינוי `premium` (שתי התוכניות ו־`trial-7d`, הכול פעיל). ב־RevenueCat: אפליקציית Play עם ה־JSON של חשבון השירות, ‏Entitlement ‏`premium` עם `premium:monthly` ו־`premium:yearly`, ‏Offering ‏`default` שבו `$rc_monthly` ו־`$rc_annual` מחוברים למוצרי Google Play, ו־webhook שעונה 200. ‏`REVENUECAT_API_KEY` ו־`REVENUECAT_WEBHOOK_SECRET` הוגדרו ב־GitHub Secrets. (ה־Entitlement ‏`baktana_english_pro` שנוצר לבד לא בשימוש.)
+> **הצעד הבא:** ‏RTDN (‏topic מ־RevenueCat אל "הגדרת מונטיזציה" ב־Play Console), ואז `VITE_REVENUECAT_ANDROID_KEY` (‏`goog_…`) ב־GitHub Variables ובנייה חדשה לבדיקה. לבדוק שוב ש־"Can validate Google Play subscription purchases" ב־RevenueCat עוברת, לאשר את ההפקדה הקטנה בבנק, ולוודא ש־License testing מוגדר.
 
 **שלב 0 – החלטות ורישום (הבעלים):**
 
@@ -399,8 +399,8 @@ revoke all on public.billing_events from public, anon, authenticated;
 **שלב 2 – RevenueCat:**
 
 - [x] פרויקט חדש, אפליקציית Play ‏(`com.baktana.english` – ה־applicationId של flavor ‏`play`. ‏`com.baktana.english.sideload` הוא ה־APK להורדה)
-- [ ] ‏Entitlement ‏`premium` (בדיוק בשם הזה), וחיבור שני ה־base plans אליו. ‏Offering ‏`default` (מסומן Current) עם ה־packages המובנים **Monthly** ‏(`$rc_monthly`) ו־**Annual** ‏(`$rc_annual`): מסך המנוי מזהה את המסלולים לפי סוג ה־package
-- [ ] ‏Webhook: ה־URL של `billing-webhook` ו־Authorization header סודי
+- [x] ‏Entitlement ‏`premium` (בדיוק בשם הזה), וחיבור שני ה־base plans אליו. ‏Offering ‏`default` (מסומן Current) עם ה־packages המובנים **Monthly** ‏(`$rc_monthly`) ו־**Annual** ‏(`$rc_annual`): מסך המנוי מזהה את המסלולים לפי סוג ה־package
+- [x] ‏Webhook: ה־URL של `billing-webhook` ו־Authorization header סודי. ‏Test event החזיר 200 (29.10.2026)
 - [ ] מפתח Public SDK ‏(`goog_…`) ל־GitHub **Variables** בשם `VITE_REVENUECAT_ANDROID_KEY`. מפתח Secret API ‏(`sk_…`) ל־GitHub **Secrets** בשם `REVENUECAT_API_KEY`, ומחרוזת אקראית ל־Secrets בשם `REVENUECAT_WEBHOOK_SECRET`. ה־workflows מעבירים אותם לבד ל־Supabase ולבנייה ([supabase.md](supabase.md#מנוי-בתשלום-billing-webhook))
 
 **שלב 3 – קוד (בוצע):**
