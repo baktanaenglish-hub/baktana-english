@@ -186,8 +186,12 @@ function serialized<T>(task: () => Promise<T>): Promise<T> {
   return run;
 }
 
-/** RevenueCat, logged in as this learner. */
-async function purchasesFor(userId: string): Promise<PurchasesModule['Purchases']> {
+/**
+ * RevenueCat, logged in as this learner. The plugin comes back wrapped in an object because it is
+ * a Capacitor proxy that answers every property, `then` included: resolving a promise with it
+ * directly would treat it as a thenable and never settle.
+ */
+async function purchasesFor(userId: string): Promise<{ Purchases: PurchasesModule['Purchases'] }> {
   if ((await billingSupport()) !== 'store') throw new BillingError(BILLING_ERROR_MESSAGE);
   const { Purchases } = await load();
   await serialized(async () => {
@@ -201,7 +205,7 @@ async function purchasesFor(userId: string): Promise<PurchasesModule['Purchases'
       packages.clear();
     }
   });
-  return Purchases;
+  return { Purchases };
 }
 
 /**
@@ -246,7 +250,7 @@ export const PLANS_TIMEOUT_MS = 20_000;
 export async function loadPlans(userId: string): Promise<Plan[]> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const Purchases = await purchasesFor(userId);
+    const { Purchases } = await purchasesFor(userId);
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new BillingError(BILLING_PLANS_MESSAGE)), PLANS_TIMEOUT_MS);
     });
@@ -269,7 +273,7 @@ export type PurchaseResult = 'purchased' | 'cancelled' | 'pending';
 
 /** Opens Google Play's purchase sheet for a plan from loadPlans. Throws BillingError (Hebrew). */
 export async function purchasePlan(userId: string, planId: string): Promise<PurchaseResult> {
-  const Purchases = await purchasesFor(userId).catch((err: unknown) => {
+  const { Purchases } = await purchasesFor(userId).catch((err: unknown) => {
     throw billingError(err);
   });
   const aPackage = packages.get(planId);
@@ -295,7 +299,7 @@ export async function purchasePlan(userId: string, planId: string): Promise<Purc
  */
 export async function restorePurchases(userId: string): Promise<boolean> {
   try {
-    const Purchases = await purchasesFor(userId);
+    const { Purchases } = await purchasesFor(userId);
     const { customerInfo } = await Purchases.restorePurchases();
     return customerInfo.entitlements.active[ENTITLEMENT] !== undefined;
   } catch (err) {
