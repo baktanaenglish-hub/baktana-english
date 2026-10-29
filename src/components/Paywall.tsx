@@ -62,7 +62,25 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
 
   const userId = user?.id ?? null;
   const premium = status?.premium === true;
-  const canBuy = support === 'store' && userId !== null && !premium;
+  /** The learner whose premium status the server has just answered (or couldn't be reached for). */
+  const [checkedFor, setCheckedFor] = useState<string | null>(null);
+  // The screen can open before the app heard from the server (from the profile right after launch),
+  // so it asks again: a premium learner sees their membership, never the plans.
+  const canBuy = support === 'store' && userId !== null && checkedFor === userId && !premium;
+
+  useEffect(() => {
+    if (!userId) return;
+    const controller = new AbortController();
+    const done = () => !controller.signal.aborted && setCheckedFor(userId);
+    getCallStatus(controller.signal).then((res) => {
+      if (controller.signal.aborted) return;
+      onStatus(res);
+      done();
+    }, done);
+    return () => controller.abort();
+    // Only a new learner asks again; onStatus is App's state setter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   function fetchPlans(id: string) {
     setPlans({ kind: 'loading' });

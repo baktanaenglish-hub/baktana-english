@@ -239,11 +239,18 @@ function billingError(err: unknown): BillingError {
   return err instanceof BillingError ? err : new BillingError(BILLING_ERROR_MESSAGE);
 }
 
+/** How long the plans may take to arrive from Google Play before the screen offers to try again. */
+export const PLANS_TIMEOUT_MS = 20_000;
+
 /** The plans on sale, with prices from Google Play. Throws BillingError (Hebrew). */
 export async function loadPlans(userId: string): Promise<Plan[]> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const Purchases = await purchasesFor(userId);
-    const offerings = await Purchases.getOfferings();
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new BillingError(BILLING_PLANS_MESSAGE)), PLANS_TIMEOUT_MS);
+    });
+    const offerings = await Promise.race([Purchases.getOfferings(), timeout]);
     const available = offerings.current?.availablePackages ?? [];
     packages.clear();
     for (const p of available) packages.set(p.identifier, p);
@@ -252,6 +259,8 @@ export async function loadPlans(userId: string): Promise<Plan[]> {
     return plans;
   } catch (err) {
     throw err instanceof BillingError ? err : billingError(err);
+  } finally {
+    clearTimeout(timer);
   }
 }
 
