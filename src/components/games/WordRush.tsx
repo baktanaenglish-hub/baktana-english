@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Word } from '../../types';
 import { RUSH_MS, RUSH_PENALTY_MS, rushPoints, rushQuestion, type RushQuestion } from '../../lib/games';
 import { sounds } from '../../lib/sound';
+import { Icon } from '../Icon';
 
 interface Props {
   pool: Word[];
@@ -57,7 +58,7 @@ export function WordRush({ pool, onFinish, onQuit }: Props) {
     <div className="game rush">
       <header className="lesson-header">
         <button type="button" className="icon-btn" onClick={onQuit} aria-label="יציאה מהמשחק">
-          ✕
+          <Icon name="x" />
         </button>
         <div className="progress-track" role="timer" aria-label={`${Math.ceil(left / 1000)} שניות`}>
           <div
@@ -66,17 +67,17 @@ export function WordRush({ pool, onFinish, onQuit }: Props) {
           />
         </div>
         <span className="rush-time" dir="ltr">
-          ⏱ {Math.ceil(left / 1000)}
+          <Icon name="timer" /> {Math.ceil(left / 1000)}
         </span>
       </header>
       <main className="lesson-body rush-body">
         <div className="rush-stats">
           <span className="rush-score" aria-label={`ניקוד ${score}`}>
-            ⭐ {score}
+            <Icon name="star" filled /> {score}
           </span>
           {combo >= 2 && (
             <span className="rush-combo pop" key={combo}>
-              🔥 x{multiplier}
+              <Icon name="flame" filled /> x{multiplier}
             </span>
           )}
         </div>

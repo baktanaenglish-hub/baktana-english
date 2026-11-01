@@ -221,7 +221,7 @@ test('a guest is invited to sign in, and the characters are a teaser', async ({ 
 test('a signed-in learner without premium sees the locked teaser', async ({ page }) => {
   await openSignedIn(page, { premium: false, callsToday: 0, callsPerDay: 10 });
   await openCallTab(page);
-  await expect(page.getByText('🔒 שיחות וידאו הן חלק מפרימיום')).toBeVisible();
+  await expect(page.getByText('שיחות וידאו הן חלק מפרימיום')).toBeVisible();
   await expect(page.locator('.persona-card')).toHaveCount(4);
   for (const button of await page.locator('.persona-call').all()) await expect(button).toBeDisabled();
   await expect(page.locator('.calls-left')).toHaveCount(0);
@@ -231,7 +231,7 @@ test('a signed-in learner without premium sees the locked teaser', async ({ page
 test('the premium screen opens from the call tab; on the website it points to the Play app', async ({ page }) => {
   await openSignedIn(page, { premium: false, callsToday: 0, callsPerDay: 10 });
   await openCallTab(page);
-  await page.getByRole('button', { name: '👑 לפרטים על פרימיום' }).click();
+  await page.getByRole('button', { name: 'לפרטים על פרימיום' }).click();
   await expect(page.getByRole('heading', { name: /פרימיום/ })).toBeVisible();
   await expect(page.getByText('עד 10 שיחות וידאו ביום', { exact: false })).toBeVisible();
   // Billing is only in the Google Play build: no plans or buy button here.
@@ -239,7 +239,7 @@ test('the premium screen opens from the call tab; on the website it points to th
   await expect(page.locator('.paywall-plan')).toHaveCount(0);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/paywall-web.png`, fullPage: true });
   await page.getByRole('button', { name: 'חזרה' }).click();
-  await expect(page.getByText('🔒 שיחות וידאו הן חלק מפרימיום')).toBeVisible();
+  await expect(page.getByText('שיחות וידאו הן חלק מפרימיום')).toBeVisible();
 });
 
 test('a subscriber sees when premium renews on the profile and the premium screen', async ({ page }) => {
@@ -252,7 +252,7 @@ test('a subscriber sees when premium renews on the profile and the premium scree
   await expect(page.getByText('המנוי שלכם פעיל.')).toBeVisible();
   await expect(page.getByText('מתחדש ב־21 בנובמבר 2026')).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/paywall-subscriber.png`, fullPage: true });
-  await page.getByRole('button', { name: 'לשיחות 📞' }).click();
+  await page.getByRole('button', { name: 'לשיחות' }).click();
   await expect(page.locator('.calls-left')).toBeVisible();
 });
 
@@ -285,7 +285,7 @@ test('reaching the daily limit mid-call ends it with a Hebrew message', async ({
   const status = premium(9);
   await openSignedIn(page, status);
   await page.route('**/api/call/turn', (route) =>
-    route.fulfill({ status: 429, json: { error: 'daily_limit', message: 'הגעתם ל־10 שיחות היום. נתראה מחר! 🌙' } }),
+    route.fulfill({ status: 429, json: { error: 'daily_limit', message: 'הגעתם ל־10 שיחות היום. נתראה מחר!' } }),
   );
   await expect(page.locator('.path')).toBeVisible();
   await callPersona(page, 'Daniel');

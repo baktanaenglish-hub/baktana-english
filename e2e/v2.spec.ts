@@ -47,22 +47,22 @@ function lessonsThrough(...ids: string[]): Lesson {
 }
 
 test.describe('v2 review (US-R1, US-R5, US-R6)', () => {
-  test('US-R1 AC2: 2 items due → "🧠 חזרה (2)" without a pinned card', async ({ page }) => {
+  test('US-R1 AC2: 2 items due → "חזרה (2)" without a pinned card', async ({ page }) => {
     await recordSpeech(page);
     await seedProgress(page, { completed: { u1l1: 1 }, xp: 15 });
     await seedSrs(page, L1.words.slice(0, 2).map(wordKey));
     await page.goto('/');
-    await expect(page.locator('.practice-btn')).toHaveText('🧠 חזרה (2)');
+    await expect(page.locator('.practice-btn')).toHaveText('חזרה (2)');
     await expect(page.locator('.practice-btn')).toBeEnabled();
     await expect(page.locator('.review-card')).toHaveCount(0);
   });
 
-  test('US-R1 AC1: nothing due and a completed lesson → "💪 תרגול", enabled, no card', async ({ page }) => {
+  test('US-R1 AC1: nothing due and a completed lesson → "תרגול", enabled, no card', async ({ page }) => {
     await recordSpeech(page);
     await seedProgress(page, { completed: { u1l1: 1 }, xp: 15 });
     await seedSrs(page, L1.words.map(wordKey), { box: 2, dueInDays: 3 });
     await page.goto('/');
-    await expect(page.locator('.practice-btn')).toHaveText('💪 תרגול');
+    await expect(page.locator('.practice-btn')).toHaveText('תרגול');
     await expect(page.locator('.practice-btn')).toBeEnabled();
     await expect(page.locator('.review-card')).toHaveCount(0);
   });
@@ -80,7 +80,7 @@ test.describe('v2 review (US-R1, US-R5, US-R6)', () => {
 
     const card = page.locator('.review-card');
     await expect(card).toContainText('יש לכם 3 מילים ומשפטים לחזרה');
-    await expect(page.locator('.practice-btn')).toHaveText('🧠 חזרה (3)');
+    await expect(page.locator('.practice-btn')).toHaveText('חזרה (3)');
     await card.getByRole('button', { name: 'לחזרה' }).click();
     await expect(page.locator('.lesson-header .practice-badge')).toBeVisible();
     await finishLesson(page, L1);
@@ -250,7 +250,7 @@ test.describe('v2 review (US-R1, US-R5, US-R6)', () => {
     await page.getByRole('button', { name: /מתחילים מאפס/ }).click();
     await tab(page, 'לימוד');
     await expect(page.locator('.path')).toBeVisible();
-    // US-R1 AC4 after a reset: it used to offer "🧠 חזרה (5)" for words of a lesson that is no longer done.
+    // US-R1 AC4 after a reset: it used to offer "חזרה (5)" for words of a lesson that is no longer done.
     await expect(page.locator('.practice-btn')).toBeDisabled();
     await expect(page.locator('.review-card')).toHaveCount(0);
     expect((await localSrs(page))?.items).toEqual({});

@@ -1,5 +1,6 @@
 import { useEnterKey } from '../lib/useEnterKey';
 import { RichTip } from './RichTip';
+import { Icon } from './Icon';
 
 interface Props {
   title: string;
@@ -13,7 +14,9 @@ export function TipCard({ title, tip, onDone }: Props) {
   return (
     <>
       <div className="exercise tip-card">
-        <h2 className="exercise-title">💡 לפני שמתחילים</h2>
+        <h2 className="exercise-title">
+          <Icon name="lightbulb" /> לפני שמתחילים
+        </h2>
         <div className="tip-box">
           <span className="tip-label">{title}</span>
           <RichTip text={tip} />

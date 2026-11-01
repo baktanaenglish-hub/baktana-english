@@ -17,6 +17,7 @@ import {
 import type { PetDesign } from '../../../shared/pet-design';
 import { PetAvatar } from './PetAvatar';
 import { PetDesigner } from './PetDesigner';
+import { Icon } from '../Icon';
 
 interface Props {
   pet: PetState | null;
@@ -55,7 +56,7 @@ function Adopt({ onAdopt }: { onAdopt: Props['onAdopt'] }) {
       }}
     >
       <div className="big-emoji pop" aria-hidden="true">
-        🥚
+        <Icon name="egg" />
       </div>
       <h2>בחרו חיה שתלווה אתכם</h2>
       <p className="muted">
@@ -86,7 +87,7 @@ function Adopt({ onAdopt }: { onAdopt: Props['onAdopt'] }) {
         />
       </label>
       <button type="submit" className="btn primary wide">
-        🐾 אימוץ
+        <Icon name="paw-print" /> אימוץ
       </button>
     </form>
   );
@@ -163,20 +164,24 @@ function PetHome(props: Props & { pet: PetState }) {
             </span>
           </div>
         ) : (
-          <span className="muted">הגעתם לשלב האחרון. אגדה! 🌟</span>
+          <span className="muted">הגעתם לשלב האחרון. אגדה!</span>
         )}
       </section>
 
-      <h3>⚡ האתגר של היום</h3>
+      <h3>
+        <Icon name="zap" filled /> האתגר של היום
+      </h3>
       {hasAbility(xp, 'challenge') ? (
         <div className={`pet-challenge${status.claimed ? ' done' : ''}`}>
           <span className="quest-icon" aria-hidden="true">
-            {status.claimed ? '✅' : challenge.icon}
+            <Icon name={status.claimed ? 'circle-check' : challenge.icon} />
           </span>
           <div className="quest-body">
             <div className="quest-head">
               <span>{challenge.title}</span>
-              <span className="quest-gems">💎 {challengeGems(challenge, xp)}</span>
+              <span className="quest-gems">
+                <Icon name="gem" /> {challengeGems(challenge, xp)}
+              </span>
             </div>
             <div
               className="progress-track small"
@@ -199,7 +204,9 @@ function PetHome(props: Props & { pet: PetState }) {
         </p>
       )}
 
-      <h3>🎒 אביזרים</h3>
+      <h3>
+        <Icon name="backpack" /> אביזרים
+      </h3>
       <div className="avatar-grid pet-wardrobe">
         {ACCESSORIES.map((a) => {
           const owned = pet.accessories.includes(a.id);
@@ -215,22 +222,36 @@ function PetHome(props: Props & { pet: PetState }) {
               aria-label={owned ? `${a.name}${worn ? ' (עליה)' : ''}` : `${a.name} – נפתח ב: ${a.hint}`}
             >
               <span className="avatar-emoji" aria-hidden="true">
-                {owned ? a.icon : '🔒'}
+                {owned ? a.icon : <Icon name="lock" />}
               </span>
               <span className="avatar-name">{a.name}</span>
-              <span className="avatar-price">{owned ? (worn ? '✓ עליה' : 'ללבוש') : a.hint}</span>
+              <span className="avatar-price">
+                {owned ? (
+                  worn ? (
+                    <>
+                      <Icon name="check" /> עליה
+                    </>
+                  ) : (
+                    'ללבוש'
+                  )
+                ) : (
+                  a.hint
+                )}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <h3>🌱 יכולות ושלבים</h3>
+      <h3>
+        <Icon name="sprout" /> יכולות ושלבים
+      </h3>
       <ol className="pet-abilities">
         {ABILITIES.map((a) => {
           const open = look.stage >= a.stage;
           return (
             <li key={a.id} className={open ? 'open' : ''}>
-              <span aria-hidden="true">{open ? a.icon : '🔒'}</span>
+              <Icon name={open ? a.icon : 'lock'} />
               <div>
                 <strong>{a.title}</strong>
                 <span className="muted">
@@ -243,7 +264,9 @@ function PetHome(props: Props & { pet: PetState }) {
         })}
       </ol>
 
-      <h3>👫 עם חברים</h3>
+      <h3>
+        <Icon name="users" /> עם חברים
+      </h3>
       {props.onLeague && (
         <p className="muted">
           {pet.name} מופיעה ליד השם שלכם בדירוג של הקבוצות שלכם. כשהקבוצה משלימה אתגר שבועי, כל החיות בקבוצה מקבלות פרס
@@ -256,11 +279,11 @@ function PetHome(props: Props & { pet: PetState }) {
       )}
       <div className="pet-social">
         <button type="button" className="btn secondary" onClick={() => void share()}>
-          📤 שתפו את {pet.name}
+          <Icon name="share-2" /> שתפו את {pet.name}
         </button>
         {props.onLeague && (
           <button type="button" className="btn secondary" onClick={props.onLeague}>
-            👥 לקבוצות שלי
+            <Icon name="users" /> לקבוצות שלי
           </button>
         )}
         {shared && (
@@ -270,13 +293,15 @@ function PetHome(props: Props & { pet: PetState }) {
         )}
       </div>
 
-      <h3>✨ חיה ייחודית (פרימיום)</h3>
+      <h3>
+        <Icon name="sparkles" /> חיה ייחודית (פרימיום)
+      </h3>
       {props.premium ? (
         <div className="pet-premium">
           <p className="muted">עצבו חיה משלכם: מראה, צבע, תכונות מיוחדות ואישיות – בעזרת בינה מלאכותית או ידנית.</p>
           <div className="pet-social">
             <button type="button" className="btn primary" onClick={() => setDesigning(true)}>
-              🎨 {pet.design ? 'עריכת העיצוב' : 'לעצב חיה ייחודית'}
+              <Icon name="palette" /> {pet.design ? 'עריכת העיצוב' : 'לעצב חיה ייחודית'}
             </button>
             {pet.design && (
               <button type="button" className="btn ghost" onClick={() => props.onDesign(null)}>

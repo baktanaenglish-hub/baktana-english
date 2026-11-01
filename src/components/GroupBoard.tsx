@@ -3,7 +3,8 @@ import type { GroupLeaderboardResponse, User } from '../../shared/api';
 import { FAIR_GROUP_SIZE, type Period } from '../../shared/groups';
 import { api, errorMessage } from '../lib/api';
 import { endsInText } from '../lib/groups';
-import { MEDALS } from './Leaderboard';
+import { Icon } from './Icon';
+import { RankMark } from './Leaderboard';
 import { PeriodPicker } from './PeriodPicker';
 
 interface Props {
@@ -41,15 +42,17 @@ export function GroupBoard({ user }: Props) {
 
   return (
     <div className="group-board">
-      <h2>🏟️ דירוג הקבוצות</h2>
+      <h2>
+        <Icon name="chart-column" /> דירוג הקבוצות
+      </h2>
       <p className="muted">
         {COMPETITION[period]}
         {endsIn && ` · ${endsIn}`}
       </p>
       <PeriodPicker value={period} onChange={setPeriod} label="תקופת דירוג הקבוצות" />
       <p className="muted fair-note">
-        ⚖️ הדירוג לפי ממוצע XP לחבר/ה, כך שקבוצה קטנה יכולה לנצח קבוצה גדולה. קבוצה של פחות מ־{FAIR_GROUP_SIZE} נספרת
-        כאילו יש בה {FAIR_GROUP_SIZE}.
+        <Icon name="scale" /> הדירוג לפי ממוצע XP לחבר/ה, כך שקבוצה קטנה יכולה לנצח קבוצה גדולה. קבוצה של פחות מ־
+        {FAIR_GROUP_SIZE} נספרת כאילו יש בה {FAIR_GROUP_SIZE}.
       </p>
 
       {state.kind === 'loading' && (
@@ -62,7 +65,9 @@ export function GroupBoard({ user }: Props) {
 
       {state.kind === 'error' && (
         <div className="panel center">
-          <p>📡 {state.message}</p>
+          <p>
+            <Icon name="wifi-off" /> {state.message}
+          </p>
           <button type="button" className="btn ghost" onClick={load}>
             נסו שוב
           </button>
@@ -71,11 +76,13 @@ export function GroupBoard({ user }: Props) {
 
       {state.kind === 'ready' && state.previousWinners.length > 0 && (
         <div className="panel winners">
-          <h3>🏅 {PREVIOUS[period]}</h3>
+          <h3>
+            <Icon name="award" /> {PREVIOUS[period]}
+          </h3>
           <ol className="winner-list">
             {state.previousWinners.map((w) => (
               <li key={`${w.rank}-${w.name}`} className={w.isMine ? 'mine' : ''}>
-                <span aria-hidden="true">{MEDALS[w.rank - 1]}</span> <span dir="auto">{w.name}</span>
+                <RankMark rank={w.rank} /> <span dir="auto">{w.name}</span>
                 {w.isMine && <span className="me-tag"> (הקבוצה שלי)</span>}
               </li>
             ))}
@@ -96,9 +103,11 @@ export function GroupBoard({ user }: Props) {
               key={`${entry.rank}-${entry.name}`}
               className={`board-row${entry.isMine ? ' me' : ''}${i > 0 && entry.rank > state.entries[i - 1].rank + 1 ? ' gap' : ''}`}
             >
-              <span className="board-rank">{MEDALS[entry.rank - 1] ?? entry.rank}</span>
+              <span className="board-rank">
+                <RankMark rank={entry.rank} />
+              </span>
               <span className="board-avatar" aria-hidden="true">
-                👥
+                <Icon name="users" />
               </span>
               <span className="board-name" dir="auto">
                 {entry.name}

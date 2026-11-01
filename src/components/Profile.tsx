@@ -8,6 +8,7 @@ import { GOAL_OPTIONS, dailyGoalOf } from '../lib/goals';
 import { canListen } from '../lib/listen';
 import { MAX_HEARTS, msUntilNextHeart, type Progress } from '../lib/progress';
 import type { Settings, ThemeChoice } from '../lib/settings';
+import { Icon, type IconName } from './Icon';
 import { ReminderSettings } from './ReminderSettings';
 import { PremiumBadge, avatarFace } from './TopBar';
 
@@ -39,17 +40,16 @@ interface Props {
   onShop?: () => void;
 }
 
-const SYNC_TEXT: Record<SyncStatus, string> = {
-  guest: '',
-  syncing: '🔄 מסנכרן…',
-  synced: '✅ ההתקדמות מסונכרנת',
-  offline: '📡 אין חיבור – ההתקדמות נשמרת במכשיר ותסונכרן אחר כך',
+const SYNC_TEXT: Record<Exclude<SyncStatus, 'guest'>, { icon: IconName; text: string }> = {
+  syncing: { icon: 'refresh-cw', text: 'מסנכרן…' },
+  synced: { icon: 'circle-check', text: 'ההתקדמות מסונכרנת' },
+  offline: { icon: 'wifi-off', text: 'אין חיבור – ההתקדמות נשמרת במכשיר ותסונכרן אחר כך' },
 };
 
-const THEMES: { value: ThemeChoice; label: string }[] = [
+const THEMES: { value: ThemeChoice; icon?: IconName; label: string }[] = [
   { value: 'system', label: 'אוטומטי' },
-  { value: 'light', label: '☀️ בהיר' },
-  { value: 'dark', label: '🌙 כהה' },
+  { value: 'light', icon: 'sun', label: 'בהיר' },
+  { value: 'dark', icon: 'moon', label: 'כהה' },
 ];
 
 export function Profile(props: Props) {
@@ -74,7 +74,11 @@ export function Profile(props: Props) {
                 {user.email}
               </span>
               <span className="sync-status" role="status">
-                {SYNC_TEXT[syncStatus]}
+                {syncStatus !== 'guest' && (
+                  <>
+                    <Icon name={SYNC_TEXT[syncStatus].icon} /> {SYNC_TEXT[syncStatus].text}
+                  </>
+                )}
               </span>
             </>
           ) : (
@@ -107,7 +111,9 @@ export function Profile(props: Props) {
       {user && props.onPremium && (
         <section className="panel premium-card">
           <div>
-            <h3>{props.premium ? '👑 מנוי פרימיום' : '👑 פרימיום'}</h3>
+            <h3>
+              <Icon name="crown" filled /> {props.premium ? 'מנוי פרימיום' : 'פרימיום'}
+            </h3>
             <p className="muted">
               {props.premium ? props.subscription || 'המנוי שלכם פעיל' : 'שיחות וידאו באנגלית עם דמויות AI'}
             </p>
@@ -126,16 +132,22 @@ export function Profile(props: Props) {
       <div className="stat-cards">
         <div className="stat-card streak">
           <span className="label">רצף ימים</span>
-          <span className="value">🔥 {streak}</span>
+          <span className="value">
+            <Icon name="flame" filled /> {streak}
+          </span>
         </div>
         <div className="stat-card xp">
           <span className="label">סה״כ XP</span>
-          <span className="value">⭐ {progress.xp}</span>
+          <span className="value">
+            <Icon name="star" filled /> {progress.xp}
+          </span>
         </div>
         {props.gems !== undefined && (
           <button type="button" className="stat-card gems" onClick={props.onShop} aria-label="יהלומים – לחנות">
             <span className="label">יהלומים</span>
-            <span className="value">💎 {props.gems}</span>
+            <span className="value">
+              <Icon name="gem" filled /> {props.gems}
+            </span>
           </button>
         )}
         <div className="stat-card accuracy">
@@ -180,7 +192,7 @@ export function Profile(props: Props) {
       <section className="panel">
         <h3>לבבות</h3>
         <p>
-          ❤️ {progress.hearts} מתוך {MAX_HEARTS}
+          <Icon name="heart" filled /> {progress.hearts} מתוך {MAX_HEARTS}
           {progress.hearts < MAX_HEARTS && ` · לב הבא בעוד ${nextHeart} דק׳`}
         </p>
       </section>
@@ -201,7 +213,7 @@ export function Profile(props: Props) {
                 className={`chip${settings.theme === theme.value ? ' selected' : ''}`}
                 onClick={() => props.onSettings({ theme: theme.value })}
               >
-                {theme.label}
+                {theme.icon && <Icon name={theme.icon} />} {theme.label}
               </button>
             ))}
           </div>

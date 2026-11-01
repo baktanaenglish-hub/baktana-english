@@ -1,6 +1,7 @@
 import type { GameId, GemState } from '../lib/gems';
 import { GAMES, REWARDED_PLAYS, gameUnlocked, playsToday, unlockProgress } from '../lib/games';
 import type { Progress } from '../lib/progress';
+import { Icon } from './Icon';
 
 interface Props {
   gems: GemState;
@@ -16,12 +17,12 @@ export function Arcade({ gems, progress, today, onPlay, onUnlock }: Props) {
     <div className="arcade">
       <section className="arcade-head pop">
         <span className="arcade-big" aria-hidden="true">
-          🎮
+          <Icon name="gamepad-2" />
         </span>
         <div>
           <h2>משחקים</h2>
           <span className="muted">
-            משחקים עם המילים שכבר למדתם. {REWARDED_PLAYS} המשחקים הראשונים בכל יום מכל סוג נותנים יהלומים 💎
+            משחקים עם המילים שכבר למדתם. {REWARDED_PLAYS} המשחקים הראשונים בכל יום מכל סוג נותנים יהלומים
           </span>
         </div>
       </section>
@@ -34,14 +35,15 @@ export function Arcade({ gems, progress, today, onPlay, onUnlock }: Props) {
           return (
             <section key={game.id} className={`game-card${open ? ' open' : ' locked'}`} data-game={game.id}>
               <span className="game-icon" aria-hidden="true">
-                {open ? game.icon : '🔒'}
+                <Icon name={open ? game.icon : 'lock'} />
               </span>
               <div className="game-text">
                 <h3>{game.title}</h3>
                 <p className="muted">{game.description}</p>
                 {open && (
                   <p className="game-meta">
-                    🏆 שיא: {best} · 💎 פרסים היום: {Math.min(plays, REWARDED_PLAYS)}/{REWARDED_PLAYS}
+                    <Icon name="trophy" /> שיא: {best} · <Icon name="gem" /> פרסים היום:{' '}
+                    {Math.min(plays, REWARDED_PLAYS)}/{REWARDED_PLAYS}
                   </p>
                 )}
                 {!open && steps && (
@@ -69,7 +71,7 @@ export function Arcade({ gems, progress, today, onPlay, onUnlock }: Props) {
                     aria-label={`פתיחת ${game.title} ב־${game.unlock.price} יהלומים`}
                     title={gems.gems < game.unlock.price ? 'אספו עוד יהלומים כדי לפתוח' : undefined}
                   >
-                    🔓 💎 {game.unlock.price}
+                    <Icon name="lock-open" /> <Icon name="gem" /> {game.unlock.price}
                   </button>
                 )
               )}

@@ -23,7 +23,6 @@ import {
 
 const L1 = lesson('u1l1');
 const L2 = lesson('u1l2');
-const topBar = (page: Page) => page.locator('.top-bar');
 let counter = 0;
 const uniqueEmail = () => `e2e-${Date.now()}-${counter++}@example.com`;
 
@@ -71,9 +70,9 @@ test('US-G1, US-L6, US-L7, US-G2, US-D2: a guest finishes the first lesson and t
 
   // US-G1 AC1/AC2/AC4
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-  await expect(topBar(page)).toContainText('🔥 0');
-  await expect(topBar(page)).toContainText('⭐ 0');
-  await expect(topBar(page)).toContainText('❤️ 5');
+  await expect(page.locator('.streak-stat')).toHaveText('0');
+  await expect(page.locator('.xp-stat')).toHaveText('0');
+  await expect(page.locator('.hearts-stat')).toHaveText('5');
   await expect(lessonButton(page, 'u1l1')).toBeEnabled();
   await expect(page.locator('.lesson-node.has-label')).toContainText(L1.title);
   await expect(page.locator('.start-label')).toHaveText('התחילו!');
@@ -101,13 +100,13 @@ test('US-G1, US-L6, US-L7, US-G2, US-D2: a guest finishes the first lesson and t
   await expect(lessonButton(page, 'u1l1')).toHaveAttribute('aria-label', /\(הושלם\)/);
   await expect(lessonButton(page, 'u1l2')).toBeEnabled();
   await expect(page.locator('.lesson-node.has-label')).toContainText(L2.title);
-  await expect(topBar(page)).toContainText('⭐ 15');
-  await expect(topBar(page)).toContainText('🔥 1');
+  await expect(page.locator('.xp-stat')).toHaveText('15');
+  await expect(page.locator('.streak-stat')).toHaveText('1');
 
   // US-G2 AC1 + US-D2 AC2: a reload keeps progress and skips onboarding.
   await page.reload();
   await expect(lessonButton(page, 'u1l1')).toHaveAttribute('aria-label', /\(הושלם\)/);
-  await expect(topBar(page)).toContainText('⭐ 15');
+  await expect(page.locator('.xp-stat')).toHaveText('15');
   expect((await localProgress(page)).completed).toEqual({ u1l1: 1 });
   expect(errors).toEqual([]);
 });
@@ -122,7 +121,7 @@ test('US-H1, US-L5, US-L6 AC2: a wrong answer costs a heart and the exercise com
   const bar = page.locator('.lesson-footer.feedback.bad');
   await expect(bar).toContainText('לא בדיוק…');
   await expect(bar).toContainText('התשובה הנכונה:');
-  await expect(page.locator('.lesson-header .hearts')).toContainText('❤️ 4');
+  await expect(page.locator('.lesson-header .hearts')).toHaveText('4');
   await expect(progressBar).toHaveAttribute('aria-valuenow', '0'); // US-L5 AC3
   await next(page);
 
@@ -134,7 +133,7 @@ test('US-H1, US-L5, US-L6 AC2: a wrong answer costs a heart and the exercise com
   await expect(page.locator('.stat-card.xp')).toContainText('+10');
   await expect(page.locator('.stat-card.accuracy')).toContainText(`${Math.round((12 / 13) * 100)}%`);
   await page.getByRole('button', { name: 'המשך' }).click();
-  await expect(topBar(page)).toContainText('❤️ 4');
+  await expect(page.locator('.hearts-stat')).toHaveText('4');
 
   // US-H2 AC4: the profile shows when the next heart arrives.
   await tab(page, 'פרופיל');
@@ -152,17 +151,17 @@ test('US-H3: running out of hearts shows the out-of-hearts screen', async ({ pag
   await expect(page.locator('.lesson-footer.feedback.bad')).toBeVisible();
   await next(page);
   await expect(page.getByRole('heading', { name: 'נגמרו הלבבות' })).toBeVisible();
-  await expect(page.locator('.out-of-hearts')).toContainText('💔');
+  await expect(page.locator('.out-of-hearts .big-emoji svg')).toBeVisible();
   await expect(page.locator('.out-of-hearts')).toContainText('לב חדש מתמלא כל 30 דקות');
   // A countdown and a way to the shop; nothing was learned yet, so there is no review to offer.
   await expect(page.getByRole('timer')).toHaveText(/לב חדש בעוד (29|30) דקות/);
-  await expect(page.getByRole('button', { name: '💎 לבבות בחנות' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '🧠 לחזרה בלי לבבות' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'לבבות בחנות' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'לחזרה בלי לבבות' })).toHaveCount(0);
   await page.getByRole('button', { name: 'חזרה למסלול' }).click();
 
   // AC3: nothing from the interrupted lesson is saved.
   await expect(lessonButton(page, 'u1l1')).not.toHaveAttribute('aria-label', /\(הושלם\)/);
-  await expect(topBar(page)).toContainText('❤️ 0');
+  await expect(page.locator('.hearts-stat')).toHaveText('0');
   expect((await localProgress(page)).xp).toBe(0);
 
   // AC2: with 0 hearts a lesson opens straight on that screen.
@@ -204,7 +203,7 @@ test('US-A1, US-A3, US-A4, US-A2, US-P2: register → progress synced → reload
   // With nothing due the session is built from upcoming items (or random practice before SRS data).
   await expect(page.locator('.lesson-complete h2')).toHaveText(/^(התרגול הושלם|החזרה הושלמה)!$/);
   await page.getByRole('button', { name: 'המשך' }).click();
-  await expect(topBar(page)).toContainText('⭐ 40');
+  await expect(page.locator('.xp-stat')).toHaveText('40');
   await expect.poll(async () => (await apiMe(page)).progress.xp).toBe(40);
   expect((await apiMe(page)).progress.completed).toEqual({ u1l1: 1, u1l2: 1 }); // US-P2 AC2
 
@@ -214,7 +213,7 @@ test('US-A1, US-A3, US-A4, US-A2, US-P2: register → progress synced → reload
   await expect(page.locator('.account-info h2')).toHaveText('רותם');
   await tab(page, 'לימוד');
   await expect(lessonButton(page, 'u1l2')).toHaveAttribute('aria-label', /\(הושלם\)/);
-  await expect(topBar(page)).toContainText('⭐ 40');
+  await expect(page.locator('.xp-stat')).toHaveText('40');
 
   // US-A2 AC1 + US-A3 AC3 + US-A4 AC3: logging in on another device brings the progress along.
   const other = await browser.newContext({ locale: 'he-IL', viewport: { width: 420, height: 860 } });
@@ -229,7 +228,7 @@ test('US-A1, US-A3, US-A4, US-A2, US-P2: register → progress synced → reload
   await tab(device, 'לימוד');
   await expect(lessonButton(device, 'u1l2')).toHaveAttribute('aria-label', /\(הושלם\)/);
   await expect(lessonButton(device, 'u1l3')).toBeEnabled();
-  await expect(topBar(device)).toContainText('⭐ 40');
+  await expect(device.locator('.xp-stat')).toHaveText('40');
 
   // US-A2 AC5: signing out removes the token and leaves a fresh guest; the progress stays on the server.
   await tab(device, 'פרופיל');
@@ -328,7 +327,7 @@ test.describe('server unavailable', () => {
     await expect(page.getByRole('button', { name: 'נסו שוב' })).toBeVisible();
 
     await tab(page, 'פרופיל');
-    await expect(page.locator('.profile')).toContainText('⭐ 15');
+    await expect(page.locator('.profile .stat-card.xp .value')).toHaveText('15');
     await page.getByRole('button', { name: 'יצירת פרופיל / התחברות' }).click();
     await page.getByLabel('שם תצוגה').fill('אופליין');
     await page.getByLabel('אימייל').fill(uniqueEmail());
@@ -398,7 +397,7 @@ test('US-G2 AC3: resetting progress asks first', async ({ page }) => {
 
   page.once('dialog', (d) => d.dismiss());
   await page.getByRole('button', { name: 'איפוס התקדמות' }).click();
-  await expect(page.locator('.profile')).toContainText('⭐ 25');
+  await expect(page.locator('.profile .stat-card.xp .value')).toHaveText('25');
 
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'איפוס התקדמות' }).click();
@@ -408,7 +407,9 @@ test('US-G2 AC3: resetting progress asks first', async ({ page }) => {
 });
 
 test.describe('v2 (docs/spec/v2.md §9)', () => {
-  test('US-I1: the unit intro opens before the first lesson, once; 📖 reopens it; level chips', async ({ page }) => {
+  test('US-I1: the unit intro opens before the first lesson, once; the book button reopens it; level chips', async ({
+    page,
+  }) => {
     const errors = pageErrors(page);
     await openFresh(page);
     // AC5: every unit banner shows its CEFR level.
@@ -431,7 +432,7 @@ test.describe('v2 (docs/spec/v2.md §9)', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await page.getByRole('button', { name: 'יציאה מהשיעור' }).click();
 
-    // AC3: 📖 shows it any time without starting a lesson.
+    // AC3: the book button shows it any time without starting a lesson.
     await page
       .locator('.unit-banner')
       .first()
@@ -499,8 +500,8 @@ test.describe('v2 (docs/spec/v2.md §9)', () => {
     await finishLesson(page, L1);
     await expect(page.locator('.stat-card.xp')).toContainText('+10');
     await page.getByRole('button', { name: 'המשך' }).click();
-    await expect(topBar(page)).toContainText('❤️ 0');
-    await expect(topBar(page)).toContainText('⭐ 25');
+    await expect(page.locator('.hearts-stat')).toHaveText('0');
+    await expect(page.locator('.xp-stat')).toHaveText('25');
     expect((await localProgress(page)).completed).toEqual({ u1l1: 1 });
   });
 

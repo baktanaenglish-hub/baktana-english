@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import type { AuthResponse } from '../../shared/api';
 import { api, errorMessage } from '../lib/api';
 import { PASSWORD_RESET, PRIVACY_URL, TERMS_URL } from '../lib/config';
+import { Icon } from './Icon';
 
 interface Props {
   /** `mode` tells a new account ('register') from a login. */
@@ -75,7 +76,7 @@ export function AuthScreen({ onSignedIn, onCancel, initialMode = 'register' }: P
     <div className="auth">
       <header className="auth-header">
         <button type="button" className="icon-btn" onClick={onCancel} aria-label="חזרה">
-          ✕
+          <Icon name="x" />
         </button>
       </header>
       <form className="auth-form" onSubmit={submit} noValidate>

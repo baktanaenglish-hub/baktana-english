@@ -3,6 +3,7 @@
  * "מרוץ מילים" opens after unit 1; "זיכרון" is bought once with gems.
  * Only the first few games a day pay gems, so the arcade adds to lessons rather than replacing them.
  */
+import type { IconName } from '../components/Icon';
 import { course } from '../data/course';
 import type { Word } from '../types';
 import { earn, type GameId, type GemState, type Reward } from './gems';
@@ -11,7 +12,7 @@ import { shuffle, type Rng } from './random';
 
 export interface GameInfo {
   id: GameId;
-  icon: string;
+  icon: IconName;
   title: string;
   description: string;
   /** Opens once every lesson of this unit (index in the course) is done, or when bought for gems. */
@@ -21,14 +22,14 @@ export interface GameInfo {
 export const GAMES: GameInfo[] = [
   {
     id: 'rush',
-    icon: '⚡',
+    icon: 'zap',
     title: 'מרוץ מילים',
     description: '60 שניות, כמה שיותר מילים. רצף תשובות נכונות מכפיל את הניקוד!',
     unlock: { unit: 0 },
   },
   {
     id: 'memory',
-    icon: '🃏',
+    icon: 'layout-grid',
     title: 'זיכרון',
     description: 'הפכו קלפים ומצאו כל מילה באנגלית עם התרגום שלה – בכמה שפחות צעדים.',
     unlock: { price: 100 },
@@ -161,7 +162,7 @@ export function finishGame(
   if (plays < REWARDED_PLAYS) {
     const gems = gameGems(id, score);
     if (gems > 0) rewards.push({ icon: gameInfo(id).icon, label: `${score} נקודות`, gems });
-    if (record && best > 0) rewards.push({ icon: '🏆', label: 'שיא חדש!', gems: RECORD_BONUS_GEMS });
+    if (record && best > 0) rewards.push({ icon: 'trophy', label: 'שיא חדש!', gems: RECORD_BONUS_GEMS });
   }
   const games = {
     ...s.games,

@@ -34,7 +34,7 @@ export const CALL_OFFLINE_MESSAGE = 'אין חיבור לשרת כרגע. בדק
 export const CALL_TIMEOUT_MESSAGE = 'התשובה מתעכבת. נסו שוב בעוד רגע.';
 export const CALL_SIGNED_OUT_MESSAGE = 'צריך להתחבר כדי לדבר עם הדמויות.';
 export const CALL_PREMIUM_MESSAGE = 'שיחות וידאו זמינות למנויי פרימיום.';
-export const CALL_LIMIT_MESSAGE = `הגעתם ל־${CALL_LIMITS.callsPerDay} שיחות היום. נתראה מחר! 🌙`;
+export const CALL_LIMIT_MESSAGE = `הגעתם ל־${CALL_LIMITS.callsPerDay} שיחות היום. נתראה מחר!`;
 const GENERIC_MESSAGE = 'משהו השתבש בשיחה. נסו שוב בעוד רגע.';
 
 function isApiError(body: unknown): body is ApiError {

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { Unit } from '../types';
 import { RichTip } from './RichTip';
+import { Icon } from './Icon';
 
 interface Props {
   unit: Unit;
@@ -8,7 +9,7 @@ interface Props {
   trigger: 'auto' | 'button';
   /** "יאללה, מתחילים" (auto) or "הבנתי" (button). */
   onConfirm: () => void;
-  /** ✕, Escape or a tap outside the sheet. */
+  /** The close button, Escape or a tap outside the sheet. */
   onClose: () => void;
 }
 
@@ -34,11 +35,11 @@ export function UnitIntro({ unit, trigger, onConfirm, onClose }: Props) {
         style={{ borderTopColor: unit.color }}
       >
         <button type="button" className="icon-btn sheet-close" onClick={onClose} aria-label="סגירה">
-          ✕
+          <Icon name="x" />
         </button>
         <div className="sheet-head">
           <span className="intro-icon" aria-hidden="true" style={{ background: unit.color }}>
-            📖
+            <Icon name="book-open" />
           </span>
           <div>
             <h2 id={titleId}>{unit.title}</h2>
@@ -63,7 +64,9 @@ export function UnitIntro({ unit, trigger, onConfirm, onClose }: Props) {
         )}
         {unit.intro && (
           <div className="tip-box">
-            <span className="tip-label">💡 טיפ</span>
+            <span className="tip-label">
+              <Icon name="lightbulb" /> טיפ
+            </span>
             <RichTip text={unit.intro.tip} />
           </div>
         )}

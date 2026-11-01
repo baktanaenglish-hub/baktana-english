@@ -6,6 +6,7 @@ import { canPractice } from '../lib/practice';
 import { currentLessonId, isCatchUp, isUnlocked, type Progress } from '../lib/progress';
 import type { Unit } from '../types';
 import { unitTestOpen, unitTestPassed } from '../lib/unit-test';
+import { Icon, type IconName } from './Icon';
 import { ReviewCard } from './ReviewCard';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   due: number;
   onStart: (lessonId: string) => void;
   onReview: () => void;
-  /** Opens the unit's intro sheet (📖 on the banner). */
+  /** Opens the unit's intro sheet (the book button on the banner). */
   onIntro: (unit: Unit) => void;
   /** Starts the placement test (offered until the learner gets past unit 1). */
   onPlacement?: () => void;
@@ -23,16 +24,17 @@ interface Props {
 }
 
 export interface ReviewButtonState {
+  icon: IconName;
   label: string;
   disabled: boolean;
   /** Pin the review card at the top of the path. */
   pinned: boolean;
 }
 
-/** The review button in the daily card: "🧠 חזרה (N)", "💪 תרגול" or disabled (docs/spec/v2.md §7.2). */
+/** The review button in the daily card: "חזרה (N)", "תרגול" or disabled (docs/spec/v2.md §7.2). */
 export function reviewButtonState(due: number, anyCompleted: boolean): ReviewButtonState {
-  if (due > 0) return { label: `🧠 חזרה (${due})`, disabled: false, pinned: due >= REVIEW_PIN_THRESHOLD };
-  return { label: '💪 תרגול', disabled: !anyCompleted, pinned: false };
+  if (due > 0) return { icon: 'brain', label: `חזרה (${due})`, disabled: false, pinned: due >= REVIEW_PIN_THRESHOLD };
+  return { icon: 'dumbbell', label: 'תרגול', disabled: !anyCompleted, pinned: false };
 }
 
 /** Zig-zag offsets for the lesson bubbles, like a winding path. */
@@ -58,8 +60,8 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
   }, [lockedNote]);
   const currentTitle = allLessons.find((l) => l.id === current)?.title;
   const lockedLessonNote = currentTitle
-    ? `🔒 השיעור הזה עוד נעול. סיימו קודם את "${currentTitle}".`
-    : '🔒 השיעור הזה עוד נעול.';
+    ? `השיעור הזה עוד נעול. סיימו קודם את "${currentTitle}".`
+    : 'השיעור הזה עוד נעול.';
 
   // Bring the lesson to continue with into view when the path opens.
   useEffect(() => {
@@ -77,14 +79,16 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
             <span className="muted">מבחן מיקום קצר ותדלגו לרמה שלכם.</span>
           </p>
           <button type="button" className="btn secondary" onClick={onPlacement}>
-            🎯 מבחן מיקום
+            <Icon name="target" /> מבחן מיקום
           </button>
         </section>
       )}
       <section className="today-card">
         <div className="today-goal">
           <div className="today-head">
-            <strong>🎯 יעד יומי</strong>
+            <strong>
+              <Icon name="target" /> יעד יומי
+            </strong>
             <span className="muted" dir="ltr">
               {Math.min(progress.xpToday, goal)}/{goal} XP
             </span>
@@ -106,7 +110,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                 : 'חזרה על שיעורים שסיימתם'
           }
         >
-          {review.label}
+          <Icon name={review.icon} /> {review.label}
         </button>
       </section>
 
@@ -119,7 +123,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                 {unitTestPassed(progress, unit) && (
                   <span className="unit-crown" title="עברתם את מבחן היחידה">
                     {' '}
-                    👑
+                    <Icon name="crown" filled />
                   </span>
                 )}
               </h2>
@@ -139,7 +143,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                   aria-label={`טיפ פתיחה: ${unit.title}`}
                   title="טיפ פתיחה"
                 >
-                  <span aria-hidden="true">📖</span>
+                  <Icon name="book-open" />
                 </button>
               )}
             </div>
@@ -167,7 +171,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                     data-lesson-id={lesson.id}
                     aria-label={`${lesson.title}${done ? ' (הושלם)' : open ? '' : ' (נעול)'}${catchUp ? ' (חדש!)' : ''}`}
                   >
-                    {done ? '✓' : open ? '★' : '🔒'}
+                    <Icon name={done ? 'check' : open ? 'star' : 'lock'} filled={open && !done} className="node-icon" />
                   </button>
                   {catchUp && (
                     <span className="new-chip" aria-hidden="true">
@@ -184,7 +188,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                 open={unitTestOpen(progress, unit)}
                 color={unit.color}
                 onStart={() => onUnitTest(unit)}
-                onLocked={() => setLockedNote('🔒 המבחן נפתח אחרי שמסיימים את כל השיעורים ביחידה.')}
+                onLocked={() => setLockedNote('המבחן נפתח אחרי שמסיימים את כל השיעורים ביחידה.')}
               />
             )}
           </div>
@@ -207,7 +211,7 @@ interface UnitTestNodeProps {
   onLocked: () => void;
 }
 
-/** The end-of-unit test at the bottom of each unit: locked, open (🏆) or passed (👑, retakable). */
+/** The end-of-unit test at the bottom of each unit: locked, open (trophy) or passed (crown, retakable). */
 function UnitTestNode({ passed, open, color, onStart, onLocked }: UnitTestNodeProps) {
   return (
     <div className="lesson-node unit-test-node">
@@ -219,7 +223,7 @@ function UnitTestNode({ passed, open, color, onStart, onLocked }: UnitTestNodePr
         onClick={open ? onStart : onLocked}
         aria-label={`מבחן יחידה${passed ? ' (עברתם)' : open ? '' : ' (נעול – סיימו את כל השיעורים)'}`}
       >
-        {passed ? '👑' : open ? '🏆' : '🔒'}
+        <Icon name={passed ? 'crown' : open ? 'trophy' : 'lock'} filled={passed || open} className="node-icon" />
       </button>
       <span className="node-title">מבחן יחידה</span>
     </div>

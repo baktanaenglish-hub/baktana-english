@@ -8,6 +8,7 @@ import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { useCallback, useEffect, useState } from 'react';
 import { DUEL_DAYS, DUEL_PRIZES, type DuelResult, type DuelState, type DuelSummary } from '../../shared/duels';
+import type { IconName } from '../components/Icon';
 import { api, errorMessage } from './api';
 
 export const DUELS_KEY = 'baktana-english:duels:v1';
@@ -17,7 +18,7 @@ export const MAX_DUEL_NOTICES = 20;
 export interface DuelNotice {
   id: string;
   duelId: string;
-  icon: string;
+  icon: IconName;
   text: string;
   at: number;
 }
@@ -85,7 +86,7 @@ export function duelNotices(seen: Record<string, DuelState>, duels: DuelSummary[
     .map((d) => ({
       id: `${d.id}|accepted`,
       duelId: d.id,
-      icon: '⚔️',
+      icon: 'swords',
       text: `${d.opponent!.displayName} קיבל/ה את ההזמנה שלכם – התחרות התחילה! ${DUEL_DAYS} ימים, מי יצבור יותר XP?`,
       at: now,
     }));
@@ -127,7 +128,7 @@ export async function notifyDuelNotices(notices: DuelNotice[]): Promise<void> {
     await LocalNotifications.schedule({
       notifications: notices.slice(0, 3).map((n, i) => ({
         id: NOTICE_FIRST_ID + ((Math.floor(n.at / 1000) + i) % NOTICE_SLOTS),
-        title: `${n.icon} ראש בראש`,
+        title: 'ראש בראש',
         body: n.text,
         schedule: { at, allowWhileIdle: true },
         smallIcon: 'ic_stat_notify',

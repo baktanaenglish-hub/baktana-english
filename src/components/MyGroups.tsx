@@ -12,7 +12,8 @@ import {
 import { api, errorMessage } from '../lib/api';
 import { authRedirectUrl } from '../lib/config';
 import { claimKey, claimable, endsInText, type GroupsState } from '../lib/groups';
-import { MEDALS } from './Leaderboard';
+import { Icon, isIconName } from './Icon';
+import { RankMark } from './Leaderboard';
 import { PeriodPicker } from './PeriodPicker';
 import { STAGES } from '../lib/pet';
 import type { PetBadge } from '../../shared/pet-design';
@@ -44,7 +45,9 @@ export function MyGroups({ user, state, onSignIn, onGems, joinCode, onJoinCodeUs
   if (!user) {
     return (
       <div className="my-groups">
-        <h2>👥 הקבוצות שלי</h2>
+        <h2>
+          <Icon name="users" /> הקבוצות שלי
+        </h2>
         <div className="panel center">
           {joinCode && <p>הוזמנתם להצטרף לקבוצה (קוד {joinCode}).</p>}
           <p>צרו פרופיל כדי ליצור קבוצה פרטית עם חברים, להתחרות יחד ולהשלים אתגרים קבוצתיים.</p>
@@ -74,16 +77,20 @@ export function MyGroups({ user, state, onSignIn, onGems, joinCode, onJoinCodeUs
 
   return (
     <div className="my-groups">
-      <h2>👥 הקבוצות שלי</h2>
+      <h2>
+        <Icon name="users" /> הקבוצות שלי
+      </h2>
       <p className="muted">לומדים כל אחד במסלול שלו, וכל XP שצברתם מקדם גם את הקבוצה.</p>
 
       {state.local.notices.length > 0 && (
         <section className="panel notices" aria-label="התראות קבוצה">
-          <h3>🔔 התראות</h3>
+          <h3>
+            <Icon name="bell" /> התראות
+          </h3>
           <ul>
             {state.local.notices.slice(0, 8).map((n) => (
               <li key={n.id} className={n.at > seenUntil ? 'unread' : ''}>
-                <span aria-hidden="true">{n.icon}</span> {n.text}
+                <Icon name={isIconName(n.icon) ? n.icon : 'bell'} /> {n.text}
               </li>
             ))}
           </ul>
@@ -98,7 +105,9 @@ export function MyGroups({ user, state, onSignIn, onGems, joinCode, onJoinCodeUs
 
       {state.error && state.groups === null && (
         <div className="panel center">
-          <p>📡 {state.error}</p>
+          <p>
+            <Icon name="wifi-off" /> {state.error}
+          </p>
           <button type="button" className="btn ghost" onClick={() => void state.refresh()}>
             נסו שוב
           </button>
@@ -109,7 +118,11 @@ export function MyGroups({ user, state, onSignIn, onGems, joinCode, onJoinCodeUs
         <button key={g.id} type="button" className="group-card" onClick={() => setOpenId(g.id)}>
           <span className="group-card-head">
             <strong dir="auto">{g.name}</strong>
-            {claimable(state.local, g).length > 0 && <span className="claim-dot">💎 פרס מחכה</span>}
+            {claimable(state.local, g).length > 0 && (
+              <span className="claim-dot">
+                <Icon name="gem" /> פרס מחכה
+              </span>
+            )}
           </span>
           <span className="muted">
             {g.memberCount === 1 ? 'רק את/ה, בינתיים' : `${g.memberCount} חברים`} · {g.weekXp} XP השבוע
@@ -189,7 +202,9 @@ function GroupForms({
   return (
     <div className="group-forms">
       <form className="panel" onSubmit={(e) => run(e, () => api.joinGroup(code))}>
-        <h3>🔑 הצטרפות לקבוצה</h3>
+        <h3>
+          <Icon name="key-round" /> הצטרפות לקבוצה
+        </h3>
         <label htmlFor="join-code">קוד הצטרפות</label>
         <div className="inline-form">
           <input
@@ -208,7 +223,9 @@ function GroupForms({
         </div>
       </form>
       <form className="panel" onSubmit={(e) => run(e, () => api.createGroup(name))}>
-        <h3>✨ קבוצה חדשה</h3>
+        <h3>
+          <Icon name="sparkles" /> קבוצה חדשה
+        </h3>
         <label htmlFor="group-name">שם הקבוצה</label>
         <div className="inline-form">
           <input
@@ -297,14 +314,18 @@ function GroupPage({
       <button type="button" className="link-btn" onClick={onBack}>
         › חזרה לקבוצות שלי
       </button>
-      <h2 dir="auto">👥 {group.name}</h2>
+      <h2 dir="auto">
+        <Icon name="users" /> {group.name}
+      </h2>
       <p className="muted">
         {group.memberCount} / {MAX_GROUP_MEMBERS} חברים · {group.weekScore} XP לחבר/ה השבוע
         {group.weekRank !== null && ` · מקום ${group.weekRank} בדירוג הקבוצות`}
       </p>
 
       <section className="panel invite">
-        <h3>📨 הזמנת חברים</h3>
+        <h3>
+          <Icon name="mail" /> הזמנת חברים
+        </h3>
         <p>שלחו לחברים את הקישור, או תנו להם את הקוד:</p>
         <p className="invite-code" dir="ltr">
           {group.inviteCode}
@@ -323,7 +344,9 @@ function GroupPage({
       </section>
 
       <section className="panel challenges">
-        <h3>🎯 אתגרי השבוע</h3>
+        <h3>
+          <Icon name="target" /> אתגרי השבוע
+        </h3>
         <p className="muted">{endsInText(group.weekEnd)} · היעדים גדלים עם מספר החברים</p>
         {prize && (
           <p className="group-pet-prize pop" role="status">
@@ -346,7 +369,9 @@ function GroupPage({
       </section>
 
       <section className="group-members">
-        <h3>🏅 הדירוג בקבוצה</h3>
+        <h3>
+          <Icon name="award" /> הדירוג בקבוצה
+        </h3>
         <PeriodPicker value={period} onChange={setPeriod} label="תקופת הדירוג בקבוצה" />
         {members === null && !error && (
           <ol className="board" aria-busy="true" aria-label="טוען חברים">
@@ -357,7 +382,9 @@ function GroupPage({
           <ol className="board">
             {members.map((m) => (
               <li key={`${m.rank}-${m.displayName}`} className={`board-row${m.isMe ? ' me' : ''}`}>
-                <span className="board-rank">{MEDALS[m.rank - 1] ?? m.rank}</span>
+                <span className="board-rank">
+                  <RankMark rank={m.rank} />
+                </span>
                 {m.pet ? (
                   <MemberPet pet={m.pet} />
                 ) : (
@@ -371,7 +398,7 @@ function GroupPage({
                   {m.isOwner && <span className="board-sub">מייסד/ת הקבוצה</span>}
                   {m.pet && (
                     <span className="board-sub">
-                      🐾 {m.pet.name} · {STAGES[m.pet.stage]?.name}
+                      <Icon name="paw-print" /> {m.pet.name} · {STAGES[m.pet.stage]?.name}
                     </span>
                   )}
                 </span>
@@ -444,13 +471,17 @@ function ChallengeRow({
       </span>
       {c.done && !claimed && (
         <button type="button" className="btn primary claim-btn" onClick={onClaim}>
-          קבלת {c.gems} 💎
+          קבלת {c.gems} יהלומים
         </button>
       )}
-      {c.done && claimed && <span className="claimed">✓ נאסף</span>}
+      {c.done && claimed && (
+        <span className="claimed">
+          <Icon name="check" /> נאסף
+        </span>
+      )}
       {!c.done && (
         <span className="challenge-gems muted" aria-label={`פרס: ${c.gems} יהלומים`}>
-          {c.gems} 💎
+          <Icon name="gem" /> {c.gems}
         </span>
       )}
     </li>
