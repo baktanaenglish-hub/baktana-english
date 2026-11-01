@@ -3,7 +3,7 @@ import type { CallStatusResponse, CallTurnRequest, CallTurnResponse } from '../s
 import { AUTH_KEY, openFresh, recordSpeech, seedProgress } from './helpers';
 
 /**
- * AI video call: the status and turn endpoints are mocked, and the learner types (recordSpeech()
+ * AI phone call: the status and turn endpoints are mocked, and the learner types (recordSpeech()
  * hides speech recognition, so the keyboard fallback is shown). Calls need a signed-in premium
  * account: the learner registers on the e2e server and the status says whether they're premium.
  */
@@ -211,7 +211,7 @@ test('a guest is invited to sign in, and the characters are a teaser', async ({ 
     return route.abort();
   });
   await openCallTab(page);
-  await expect(page.getByText('שיחות וידאו זמינות למנויי פרימיום. התחברו כדי להמשיך')).toBeVisible();
+  await expect(page.getByText('שיחות טלפון זמינות למנויי פרימיום. התחברו כדי להמשיך')).toBeVisible();
   await expect(page.locator('.persona-call').first()).toBeDisabled();
   expect(statusCalls).toBe(0);
   await page.locator('.call-gate').getByRole('button', { name: 'התחברות' }).click();
@@ -221,7 +221,7 @@ test('a guest is invited to sign in, and the characters are a teaser', async ({ 
 test('a signed-in learner without premium sees the locked teaser', async ({ page }) => {
   await openSignedIn(page, { premium: false, callsToday: 0, callsPerDay: 10 });
   await openCallTab(page);
-  await expect(page.getByText('🔒 שיחות וידאו הן חלק מפרימיום')).toBeVisible();
+  await expect(page.getByText('🔒 שיחות טלפון הן חלק מפרימיום')).toBeVisible();
   await expect(page.locator('.persona-card')).toHaveCount(4);
   for (const button of await page.locator('.persona-call').all()) await expect(button).toBeDisabled();
   await expect(page.locator('.calls-left')).toHaveCount(0);
@@ -233,13 +233,13 @@ test('the premium screen opens from the call tab; on the website it points to th
   await openCallTab(page);
   await page.getByRole('button', { name: '👑 לפרטים על פרימיום' }).click();
   await expect(page.getByRole('heading', { name: /פרימיום/ })).toBeVisible();
-  await expect(page.getByText('עד 10 שיחות וידאו ביום', { exact: false })).toBeVisible();
+  await expect(page.getByText('עד 10 שיחות טלפון ביום', { exact: false })).toBeVisible();
   // Billing is only in the Google Play build: no plans or buy button here.
   await expect(page.getByText('ההצטרפות לפרימיום נעשית באפליקציה', { exact: false })).toBeVisible();
   await expect(page.locator('.paywall-plan')).toHaveCount(0);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/paywall-web.png`, fullPage: true });
   await page.getByRole('button', { name: 'חזרה' }).click();
-  await expect(page.getByText('🔒 שיחות וידאו הן חלק מפרימיום')).toBeVisible();
+  await expect(page.getByText('🔒 שיחות טלפון הן חלק מפרימיום')).toBeVisible();
 });
 
 test('a subscriber sees when premium renews on the profile and the premium screen', async ({ page }) => {

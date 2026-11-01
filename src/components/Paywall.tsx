@@ -37,7 +37,7 @@ const POLL_MS = 2000;
 const POLL_TRIES = 15;
 
 const BENEFITS = [
-  { icon: '📞', text: `עד ${CALL_LIMITS.callsPerDay} שיחות וידאו ביום עם דמויות AI שמדברות איתכם באנגלית` },
+  { icon: '📞', text: `עד ${CALL_LIMITS.callsPerDay} שיחות טלפון ביום עם דמויות AI שמדברות איתכם באנגלית` },
   { icon: '✍️', text: 'תיקונים והסברים בעברית תוך כדי השיחה' },
   { icon: '🎭', text: 'דמויות ומצבים שונים – מתרגלים אנגלית של החיים האמיתיים' },
   { icon: '👑', text: 'תג פרימיום בפרופיל' },

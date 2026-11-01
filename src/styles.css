@@ -2330,9 +2330,9 @@ button:disabled {
 }
 
 /* ==========================================================================
-   AI video call (src/components/call/)
+   AI phone call (src/components/call/)
    The picker and summary follow the app theme; the call itself is always dark,
-   like a video call. `--persona` is the character's accent colour.
+   like a phone's in-call screen. `--persona` is the character's accent colour.
    ========================================================================== */
 
 /* ---------- Picker ---------- */
@@ -2616,8 +2616,8 @@ button:disabled {
 /* ---------- Call screen ---------- */
 
 .call-screen {
-  --call-bg: #0d1418;
-  --call-panel: rgb(255 255 255 / 8%);
+  --call-bg: #0b1115;
+  --call-panel: rgb(255 255 255 / 7%);
   --call-text: #f1f7fb;
   --call-muted: #9fb3c0;
   position: fixed;
@@ -2626,12 +2626,12 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: calc(12px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  gap: 10px;
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
   overflow: hidden;
   color: var(--call-text);
   background:
-    radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--persona) 30%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--persona) 26%, var(--call-bg)) 0%, var(--call-bg) 55%),
     var(--call-bg);
   color-scheme: dark;
   animation: fade-in 0.25s ease;
@@ -2639,71 +2639,53 @@ button:disabled {
 
 .call-screen > * {
   width: 100%;
-  max-width: 560px;
+  max-width: 480px;
 }
 
+.call-icon {
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+}
+
+/* A quiet label at the top, like the "mobile" line on a phone's call screen. */
 .call-top {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    'id timer'
-    'role timer';
-  align-items: center;
-  gap: 0 12px;
-}
-
-.call-id {
-  grid-area: id;
   display: flex;
+  justify-content: center;
+}
+
+.call-kind {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-}
-
-.call-name {
-  font-size: 1.3rem;
-  font-weight: 800;
-}
-
-.ai-badge {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--persona);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-}
-
-.call-role {
-  grid-area: role;
+  gap: 6px;
   color: var(--call-muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-.call-timer {
-  grid-area: timer;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--call-panel);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+.call-kind .call-icon {
+  width: 1em;
+  height: 1em;
 }
 
+/* Contact photo, name, role and timer, centred – the heart of a phone call screen. */
 .call-stage {
-  position: relative;
-  flex: 1 1 0;
+  flex: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 110px;
-  padding: 8px 0;
+  gap: 4px;
+  padding: clamp(4px, 3vh, 32px) 0 4px;
+  text-align: center;
 }
 
-/* Sized by the space left above the captions, so the controls always stay on screen. */
 .call-avatar {
   position: relative;
-  height: min(100%, 52vw, 200px);
+  flex: none;
+  width: clamp(88px, min(30vw, 15vh), 128px);
   aspect-ratio: 1;
+  margin-bottom: 10px;
 }
 
 .call-avatar::before,
@@ -2712,23 +2694,19 @@ button:disabled {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 3px solid var(--persona);
+  border: 2px solid color-mix(in srgb, var(--persona) 70%, #fff);
   opacity: 0;
   pointer-events: none;
 }
 
 .call-avatar.talking::before,
 .call-avatar.ringing::before {
-  animation: call-ring 1.4s ease-out infinite;
+  animation: call-ring 1.8s ease-out infinite;
 }
 
 .call-avatar.talking::after,
 .call-avatar.ringing::after {
-  animation: call-ring 1.4s ease-out 0.7s infinite;
-}
-
-.call-avatar.ringing .call-face {
-  animation: call-shake 1.2s ease-in-out infinite;
+  animation: call-ring 1.8s ease-out 0.9s infinite;
 }
 
 .call-face {
@@ -2736,7 +2714,92 @@ button:disabled {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  box-shadow: 0 10px 40px rgb(0 0 0 / 45%);
+  box-shadow:
+    0 0 0 3px rgb(255 255 255 / 10%),
+    0 12px 36px rgb(0 0 0 / 45%);
+}
+
+.call-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.call-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ai-badge {
+  padding: 2px 7px;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 6px;
+  color: var(--call-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.call-role {
+  color: var(--call-muted);
+  font-size: 0.95rem;
+}
+
+.call-timer {
+  color: var(--call-text);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+/* Sound bars: flat while nobody speaks, moving while the character (or, in brand colour, the learner) does. */
+.call-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 22px;
+  margin-top: 4px;
+}
+
+.call-wave span {
+  width: 4px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--call-muted);
+  opacity: 0.35;
+  transform: scaleY(0.18);
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+}
+
+.call-wave.active span {
+  background: color-mix(in srgb, var(--persona) 60%, #fff);
+  opacity: 1;
+  animation: call-wave 0.9s ease-in-out infinite;
+}
+
+.call-wave.active.you span {
+  background: var(--brand);
+}
+
+.call-wave.active span:nth-child(2) {
+  animation-delay: -0.6s;
+}
+
+.call-wave.active span:nth-child(3) {
+  animation-delay: -0.3s;
+}
+
+.call-wave.active span:nth-child(4) {
+  animation-delay: -0.75s;
+}
+
+.call-wave.active span:nth-child(5) {
+  animation-delay: -0.45s;
 }
 
 /* ---------- Character portraits (components/call/PersonaPortrait.tsx) ---------- */
@@ -2782,6 +2845,17 @@ button:disabled {
   opacity: 1;
 }
 
+/* A still contact photo (the phone call): no breathing. */
+.portrait.still .pp-photo,
+.portrait.still .pp-figure,
+.portrait.still .pp-eye {
+  animation: none;
+}
+
+.portrait.still .pp-photo {
+  transform: scale(1.12);
+}
+
 .portrait .pp-figure {
   animation: pp-breathe 4.5s ease-in-out infinite;
 }
@@ -2816,41 +2890,8 @@ button:disabled {
   animation: pp-brows 2.6s ease-in-out infinite;
 }
 
-.self-view {
-  position: absolute;
-  top: 8px;
-  inset-inline-start: 0;
-  width: 96px;
-  aspect-ratio: 3 / 4;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 2px solid rgb(255 255 255 / 30%);
-  background: #000;
-  box-shadow: 0 6px 18px rgb(0 0 0 / 40%);
-}
-
-.self-view video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1);
-}
-
-.self-view-note {
-  position: absolute;
-  top: 8px;
-  inset-inline-start: 0;
-  max-width: 50%;
-  margin: 0;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: var(--call-panel);
-  color: var(--call-muted);
-  font-size: 0.8rem;
-}
-
 .call-captions {
-  flex: 0 1 auto;
+  flex: 1 1 0;
   min-height: 0;
   overflow-y: auto;
   display: flex;
@@ -2861,7 +2902,6 @@ button:disabled {
 .call-screen > .call-top,
 .call-screen > .call-level,
 .call-screen > .call-status,
-.call-screen > .call-word,
 .call-screen > .call-type,
 .call-screen > .call-controls {
   flex: none;
@@ -3036,27 +3076,6 @@ button:disabled {
   font-weight: 600;
 }
 
-.call-word {
-  align-self: center;
-  max-width: 100%;
-  padding: 7px 14px;
-  border: 1px solid rgb(255 255 255 / 25%);
-  border-radius: 999px;
-  background: var(--call-panel);
-  color: var(--call-text);
-  font: inherit;
-  font-size: 0.9rem;
-}
-
-.call-word.listening {
-  background: rgb(255 255 255 / 28%);
-  border-color: var(--call-text);
-}
-
-.call-word:disabled {
-  opacity: 0.5;
-}
-
 .call-type {
   display: flex;
   gap: 8px;
@@ -3085,13 +3104,15 @@ button:disabled {
 
 .call-send {
   flex: none;
+  display: grid;
+  place-items: center;
   width: 48px;
   height: 48px;
   border: none;
   border-radius: 50%;
   background: var(--brand);
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
 }
 
 .call-send:disabled {
@@ -3099,59 +3120,101 @@ button:disabled {
   color: var(--call-muted);
 }
 
+/* Phone-style controls: labelled round toggles, then the microphone and the red hang-up button. */
 .call-controls {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
+  gap: 16px;
   padding-top: 4px;
 }
 
-.call-ctrl,
+.call-actions {
+  display: flex;
+  justify-content: center;
+  gap: clamp(16px, 8vw, 36px);
+}
+
+.call-ctrl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--call-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.call-ctrl-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  font-size: 0.95rem;
+  transition:
+    transform 0.08s,
+    background 0.15s,
+    color 0.15s;
+}
+
+/* A toggle that is on turns white, like on a phone. */
+.call-ctrl.on .call-ctrl-icon {
+  background: var(--call-text);
+  color: var(--call-bg);
+}
+
+.call-ctrl.listening .call-ctrl-icon {
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+.call-ctrl-label {
+  color: var(--call-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.call-ctrl:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.call-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
 .call-hangup,
 .call-mic {
-  position: relative;
   display: grid;
   place-items: center;
   border: none;
   border-radius: 50%;
+  color: #fff;
   transition:
     transform 0.08s,
     background 0.15s;
-}
-
-.call-ctrl {
-  width: 52px;
-  height: 52px;
-  background: rgb(255 255 255 / 14%);
-  font-size: 1.35rem;
-}
-
-.call-ctrl.on {
-  background: rgb(255 255 255 / 28%);
-}
-
-.ctrl-slash {
-  position: absolute;
-  width: 60%;
-  height: 3px;
-  border-radius: 2px;
-  background: #fff;
-  transform: rotate(-45deg);
 }
 
 .call-mic {
   width: 76px;
   height: 76px;
   background: var(--brand);
-  color: #fff;
-  font-size: 2rem;
-  box-shadow: 0 5px 0 var(--brand-dark);
+  font-size: 1.25rem;
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--brand) 40%, transparent);
 }
 
 .call-mic.listening {
   background: var(--red);
-  box-shadow: 0 5px 0 var(--red-dark);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--red) 45%, transparent);
   animation: mic-pulse 1.2s ease-in-out infinite;
 }
 
@@ -3162,22 +3225,21 @@ button:disabled {
 }
 
 .call-hangup {
-  width: 60px;
-  height: 60px;
-  background: var(--red);
-  color: #fff;
-  font-size: 1.6rem;
-  box-shadow: 0 4px 0 var(--red-dark);
+  width: 64px;
+  height: 64px;
+  background: #e5484d;
+  font-size: 1.1rem;
+  box-shadow: 0 6px 20px rgb(229 72 77 / 35%);
 }
 
-.call-hangup span {
+.hangup-icon {
   transform: rotate(135deg);
 }
 
-.call-ctrl:active:not(:disabled),
+.call-ctrl:active:not(:disabled) .call-ctrl-icon,
 .call-mic:active:not(:disabled),
 .call-hangup:active {
-  transform: translateY(2px);
+  transform: scale(0.94);
 }
 
 .call-screen :focus-visible {
@@ -3301,20 +3363,13 @@ button:disabled {
   }
 }
 
-@keyframes call-shake {
+@keyframes call-wave {
   0%,
-  60%,
   100% {
-    transform: rotate(0);
+    transform: scaleY(0.25);
   }
-  10%,
-  30%,
   50% {
-    transform: rotate(-4deg);
-  }
-  20%,
-  40% {
-    transform: rotate(4deg);
+    transform: scaleY(1);
   }
 }
 
@@ -3429,8 +3484,14 @@ button:disabled {
   .portrait *,
   .pp-photo,
   .typing-dots span,
+  .call-wave span,
+  .call-ctrl-icon,
   .call-mic.listening {
     animation: none !important;
+  }
+  /* The sound bars stay raised, without moving, while someone speaks. */
+  .call-wave.active span {
+    transform: scaleY(0.6);
   }
   /* Still show that the character is speaking, without movement. */
   .call-avatar.talking::before {
@@ -3439,29 +3500,65 @@ button:disabled {
   }
 }
 
+/* Short screens: the contact card becomes one compact row, so the captions keep their room. */
+@media (max-height: 760px) {
+  .call-stage {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'photo id'
+      'photo role'
+      'photo timer';
+    align-items: center;
+    justify-content: stretch;
+    gap: 0 14px;
+    padding-top: 2px;
+    text-align: start;
+  }
+  .call-avatar {
+    grid-area: photo;
+    width: 64px;
+    margin: 0;
+  }
+  .call-id {
+    grid-area: id;
+    justify-content: flex-start;
+  }
+  .call-name {
+    font-size: 1.35rem;
+  }
+  .call-role {
+    grid-area: role;
+    font-size: 0.85rem;
+  }
+  .call-timer {
+    grid-area: timer;
+    font-size: 0.9rem;
+  }
+  .call-wave {
+    display: none;
+  }
+}
+
 @media (max-width: 380px) {
   .call-controls {
-    gap: 10px;
+    gap: 12px;
   }
-  .call-ctrl {
-    width: 46px;
-    height: 46px;
-    font-size: 1.2rem;
+  .call-ctrl-icon {
+    width: 50px;
+    height: 50px;
   }
   .call-mic {
     width: 68px;
     height: 68px;
   }
   .call-hangup {
-    width: 54px;
-    height: 54px;
-  }
-  .self-view {
-    width: 76px;
+    width: 58px;
+    height: 58px;
   }
 }
 
-/* ========================= End AI video call ========================= */
+/* ========================= End AI phone call ========================= */
 
 /* Daily reminder time picker */
 .time-input {

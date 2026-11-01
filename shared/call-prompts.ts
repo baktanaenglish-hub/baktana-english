@@ -1,5 +1,5 @@
 /**
- * System prompts and output parsing for the AI "video call" (contract: shared/call.ts).
+ * System prompts and output parsing for the AI "phone call" (contract: shared/call.ts).
  * Used by server/src/routes/call.ts and supabase/functions/call-turn. Pure TypeScript with
  * no imports except './call', so it runs in Node, the browser and Deno.
  *
@@ -232,7 +232,7 @@ export function buildSystemPrompt(
   correctionLevel: CorrectionLevel = 'normal',
 ): string {
   return [
-    `You are ${persona.name}, an AI character in Baktana English, an app where Hebrew speakers practise spoken English in a "video call".`,
+    `You are ${persona.name}, an AI character in Baktana English, an app where Hebrew speakers practise spoken English in a "phone call".`,
     `Your first line in this call was: "${persona.greeting}"`,
     PERSONA_RULES[persona.id],
     ...(persona.corrects ? [CORRECTION_LEVEL_RULES[correctionLevel]] : []),

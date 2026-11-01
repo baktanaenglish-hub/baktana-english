@@ -13,7 +13,7 @@ import type { ItemStates } from './srs';
 export type { Progress };
 export type { ItemState, ItemStates } from './srs';
 export type { AnalyticsEvent, EventsRequest } from './analytics';
-/** POST /api/call/turn (auth optional) – one turn of the AI video call, see shared/call.ts. */
+/** POST /api/call/turn (auth optional) – one turn of the AI phone call, see shared/call.ts. */
 export type { CallTurnRequest, CallTurnResponse } from './call';
 
 export interface User {

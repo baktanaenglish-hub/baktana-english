@@ -34,7 +34,7 @@ export function CallSummary({ result, onNewCall, onBack }: Props) {
   return (
     <div className="call-summary">
       <div className="call-summary-avatar" style={personaStyle(persona.color)} aria-hidden="true">
-        <PersonaPortrait persona={persona} />
+        <PersonaPortrait persona={persona} still />
       </div>
       <h1 ref={heading} tabIndex={-1}>
         השיחה עם <span dir="ltr">{persona.name}</span> הסתיימה
