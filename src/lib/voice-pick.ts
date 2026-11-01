@@ -40,9 +40,9 @@ const ROBOTIC =
 
 /** Well-known voice names by gender, across Windows/Edge, macOS/iOS, Chrome and Android. */
 const FEMALE =
-  /\b(female|woman|aria|jenny|michelle|ana|sonia|libby|maisie|hollie|abbie|bella|olivia|zira|hazel|susan|samantha|allison|ava|karen|moira|tessa|serena|kate|fiona|victoria|veena|catherine|nicky|emma|amy|joanna|salli|kendra|kimberly|ivy|natasha|clara|emily|sara|jane|nancy|ashley|cora|elizabeth|monica|amber)\b/i;
+  /\b(female|woman|aria|jenny|michelle|ana|sonia|libby|maisie|hollie|abbie|bella|olivia|zira|hazel|susan|samantha|allison|ava|karen|moira|tessa|serena|kate|fiona|victoria|veena|catherine|nicky|zoe|joelle|stephanie|martha|emma|amy|joanna|salli|kendra|kimberly|ivy|natasha|clara|emily|sara|jane|nancy|ashley|cora|elizabeth|monica|amber)\b/i;
 const MALE =
-  /\b(male|man|guy|davis|tony|jason|brandon|christopher|eric|roger|steffan|ryan|thomas|alfie|elliot|ethan|noah|oliver|david|mark|george|james|daniel|alex|aaron|arthur|gordon|lee|rishi|tom|evan|matthew|joey|justin|kevin|brian|andrew|william|liam|connor)\b/i;
+  /\b(male|man|guy|davis|tony|jason|brandon|christopher|eric|roger|steffan|ryan|thomas|alfie|elliot|ethan|noah|oliver|david|mark|george|james|daniel|alex|aaron|arthur|gordon|lee|rishi|tom|evan|jamie|nathan|matthew|joey|justin|kevin|brian|andrew|william|liam|connor)\b/i;
 /**
  * Google's Android voices are named like "en-us-x-tpd-network": the 3-letter code is the speaker.
  * Genders as documented for Google TTS; voices not listed here count as unknown.
@@ -76,12 +76,16 @@ export function voiceGender(voice: VoiceInfo): 'female' | 'male' | null {
   // "Male" is inside "Female", so test female first.
   if (/\bfemale\b/i.test(id)) return 'female';
   if (/\bmale\b/i.test(id)) return 'male';
-  if (FEMALE.test(voice.name)) return 'female';
-  if (MALE.test(voice.name)) return 'male';
+  // Chrome's "Google US English" is a woman's voice without saying so.
+  if (/^google us english\b/i.test(voice.name)) return 'female';
+  // Edge writes "Microsoft EmmaMultilingual Online (Natural)": split the name off before matching.
+  const name = voice.name.replace(/multilingual/gi, ' ');
+  if (FEMALE.test(name)) return 'female';
+  if (MALE.test(name)) return 'male';
   return null;
 }
 
-const norm = (lang: string) => lang.replace('_', '-').toLowerCase();
+const norm = (lang: string | undefined) => (lang ?? '').replace('_', '-').toLowerCase();
 
 /** How well a voice fits a profile; higher is better, -Infinity means never. */
 export function scoreVoice(voice: VoiceInfo, profile: VoiceProfile): number {
@@ -89,11 +93,16 @@ export function scoreVoice(voice: VoiceInfo, profile: VoiceProfile): number {
   if (!lang.startsWith('en')) return -Infinity;
   const id = `${voice.name} ${voice.voiceURI ?? ''}`.toLowerCase();
   if (profile.avoid?.some((a) => id.includes(a.toLowerCase()))) return -Infinity;
+  // Edge 150 sometimes lists broken "Microsoft undefined Online (Natural) - undefined" voices that speak
+  // with the default voice.
+  if (/\bundefined\b/.test(id)) return -Infinity;
+
+  // A voice the character asks for by name wins, in the profile's order: the profile already weighed
+  // accent, gender and quality when ranking it.
+  const rank = profile.preferred.findIndex((p) => id.includes(p.toLowerCase()));
+  if (rank >= 0) return 10_000 - rank * 10;
 
   let score = 0;
-  const rank = profile.preferred.findIndex((p) => id.includes(p.toLowerCase()));
-  if (rank >= 0) score += 1000 - rank * 10;
-
   const langs = [profile.lang, ...(profile.fallbackLangs ?? [])].map(norm);
   const langRank = langs.indexOf(lang);
   if (langRank === 0) score += 200;
