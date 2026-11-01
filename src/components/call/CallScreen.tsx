@@ -29,7 +29,8 @@ import { isCallBlocked, sendTurn } from '../../lib/call-api';
 import { judgeTurn, paceFor, speechRate, type PaceSignal } from '../../lib/call-pace';
 import type { ApiRequestError } from '../../lib/api-error';
 import { canListen, listen, type ListenError, type Listening } from '../../lib/listen';
-import { speakAsync, stopSpeaking } from '../../lib/speech';
+import { speakAsync, stopSpeaking, warmUpVoices } from '../../lib/speech';
+import { PERSONA_VOICES } from '../../lib/voices';
 import type { CallResult } from './CallSummary';
 import { CorrectionView } from './CallSummary';
 import { PersonaPortrait } from './PersonaPortrait';
@@ -147,13 +148,19 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     }
     setPhase('speaking');
     // A correction gets the slow "listen again" speed; otherwise the pace follows how the learner is coping.
-    await speakAsync(text, slow ? true : speechRate(paceFor(paceSignals.current)));
+    await speakAsync(
+      text,
+      slow ? true : speechRate(paceFor(paceSignals.current)),
+      PERSONA_VOICES[callRef.current.persona.id],
+    );
     if (alive.current && speechToken.current === token) setPhase((p) => (p === 'speaking' ? 'ready' : p));
   }, []);
 
   // Ring, then pick up with the greeting. Everything stops when the screen goes away.
   useEffect(() => {
     alive.current = true;
+    // The voice list loads while the call rings, so the greeting already has the character's voice.
+    warmUpVoices();
     const ring = setTimeout(() => {
       const at = Date.now();
       connectedRef.current = at;
