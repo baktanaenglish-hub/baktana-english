@@ -1064,7 +1064,7 @@ function Screens() {
                 setScreen({ name: tab.name });
               }}
             >
-              <Icon name={locked ? 'lock' : tab.icon} size={22} /> <span>{tab.label}</span>
+              <Icon name={locked ? 'lock' : tab.icon} size={22} /> <span className="nav-label">{tab.label}</span>
               {tab.name === 'league' && leagueBadge > 0 && screen.name !== 'league' && (
                 <span className="badge nav-badge" aria-label={`${leagueBadge} עדכונים חדשים בליגה`}>
                   {leagueBadge}

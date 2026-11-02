@@ -48,6 +48,11 @@ tools/      repo tooling (conditional server scripts, TypeScript API for ESLint)
 - Code style: 2 spaces, single quotes, semicolons, trailing commas, ~120 columns (Prettier + EditorConfig).
   Don't reformat files you aren't otherwise changing.
 - User-facing text is in Hebrew; the layout is right-to-left.
+- **Styles use the design scale** defined at the top of `src/styles.css`: colors (`--brand`, `--on-color`, …),
+  corner radii (`--radius-sm/md/lg/xl/pill`), font sizes (`--text-xs` … `--text-4xl`) and the pressable lip
+  (`box-shadow: 0 var(--lift) 0 …`). Don't add literal hex colors, radii or rem font sizes; if a value is
+  really missing, add a token instead. Exceptions: circles (`50%`), emoji/illustration sizes of 3rem and up,
+  and self-contained scenes with their own palette (the call screen, pet colors, medals).
 - Keep the app working without a backend.
 - Before opening a PR run `npm run check`. CI runs the same steps on Node 22.
 
