@@ -32,6 +32,7 @@
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3",
     "@capacitor/local-notifications": "^8.3.1",
+    "@fontsource-variable/rubik": "^5.3.0",
     "@revenuecat/purchases-capacitor": "^13.7.4",
     "@supabase/supabase-js": "^2.118.0",
     "react": "^19.3.1",
