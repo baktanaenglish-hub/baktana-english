@@ -32,16 +32,7 @@ import { canListen, listen, type ListenError, type Listening } from '../../lib/l
 import { speakAsync, stopSpeaking } from '../../lib/speech';
 import type { CallResult } from './CallSummary';
 import { CorrectionView } from './CallSummary';
-import {
-  KeyboardIcon,
-  MicIcon,
-  PhoneIcon,
-  SendIcon,
-  SpeakerIcon,
-  SpeakerOffIcon,
-  StopIcon,
-  TranslateIcon,
-} from './CallIcons';
+import { Icon, type IconName } from '../Icon';
 import { PersonaPortrait } from './PersonaPortrait';
 import { personaStyle } from './persona-style';
 
@@ -72,10 +63,13 @@ const MIC_ERRORS: Record<ListenError, string> = {
   error: 'משהו השתבש בזיהוי הדיבור. נסו שוב.',
 };
 
-const FLAG_NOTES: Record<NonNullable<CallTurnResponse['flagged']>, string> = {
-  personal_info: '🛡️ זכרו: לא משתפים פרטים אישיים כמו כתובת, טלפון או שם בית הספר.',
-  inappropriate: '🛡️ בואו נשמור על שיחה נעימה ומכבדת.',
-  self_harm: '💙 אם קשה לכם, אתם לא לבד. דברו עם מבוגר שאתם סומכים עליו, או התקשרו לער״ן – 1201, בכל שעה.',
+const FLAG_NOTES: Record<NonNullable<CallTurnResponse['flagged']>, { icon: IconName; text: string }> = {
+  personal_info: { icon: 'shield-alert', text: 'זכרו: לא משתפים פרטים אישיים כמו כתובת, טלפון או שם בית הספר.' },
+  inappropriate: { icon: 'shield-alert', text: 'בואו נשמור על שיחה נעימה ומכבדת.' },
+  self_harm: {
+    icon: 'heart-handshake',
+    text: 'אם קשה לכם, אתם לא לבד. דברו עם מבוגר שאתם סומכים עליו, או התקשרו לער״ן – 1201, בכל שעה.',
+  },
 };
 
 /**
@@ -319,7 +313,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   else if (isListening && listenFor === 'word') status = 'אמרו את המילה בעברית… לחצו שוב כשסיימתם';
   else if (isListening) status = 'מקשיבים… לחצו שוב כשסיימתם';
   else if (phase === 'thinking') status = 'מחכים לתשובה…';
-  else if (phase === 'speaking') status = `${persona.name} עונה`;
+  else if (phase === 'speaking') status = `${persona.name} עונה…`;
   else if (phase === 'error' || blocked) status = '';
   else status = keyboard && !canListen ? 'כתבו באנגלית ולחצו על שליחה' : 'לחצו על המיקרופון ודברו באנגלית';
 
@@ -330,7 +324,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     <div className="call-screen" style={personaStyle(persona.color)}>
       <header className="call-top">
         <span className="call-kind">
-          <PhoneIcon />
+          <Icon name="phone" />
           שיחת תרגול באנגלית
         </span>
       </header>
@@ -384,7 +378,9 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
             </p>
             {persona.corrects && lastUser.corrections && lastUser.corrections.length > 0 && (
               <div className="caption-corrections">
-                <span className="caption-corrections-title">💡 אפשר לומר כך:</span>
+                <span className="caption-corrections-title">
+                  <Icon name="lightbulb" /> אפשר לומר כך:
+                </span>
                 {lastUser.corrections.map((c, i) => (
                   <CorrectionView key={i} correction={c} />
                 ))}
@@ -413,7 +409,9 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
               </div>
             ) : phase === 'error' && awaiting ? (
               <div className="caption-error" role="alert">
-                <p>📡 {error}</p>
+                <p>
+                  <Icon name="wifi-off" /> {error}
+                </p>
                 <button type="button" className="btn ghost small" onClick={retry}>
                   נסו שוב
                 </button>
@@ -436,7 +434,11 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
                     {showHe && <p className="caption-he">{lastReply.he}</p>}
                   </>
                 )}
-                {lastReply.flagged && <p className="caption-flag">{FLAG_NOTES[lastReply.flagged]}</p>}
+                {lastReply.flagged && (
+                  <p className="caption-flag">
+                    <Icon name={FLAG_NOTES[lastReply.flagged].icon} /> {FLAG_NOTES[lastReply.flagged].text}
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -463,7 +465,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
             disabled={!talkable}
           />
           <button type="submit" className="call-send" aria-label="שליחה" disabled={!talkable || busy || !draft.trim()}>
-            <SendIcon />
+            <Icon name="send-horizontal" />
           </button>
         </form>
       )}
@@ -477,7 +479,9 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
             aria-pressed={muted}
             aria-label={muted ? 'הפעלת הרמקול' : 'השתקת הרמקול'}
           >
-            <span className="call-ctrl-icon">{muted ? <SpeakerOffIcon /> : <SpeakerIcon />}</span>
+            <span className="call-ctrl-icon">
+              <Icon name={muted ? 'volume-x' : 'volume-2'} />
+            </span>
             <span className="call-ctrl-label" aria-hidden="true">
               {muted ? 'מושתק' : 'רמקול'}
             </span>
@@ -495,7 +499,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
               aria-label={keyboard ? 'הסתרת המקלדת' : 'כתיבה במקלדת'}
             >
               <span className="call-ctrl-icon">
-                <KeyboardIcon />
+                <Icon name="keyboard" />
               </span>
               <span className="call-ctrl-label" aria-hidden="true">
                 מקלדת
@@ -511,7 +515,12 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
               aria-pressed={wordListening}
               aria-label={wordListening ? 'סיימתי לומר את המילה' : 'איך אומרים באנגלית? אמרו מילה בעברית'}
             >
-              <span className="call-ctrl-icon">{wordListening ? <StopIcon /> : <TranslateIcon />}</span>
+              <span className="call-ctrl-icon">
+                <Icon
+                  name={wordListening ? 'square' : 'languages'}
+                  className={wordListening ? 'icon-stop' : undefined}
+                />
+              </span>
               <span className="call-ctrl-label" aria-hidden="true">
                 {wordListening ? 'סיימתי' : 'איך אומרים?'}
               </span>
@@ -530,11 +539,14 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
               aria-pressed={sentenceListening}
               aria-label={sentenceListening ? 'סיום הדיבור' : 'לחצו ודברו'}
             >
-              {sentenceListening ? <StopIcon /> : <MicIcon />}
+              <Icon
+                name={sentenceListening ? 'square' : 'mic'}
+                className={sentenceListening ? 'icon-stop' : undefined}
+              />
             </button>
           )}
           <button type="button" className="call-hangup" onClick={finish} aria-label="ניתוק השיחה">
-            <PhoneIcon className="hangup-icon" />
+            <Icon name="phone" />
           </button>
         </div>
       </div>

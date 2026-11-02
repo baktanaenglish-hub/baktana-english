@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { QUESTS, chestAvailable, nextChestStreak, type GemState } from '../lib/gems';
+import { Icon } from './Icon';
 
 interface Props {
   gems: GemState;
@@ -28,12 +29,16 @@ export function DailyRewards({ gems, today, onOpenChest }: Props) {
           onClick={() => setOpened(onOpenChest())}
           aria-label={available ? 'פתיחת התיבה היומית' : 'התיבה היומית כבר נפתחה היום'}
         >
-          <span aria-hidden="true">{available ? '🎁' : '📦'}</span>
+          <Icon name={available ? 'gift' : 'package'} />
         </button>
         <div className="chest-text" role="status">
           {opened !== null ? (
             <strong className="pop">
-              קיבלתם <span className="gem-amount">💎 {opened}</span>!
+              קיבלתם{' '}
+              <span className="gem-amount">
+                <Icon name="gem" filled /> {opened}
+              </span>
+              !
             </strong>
           ) : available ? (
             <>
@@ -47,7 +52,9 @@ export function DailyRewards({ gems, today, onOpenChest }: Props) {
           ) : (
             <>
               <strong>חזרו מחר לתיבה הבאה</strong>
-              <span className="muted">יום {gems.chestStreak} ברצף 🔥</span>
+              <span className="muted">
+                יום {gems.chestStreak} ברצף <Icon name="flame" filled />
+              </span>
             </>
           )}
         </div>
@@ -60,7 +67,9 @@ export function DailyRewards({ gems, today, onOpenChest }: Props) {
           aria-controls="daily-quests"
           onClick={() => setShowQuests((v) => !v)}
         >
-          <span>⚡ משימות יומיות</span>
+          <span>
+            <Icon name="zap" filled /> משימות יומיות
+          </span>
           <span className="quests-count">
             {doneCount}/{QUESTS.length} {showQuests ? '▴' : '▾'}
           </span>
@@ -73,12 +82,14 @@ export function DailyRewards({ gems, today, onOpenChest }: Props) {
           return (
             <li key={quest.id} className={done ? 'done' : ''}>
               <span className="quest-icon" aria-hidden="true">
-                {done ? '✅' : quest.icon}
+                <Icon name={done ? 'circle-check' : quest.icon} />
               </span>
               <div className="quest-body">
                 <div className="quest-head">
                   <span>{quest.title}</span>
-                  <span className="quest-gems">💎 {quest.gems}</span>
+                  <span className="quest-gems">
+                    <Icon name="gem" /> {quest.gems}
+                  </span>
                 </div>
                 <div
                   className="progress-track small"

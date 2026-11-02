@@ -7,6 +7,7 @@ import {
   type GemState,
   type ShopItemId,
 } from '../lib/gems';
+import { Icon } from './Icon';
 
 interface Props {
   gems: GemState;
@@ -20,7 +21,7 @@ export function Shop({ gems, onBuy, onAvatar }: Props) {
     <div className="shop">
       <section className="gem-balance pop">
         <span className="gem-big" aria-hidden="true">
-          💎
+          <Icon name="gem" filled />
         </span>
         <div>
           <strong className="gem-count">{gems.gems}</strong>
@@ -36,7 +37,7 @@ export function Shop({ gems, onBuy, onAvatar }: Props) {
           return (
             <div key={item.id} className="shop-item">
               <span className="shop-icon" aria-hidden="true">
-                {item.icon}
+                <Icon name={item.icon} filled />
               </span>
               <div className="shop-text">
                 <strong>{item.title}</strong>
@@ -50,7 +51,7 @@ export function Shop({ gems, onBuy, onAvatar }: Props) {
                 onClick={() => onBuy(item.id)}
                 aria-label={`קנייה: ${item.title} ב־${item.price} יהלומים`}
               >
-                💎 {item.price}
+                <Icon name="gem" /> {item.price}
               </button>
             </div>
           );
@@ -77,7 +78,19 @@ export function Shop({ gems, onBuy, onAvatar }: Props) {
                 {avatar.emoji}
               </span>
               <span className="avatar-name">{avatar.name}</span>
-              <span className="avatar-price">{selected ? '✓ נבחר' : owned ? 'בחירה' : `💎 ${avatar.price}`}</span>
+              <span className="avatar-price">
+                {selected ? (
+                  <>
+                    <Icon name="check" /> נבחר
+                  </>
+                ) : owned ? (
+                  'בחירה'
+                ) : (
+                  <>
+                    <Icon name="gem" /> {avatar.price}
+                  </>
+                )}
+              </span>
             </button>
           );
         })}

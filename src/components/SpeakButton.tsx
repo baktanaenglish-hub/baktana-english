@@ -1,4 +1,5 @@
 import { canSpeak, speak } from '../lib/speech';
+import { Icon } from './Icon';
 
 interface Props {
   text: string;
@@ -15,7 +16,7 @@ export function SpeakButton({ text, slow = false, big = false }: Props) {
       onClick={() => speak(text, slow)}
       aria-label={slow ? 'השמעה איטית' : 'השמעה'}
     >
-      {slow ? '🐢' : '🔊'}
+      <Icon name={slow ? 'turtle' : 'volume-2'} />
     </button>
   );
 }

@@ -4,6 +4,7 @@ import { speak } from '../../lib/speech';
 import { checkTyped } from '../../lib/typing';
 import { CheckFooter } from '../CheckFooter';
 import { SpeakButton } from '../SpeakButton';
+import { Icon } from '../Icon';
 
 interface Props {
   exercise: Extract<Exercise, { kind: 'type' }>;
@@ -83,7 +84,7 @@ export function TypeExercise({ exercise, locked, onCheck }: Props) {
         />
         {hebrew && (
           <p className="type-warning" role="alert">
-            ⌨️ נראה שהמקלדת בעברית. החליפו לאנגלית ונסו שוב – זה לא נחשב טעות.
+            <Icon name="keyboard" /> נראה שהמקלדת בעברית. החליפו לאנגלית ונסו שוב – זה לא נחשב טעות.
           </p>
         )}
       </div>

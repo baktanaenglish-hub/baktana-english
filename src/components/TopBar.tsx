@@ -1,4 +1,5 @@
 import { MAX_HEARTS } from '../lib/progress';
+import { Icon } from './Icon';
 
 interface Props {
   streak: number;
@@ -33,16 +34,16 @@ export function TopBar({ streak, xp, hearts, gems, onGems, premium, name, avatar
       </button>
       <div className="top-stats">
         <span title="רצף ימים" className={streak > 0 ? 'stat streak-stat on' : 'stat streak-stat'}>
-          <span>🔥</span> {streak}
+          <Icon name="flame" filled={streak > 0} size={22} /> {streak}
         </span>
-        <span title="נקודות ניסיון" className="stat">
-          <span>⭐</span> {xp}
+        <span title="נקודות ניסיון" className="stat xp-stat">
+          <Icon name="star" filled size={22} /> {xp}
         </span>
-        <span className="stat" title={`לבבות (מקסימום ${MAX_HEARTS}, ועוד לבבות בונוס)`}>
-          <span>❤️</span> {hearts}
+        <span className="stat hearts-stat" title={`לבבות (מקסימום ${MAX_HEARTS}, ועוד לבבות בונוס)`}>
+          <Icon name="heart" filled size={22} /> {hearts}
         </span>
         <button type="button" className="stat gem-stat" onClick={onGems} aria-label={`${gems} יהלומים – לחנות`}>
-          <span>💎</span> {gems}
+          <Icon name="gem" filled size={22} /> {gems}
         </button>
       </div>
       <span className="brand-name" dir="ltr" title="Baktana English">
@@ -59,7 +60,8 @@ export function TopBar({ streak, xp, hearts, gems, onGems, premium, name, avatar
 export function PremiumBadge() {
   return (
     <span className="premium-badge" dir="rtl" title="מנוי פרימיום פעיל">
-      👑<span className="premium-label"> פרימיום</span>
+      <Icon name="crown" filled />
+      <span className="premium-label"> פרימיום</span>
     </span>
   );
 }

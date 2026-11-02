@@ -20,8 +20,8 @@ async function answerAny(page: Page, correct: boolean) {
 
 async function startPlacement(page: Page) {
   await openFresh(page);
-  await page.getByRole('button', { name: '🎯 מבחן מיקום' }).click();
-  await expect(page.locator('.practice-badge')).toHaveText('🎯 מבחן מיקום');
+  await page.getByRole('button', { name: 'מבחן מיקום' }).click();
+  await expect(page.locator('.practice-badge')).toHaveText('מבחן מיקום');
 }
 
 test('two known units skip ahead to unit 3', async ({ page }) => {
@@ -38,7 +38,7 @@ test('two known units skip ahead to unit 3', async ({ page }) => {
   expect(progress.completed[course[2].lessons[0].id]).toBeUndefined();
   expect(progress.xp).toBe(0);
   // Past unit 1 now, so the offer is gone.
-  await expect(page.getByRole('button', { name: '🎯 מבחן מיקום' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'מבחן מיקום' })).toHaveCount(0);
 });
 
 test('failing unit 1 starts from the beginning, without losing hearts', async ({ page }) => {

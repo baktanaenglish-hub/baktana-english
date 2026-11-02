@@ -68,7 +68,7 @@ test('a learner creates a group, a friend joins with the invite link, and their 
   await expect(friend.locator('.group-members .board-row.me')).toContainText('15 XP');
   await expect(friend.locator('.challenge').nth(1)).toContainText('1 /');
 
-  await leagueView(friend, /^🏟️ קבוצות/);
+  await leagueView(friend, /^קבוצות/);
   const mine = friend.locator('.group-board .board-row.me');
   await expect(mine).toContainText('המשפחה');
   await expect(mine).toContainText('2 חברים · 15 XP');

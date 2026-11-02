@@ -3,6 +3,7 @@ import type { Correction, Persona } from '../../../shared/call';
 import { formatDuration } from '../../lib/call';
 import { PersonaPortrait } from './PersonaPortrait';
 import { personaStyle } from './persona-style';
+import { Icon } from '../Icon';
 
 export interface CallResult {
   persona: Persona;
@@ -56,7 +57,9 @@ export function CallSummary({ result, onNewCall, onBack }: Props) {
 
       {persona.corrects && (
         <section className="call-learned" aria-labelledby="call-learned-title">
-          <h2 id="call-learned-title">📝 מה למדנו</h2>
+          <h2 id="call-learned-title">
+            <Icon name="notebook-pen" /> מה למדנו
+          </h2>
           {corrections.length === 0 ? (
             <p className="muted">לא היו תיקונים הפעם – מעולה!</p>
           ) : (

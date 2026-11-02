@@ -54,6 +54,8 @@ export default defineConfig({
         API_URL: `http://localhost:${API_PORT}`,
         VITE_CALLS_UNLOCKED: 'true',
         VITE_REVENUECAT_ANDROID_KEY: 'goog_e2e',
+        // The browser is not the Play edition, so premium shows only when it is public.
+        VITE_PREMIUM_PUBLIC: 'true',
       },
       reuseExistingServer: false,
       timeout: 60_000,

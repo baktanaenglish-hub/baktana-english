@@ -16,6 +16,7 @@ import {
 } from '../lib/billing';
 import { getCallStatus } from '../lib/call-api';
 import { PRIVACY_URL, TERMS_URL } from '../lib/config';
+import { Icon, type IconName } from './Icon';
 import { PremiumBadge } from './TopBar';
 
 interface Props {
@@ -36,11 +37,11 @@ type Phase = 'idle' | 'buying' | 'restoring' | 'activating' | 'active' | 'slow' 
 const POLL_MS = 2000;
 const POLL_TRIES = 15;
 
-const BENEFITS = [
-  { icon: '📞', text: `עד ${CALL_LIMITS.callsPerDay} שיחות טלפון ביום עם דמויות AI שמדברות איתכם באנגלית` },
-  { icon: '✍️', text: 'תיקונים והסברים בעברית תוך כדי השיחה' },
-  { icon: '🎭', text: 'דמויות ומצבים שונים – מתרגלים אנגלית של החיים האמיתיים' },
-  { icon: '👑', text: 'תג פרימיום בפרופיל' },
+const BENEFITS: { icon: IconName; text: string }[] = [
+  { icon: 'phone', text: `עד ${CALL_LIMITS.callsPerDay} שיחות טלפון ביום עם דמויות AI שמדברות איתכם באנגלית` },
+  { icon: 'pen-line', text: 'תיקונים והסברים בעברית תוך כדי השיחה' },
+  { icon: 'drama', text: 'דמויות ומצבים שונים – מתרגלים אנגלית של החיים האמיתיים' },
+  { icon: 'crown', text: 'תג פרימיום בפרופיל' },
 ];
 
 /** The premium screen: what it includes, the plans from Google Play, buying and restoring. */
@@ -167,12 +168,12 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           aria-label="חזרה"
           disabled={phase === 'buying' || phase === 'restoring'}
         >
-          ✕
+          <Icon name="x" />
         </button>
       </header>
       <div className="paywall-body">
         <div className="paywall-hero" aria-hidden="true">
-          👑
+          <Icon name="crown" filled />
         </div>
         <h1>
           <bdi dir="ltr">Baktana English</bdi> פרימיום
@@ -182,7 +183,7 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
         <ul className="paywall-benefits">
           {BENEFITS.map((b) => (
             <li key={b.icon}>
-              <span aria-hidden="true">{b.icon}</span>
+              <Icon name={b.icon} />
               <span>{b.text}</span>
             </li>
           ))}
@@ -190,12 +191,16 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
 
         {phase === 'active' || (premium && phase !== 'activating') ? (
           <div className="panel center paywall-done" role="status">
-            {phase === 'active' && <p className="call-gate-title">🎉 ברוכים הבאים לפרימיום!</p>}
+            {phase === 'active' && (
+              <p className="call-gate-title">
+                <Icon name="party-popper" /> ברוכים הבאים לפרימיום!
+              </p>
+            )}
             {phase !== 'active' && <PremiumBadge />}
             {phase !== 'active' && <p>המנוי שלכם פעיל.</p>}
             {subscriptionText(status) && <p className="muted">{subscriptionText(status)}</p>}
             <button type="button" className="btn primary wide" onClick={onCalls}>
-              לשיחות 📞
+              לשיחות <Icon name="phone" />
             </button>
             {status?.premiumUntil && support === 'store' && (
               <a className="link-btn" href={MANAGE_SUBSCRIPTION_URL} target="_blank" rel="noreferrer">
@@ -205,12 +210,16 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           </div>
         ) : phase === 'activating' ? (
           <div className="panel center" role="status" aria-live="polite">
-            <p className="call-gate-title">⏳ מפעילים את המנוי…</p>
+            <p className="call-gate-title">
+              <Icon name="hourglass" /> מפעילים את המנוי…
+            </p>
             <p className="muted">זה לוקח כמה שניות.</p>
           </div>
         ) : phase === 'slow' ? (
           <div className="panel center" role="status">
-            <p className="call-gate-title">✅ הרכישה התקבלה</p>
+            <p className="call-gate-title">
+              <Icon name="circle-check" /> הרכישה התקבלה
+            </p>
             <p>המנוי ייפתח בעוד כמה דקות. אפשר לסגור את המסך ולחזור לשיחות מאוחר יותר.</p>
             <button type="button" className="btn ghost small" onClick={() => void activate()}>
               לבדוק שוב
@@ -218,7 +227,9 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           </div>
         ) : phase === 'pending' ? (
           <div className="panel center" role="status">
-            <p className="call-gate-title">⏳ התשלום ממתין לאישור</p>
+            <p className="call-gate-title">
+              <Icon name="hourglass" /> התשלום ממתין לאישור
+            </p>
             <p>Google Play יאשר את התשלום בקרוב, והמנוי ייפתח מיד אחר כך.</p>
           </div>
         ) : !user ? (
@@ -237,7 +248,9 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           </div>
         ) : support === 'unconfigured' ? (
           <div className="panel center call-gate">
-            <p className="call-gate-title">🚀 המנוי ייפתח בקרוב!</p>
+            <p className="call-gate-title">
+              <Icon name="rocket" /> המנוי ייפתח בקרוב!
+            </p>
             <p className="muted">אנחנו מסיימים להכין את הכול. נעדכן כאן כשאפשר יהיה להצטרף.</p>
           </div>
         ) : plans.kind === 'loading' ? (
@@ -247,7 +260,9 @@ export function Paywall({ user, status, onStatus, onSignIn, onClose, onCalls }: 
           </div>
         ) : plans.kind === 'error' ? (
           <div className="panel center" role="alert">
-            <p>📡 {plans.message}</p>
+            <p>
+              <Icon name="wifi-off" /> {plans.message}
+            </p>
             <button type="button" className="btn ghost small" onClick={() => userId && fetchPlans(userId)}>
               נסו שוב
             </button>

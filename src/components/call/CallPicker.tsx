@@ -7,6 +7,7 @@ import { getCallStatus } from '../../lib/call-api';
 import { canListen } from '../../lib/listen';
 import { PersonaPortrait } from './PersonaPortrait';
 import { personaStyle } from './persona-style';
+import { Icon } from '../Icon';
 
 interface Props {
   user: User | null;
@@ -69,14 +70,15 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
 
   return (
     <div className="call-picker">
-      <h2>📞 שיחת טלפון באנגלית</h2>
+      <h2>
+        <Icon name="phone" /> שיחת טלפון באנגלית
+      </h2>
       <p className="muted">בחרו דמות, התקשרו ודברו איתה באנגלית – כמו בשיחה אמיתית.</p>
 
       {load.kind === 'signed-out' && (
         <div className="panel center call-gate">
           <p>
-            <span aria-hidden="true">⭐ </span>
-            שיחות טלפון זמינות למנויי פרימיום. התחברו כדי להמשיך
+            <Icon name="star" filled /> שיחות טלפון זמינות למנויי פרימיום. התחברו כדי להמשיך
           </p>
           <button type="button" className="btn primary" onClick={onSignIn}>
             התחברות
@@ -86,7 +88,9 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
 
       {load.kind === 'error' && (
         <div className="panel center call-gate" role="alert">
-          <p>📡 {load.message}</p>
+          <p>
+            <Icon name="wifi-off" /> {load.message}
+          </p>
           <button type="button" className="btn ghost" onClick={() => fetchStatus()}>
             נסו שוב
           </button>
@@ -97,15 +101,19 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
         <div className="panel center call-gate locked">
           {onPremium ? (
             <>
-              <p className="call-gate-title">🔒 שיחות טלפון הן חלק מפרימיום</p>
+              <p className="call-gate-title">
+                <Icon name="lock" /> שיחות טלפון הן חלק מפרימיום
+              </p>
               <p className="muted">הכירו את הדמויות שמחכות לכם, והצטרפו כדי לדבר איתן.</p>
               <button type="button" className="btn secondary" onClick={onPremium}>
-                👑 לפרטים על פרימיום
+                <Icon name="crown" /> לפרטים על פרימיום
               </button>
             </>
           ) : (
             <>
-              <p className="call-gate-title">🔒 בקרוב! שיחות טלפון יהיו חלק מפרימיום</p>
+              <p className="call-gate-title">
+                <Icon name="lock" /> בקרוב! שיחות טלפון יהיו חלק מפרימיום
+              </p>
               <p className="muted">בינתיים אפשר להכיר את הדמויות שמחכות לכם.</p>
             </>
           )}
@@ -116,33 +124,31 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
         <div className="panel center call-gate limit" role="status">
           <p className="call-gate-title">
             {shown.callsPerDay === 1 ? 'השיחה של היום כבר נוצלה.' : `הגעתם ל־${shown.callsPerDay} שיחות היום.`} נתראה
-            מחר! <span aria-hidden="true">🌙</span>
+            מחר! <Icon name="moon" />
           </p>
         </div>
       )}
 
       {load.kind !== 'error' && shown?.tester && left > 0 && (
         <p className="calls-left" role="status">
-          <span aria-hidden="true">🧪 </span>
-          שיחת ניסיון לבודקים: שיחה אחת ביום, עד {TESTER_LIMITS.maxTurns} משפטים
+          <Icon name="flask-conical" /> שיחת ניסיון לבודקים: שיחה אחת ביום, עד {TESTER_LIMITS.maxTurns} משפטים
         </p>
       )}
 
       {load.kind !== 'error' && shown?.premium && left > 0 && (
         <p className="calls-left" role="status">
-          <span aria-hidden="true">📞 </span>
-          {remainingText(left, shown.callsPerDay)}
+          <Icon name="phone" /> {remainingText(left, shown.callsPerDay)}
         </p>
       )}
 
       <p className="call-notice" role="note">
-        <span aria-hidden="true">🤖</span>
+        <Icon name="bot" />
         <span>הדמויות הן בינה מלאכותית, לא אנשים אמיתיים. אל תשתפו פרטים אישיים.</span>
       </p>
 
       {canCall && !canListen && (
         <p className="call-notice warn" role="note">
-          <span aria-hidden="true">🎤</span>
+          <Icon name="mic" />
           <span>כדי לדבר בקול צריך את האפליקציה או דפדפן Chrome. כאן אפשר לנהל את השיחה בהקלדה.</span>
         </p>
       )}
@@ -173,7 +179,7 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
                 disabled={!canCall}
                 aria-label={`התקשרו ל${p.name}, ${p.roleHe}`}
               >
-                {canCall ? 'התקשרו 📞' : '🔒 התקשרו'}
+                <Icon name={canCall ? 'phone' : 'lock'} /> התקשרו
               </button>
             </li>
           ))}

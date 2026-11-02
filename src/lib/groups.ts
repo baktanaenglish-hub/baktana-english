@@ -8,6 +8,7 @@ import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { useCallback, useEffect, useState } from 'react';
 import type { GroupSummary } from '../../shared/groups';
+import type { IconName } from '../components/Icon';
 import { api, errorMessage } from './api';
 
 export const GROUPS_KEY = 'baktana-english:groups:v1';
@@ -22,7 +23,7 @@ export interface GroupNotice {
   id: string;
   kind: NoticeKind;
   groupId: string;
-  icon: string;
+  icon: IconName;
   text: string;
   at: number;
 }
@@ -95,20 +96,20 @@ export function snapshotOf(g: GroupSummary): GroupSnapshot {
 export function groupNotices(prev: GroupSnapshot | undefined, g: GroupSummary, now = Date.now()): GroupNotice[] {
   if (!prev) return [];
   const notices: GroupNotice[] = [];
-  const add = (kind: NoticeKind, key: string, icon: string, text: string) =>
+  const add = (kind: NoticeKind, key: string, icon: IconName, text: string) =>
     notices.push({ id: `${g.id}|${kind}|${key}`, kind, groupId: g.id, icon, text, at: now });
 
   if (g.weekStart !== prev.weekStart) {
     add(
       'challenges',
       String(g.weekStart),
-      '🎯',
+      'target',
       `שבוע חדש ב„${g.name}”: ${g.challenges.length} אתגרים חדשים מחכים לכם`,
     );
   } else {
     for (const c of g.challenges) {
       if (c.done && !prev.done.includes(c.id)) {
-        add('achievement', c.id, '🎉', `„${g.name}” השלימה את האתגר: ${c.title}! אספו ${c.gems} 💎`);
+        add('achievement', c.id, 'party-popper', `„${g.name}” השלימה את האתגר: ${c.title}! אספו ${c.gems} יהלומים`);
       }
     }
     const before = prev.weekRank;
@@ -119,14 +120,14 @@ export function groupNotices(prev: GroupSnapshot | undefined, g: GroupSummary, n
         add(
           'rank',
           `${g.weekStart}:${after}`,
-          after < before ? '📈' : '📉',
+          after < before ? 'trending-up' : 'trending-down',
           after < before
             ? `„${g.name}” עלתה למקום ${after} בדירוג הקבוצות השבועי`
             : `„${g.name}” ירדה למקום ${after} בדירוג הקבוצות. זה הזמן לשיעור!`,
         );
       }
     } else if (after !== null && before === null && after <= 3) {
-      add('rank', `${g.weekStart}:${after}`, '🏆', `„${g.name}” נכנסה למקום ${after} בדירוג הקבוצות השבועי`);
+      add('rank', `${g.weekStart}:${after}`, 'trophy', `„${g.name}” נכנסה למקום ${after} בדירוג הקבוצות השבועי`);
     }
   }
   const joined = g.memberCount - prev.memberCount;
@@ -134,7 +135,7 @@ export function groupNotices(prev: GroupSnapshot | undefined, g: GroupSummary, n
     add(
       'members',
       `${g.memberCount}:${now}`,
-      '👋',
+      'user-plus',
       joined === 1 ? `חבר/ה חדש/ה הצטרף/ה ל„${g.name}”` : `${joined} חברים חדשים הצטרפו ל„${g.name}”`,
     );
   }
@@ -188,7 +189,7 @@ export async function notifyGroupNotices(notices: GroupNotice[]): Promise<void> 
     await LocalNotifications.schedule({
       notifications: notices.slice(0, 5).map((n, i) => ({
         id: NOTICE_FIRST_ID + ((Math.floor(n.at / 1000) + i) % NOTICE_SLOTS),
-        title: `${n.icon} הקבוצה שלך`,
+        title: 'הקבוצה שלך',
         body: n.text,
         schedule: { at, allowWhileIdle: true },
         smallIcon: 'ic_stat_notify',

@@ -15,6 +15,7 @@ import { errorMessage } from '../../lib/api';
 import { designPet } from '../../lib/call-api';
 import { applyDesign, STAGES, type PetState } from '../../lib/pet';
 import { PetAvatar } from './PetAvatar';
+import { Icon } from '../Icon';
 
 interface Props {
   pet: PetState;
@@ -71,7 +72,9 @@ export function PetDesigner({ pet, xp, canUseAi, onSave, onCancel }: Props) {
         if (valid) onSave(valid);
       }}
     >
-      <h2>🎨 עיצוב חיה ייחודית</h2>
+      <h2>
+        <Icon name="palette" /> עיצוב חיה ייחודית
+      </h2>
       <div className="pet-hero">
         <PetAvatar pet={applyDesign(pet, design)} xp={previewXp} size="large" />
         <strong>{design.name || '—'}</strong>
@@ -79,7 +82,9 @@ export function PetDesigner({ pet, xp, canUseAi, onSave, onCancel }: Props) {
 
       {canUseAi && (
         <fieldset className="pet-ai">
-          <legend>✨ תארו לבינה המלאכותית</legend>
+          <legend>
+            <Icon name="sparkles" /> תארו לבינה המלאכותית
+          </legend>
           <textarea
             value={prompt}
             maxLength={MAX_DESIGN_PROMPT}
@@ -93,7 +98,13 @@ export function PetDesigner({ pet, xp, canUseAi, onSave, onCancel }: Props) {
             disabled={busy || !prompt.trim()}
             onClick={() => void generate()}
           >
-            {busy ? 'מעצבים…' : '✨ עיצוב עם AI'}
+            {busy ? (
+              'מעצבים…'
+            ) : (
+              <>
+                <Icon name="sparkles" /> עיצוב עם AI
+              </>
+            )}
           </button>
           {error && (
             <p className="form-error" role="alert">

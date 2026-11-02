@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GOAL_OPTIONS } from '../lib/goals';
 import { DAILY_GOAL_XP } from '../lib/progress';
+import { Icon } from './Icon';
 
 /** How much English the learner says they know: 'some' goes on to the placement test. */
 export type StartLevel = 'new' | 'some';
@@ -25,9 +26,15 @@ export function Onboarding({ onDone, onSignIn }: Props) {
         </h1>
         <p className="lead">לומדים אנגלית בכמה דקות ביום – בחינם, בכיף ובעברית.</p>
         <ul className="features">
-          <li>🎯 שיעורים קצרים שנפתחים אחד אחרי השני</li>
-          <li>🔊 שומעים כל מילה במבטא אמריקאי</li>
-          <li>🔥 רצף ימים, נקודות XP{onSignIn && ' וליגה שבועית'}</li>
+          <li>
+            <Icon name="target" /> שיעורים קצרים שנפתחים אחד אחרי השני
+          </li>
+          <li>
+            <Icon name="volume-2" /> שומעים כל מילה במבטא אמריקאי
+          </li>
+          <li>
+            <Icon name="flame" /> רצף ימים, נקודות XP{onSignIn && ' וליגה שבועית'}
+          </li>
         </ul>
         <p className="privacy-note">אנחנו אוספים נתוני שימוש אנונימיים כדי לשפר את הקורס. אפשר לכבות בפרופיל.</p>
         <div className="onboarding-actions">
@@ -51,11 +58,15 @@ export function Onboarding({ onDone, onSignIn }: Props) {
         <p className="lead">כדי שנתחיל מהמקום הנכון.</p>
         <div className="goal-options">
           <button type="button" className="goal-option level-option" onClick={() => onDone(goal, 'new')} autoFocus>
-            <span className="goal-label">🌱 מתחילים מאפס</span>
+            <span className="goal-label">
+              <Icon name="sprout" /> מתחילים מאפס
+            </span>
             <span className="goal-hint">מתחילים מהשיעור הראשון</span>
           </button>
           <button type="button" className="goal-option level-option" onClick={() => onDone(goal, 'some')}>
-            <span className="goal-label">📚 כבר יודעים קצת</span>
+            <span className="goal-label">
+              <Icon name="book-open" /> כבר יודעים קצת
+            </span>
             <span className="goal-hint">מבחן מיקום קצר מדלג על מה שכבר יודעים</span>
           </button>
         </div>

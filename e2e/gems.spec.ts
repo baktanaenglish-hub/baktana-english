@@ -1,5 +1,5 @@
 /**
- * Gems 💎: a daily chest, gems and quest rewards for a lesson, and the shop.
+ * Gems: a daily chest, gems and quest rewards for a lesson, and the shop.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { finishLesson, lesson, openFresh, openLesson } from './helpers';
@@ -49,5 +49,5 @@ test('the daily chest, a lesson and the shop', async ({ page }) => {
   const before = Number((await page.locator('.gem-count').textContent())!);
   await page.getByRole('button', { name: /קנייה: 3 לבבות בונוס/ }).click();
   await expect(page.locator('.gem-count')).toHaveText(String(before - 30));
-  await expect(page.locator('.top-stats')).toContainText('❤️ 8');
+  await expect(page.locator('.hearts-stat')).toHaveText('8');
 });

@@ -22,8 +22,7 @@ const TIMEOUT_MS = 20_000;
 const unavailable = () => new HttpError(503, 'design_unavailable', 'עיצוב עם AI לא זמין כרגע');
 const failed = () => new HttpError(502, 'design_failed', 'העיצוב לא הצליח הפעם. נסו שוב בעוד רגע.');
 const premiumRequired = () => new HttpError(403, 'premium_required', 'עיצוב חיה ייחודית זמין למנויי פרימיום');
-const dailyLimit = () =>
-  new HttpError(429, 'daily_limit', `הגעתם ל־${PET_DESIGNS_PER_DAY} עיצובים היום. נמשיך מחר! 🌙`);
+const dailyLimit = () => new HttpError(429, 'daily_limit', `הגעתם ל־${PET_DESIGNS_PER_DAY} עיצובים היום. נמשיך מחר!`);
 const inappropriate = () => new HttpError(400, 'invalid_design', 'נסו לתאר את החיה במילים אחרות 🙂');
 
 /**
