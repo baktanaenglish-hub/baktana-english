@@ -85,7 +85,14 @@ import {
 import { remindersNative, syncReminders } from './lib/reminders';
 import { loadReminderOffered, saveReminderOffered, shouldOfferReminder } from './lib/reminder-offer';
 import { ReminderOffer } from './components/ReminderOffer';
-import { applyPlacement, clearPlacement, placementDone, savePlacement, startPlacement, unitsPassed } from './lib/placement';
+import {
+  applyPlacement,
+  clearPlacement,
+  placementDone,
+  savePlacement,
+  startPlacement,
+  unitsPassed,
+} from './lib/placement';
 import { QuizScreen } from './components/QuizScreen';
 import { PlacementResult } from './components/PlacementResult';
 import { UnitTestResult } from './components/UnitTestResult';
