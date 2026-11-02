@@ -46,28 +46,36 @@ export function ChoiceExercise({ exercise, locked, onCheck }: Props) {
   return (
     <>
       <div className="exercise">
-        {exercise.newWord && (
-          <div className="new-word" role="note" aria-label={`מילה חדשה: ${english} – ${hebrew}`}>
-            <span className="new-word-badge">
-              <Icon name="sparkles" /> מילה חדשה
-            </span>
-            <div className="new-word-pair">
-              <SpeakButton text={english} />
-              <span dir="ltr" className="new-word-en">
-                {english}
+        {exercise.newWord ? (
+          <>
+            {/* Taught first, then asked: the card is the prompt, so the question is not repeated under it. */}
+            <div className="new-word" role="note" aria-label={`מילה חדשה: ${english} – ${hebrew}`}>
+              <span className="new-word-badge">
+                <Icon name="sparkles" /> מילה חדשה
               </span>
-              <span aria-hidden="true">=</span>
-              <span>{hebrew}</span>
+              <div className="new-word-main">
+                <SpeakButton text={english} />
+                <span dir="ltr" className={`new-word-en${englishOptions ? '' : ' prompt-word'}`}>
+                  {english}
+                </span>
+              </div>
+              <span className={`new-word-he${englishOptions ? ' prompt-word' : ''}`}>{hebrew}</span>
             </div>
-          </div>
+            <h2 className="exercise-title">{englishOptions ? 'בחרו את המילה באנגלית' : 'בחרו את הפירוש בעברית'}</h2>
+          </>
+        ) : (
+          <>
+            <h2 className="exercise-title">
+              {exercise.promptLang === 'he' ? 'איך אומרים באנגלית?' : 'מה הפירוש בעברית?'}
+            </h2>
+            <div className="prompt-row">
+              {exercise.promptLang === 'en' && <SpeakButton text={exercise.prompt} />}
+              <span className="prompt-word" dir={exercise.promptLang === 'en' ? 'ltr' : 'rtl'}>
+                {exercise.prompt}
+              </span>
+            </div>
+          </>
         )}
-        <h2 className="exercise-title">{exercise.promptLang === 'he' ? 'איך אומרים באנגלית?' : 'מה הפירוש בעברית?'}</h2>
-        <div className="prompt-row">
-          {exercise.promptLang === 'en' && <SpeakButton text={exercise.prompt} />}
-          <span className="prompt-word" dir={exercise.promptLang === 'en' ? 'ltr' : 'rtl'}>
-            {exercise.prompt}
-          </span>
-        </div>
         <div className="options">
           {exercise.options.map((option, i) => (
             <button

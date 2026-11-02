@@ -617,34 +617,41 @@ button:disabled {
   gap: 12px;
 }
 
-/* A word met for the first time, shown with its translation above the question. */
+/* A word met for the first time: taught in a card first, then picked from the options. */
 .new-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 8px;
-  padding: 12px 14px;
+  padding: 16px;
   border: 2px solid var(--select-border);
   border-radius: 16px;
   background: var(--select-bg);
+  text-align: center;
 }
 
 .new-word-badge {
-  display: inline-block;
-  margin-bottom: 6px;
   color: var(--select-text);
   font-size: 0.85rem;
   font-weight: 800;
 }
 
-.new-word-pair {
+.new-word-main {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  font-size: 1.25rem;
+  gap: 12px;
+}
+
+.new-word .new-word-en {
+  color: var(--select-text);
+  font-size: 2rem;
   font-weight: 700;
 }
 
-.new-word-en {
-  color: var(--select-text);
+.new-word .new-word-he {
+  font-size: 1.35rem;
+  font-weight: 700;
 }
 
 /* Leaving a lesson half-way. */
@@ -831,6 +838,13 @@ button:disabled {
   font-size: 0.85rem;
   color: var(--faint);
   flex-shrink: 0;
+}
+
+/* The number keys only help with a keyboard; on a touch screen they are noise. */
+@media (hover: none) and (pointer: coarse) {
+  .option-key {
+    display: none;
+  }
 }
 
 .option.selected .option-key {
@@ -1072,6 +1086,12 @@ button:disabled {
   flex-wrap: wrap;
   justify-content: center;
   margin: 12px 0 24px;
+}
+
+/* The profile has four cards: a 2×2 grid instead of a row of three and an orphan. */
+.stat-cards.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .stat-card {
@@ -1337,6 +1357,8 @@ button:disabled {
 .mascot {
   width: 112px;
   height: 112px;
+  /* The column is a flex box: without this the logo hugs the right edge (RTL). */
+  align-self: center;
 }
 
 .features {

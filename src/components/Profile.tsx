@@ -129,7 +129,7 @@ export function Profile(props: Props) {
       )}
 
       <h2>ההתקדמות שלי</h2>
-      <div className="stat-cards">
+      <div className="stat-cards profile-stats">
         <div className="stat-card streak">
           <span className="label">רצף ימים</span>
           <span className="value">
