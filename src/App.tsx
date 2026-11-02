@@ -85,7 +85,14 @@ import {
 import { remindersNative, syncReminders } from './lib/reminders';
 import { loadReminderOffered, saveReminderOffered, shouldOfferReminder } from './lib/reminder-offer';
 import { ReminderOffer } from './components/ReminderOffer';
-import { applyPlacement, placementDone, placementQuestions, unitsPassed } from './lib/placement';
+import {
+  applyPlacement,
+  clearPlacement,
+  placementDone,
+  savePlacement,
+  startPlacement,
+  unitsPassed,
+} from './lib/placement';
 import { QuizScreen } from './components/QuizScreen';
 import { PlacementResult } from './components/PlacementResult';
 import { UnitTestResult } from './components/UnitTestResult';
@@ -122,7 +129,7 @@ type Screen =
   /** An arcade game; `round` remounts it for "another round". */
   | { name: 'game'; game: GameId; round: number }
   | { name: 'game-done'; game: GameId; score: number; record: boolean; rewards: Reward[] }
-  | { name: 'placement'; exercises: Exercise[] }
+  | { name: 'placement'; exercises: Exercise[]; answers: boolean[] }
   | { name: 'placement-done'; units: number }
   | { name: 'unit-test'; unit: Unit; exercises: Exercise[] }
   | { name: 'unit-test-done'; unit: Unit; right: number; passed: boolean; rewards: Reward[] }
@@ -498,7 +505,7 @@ function Screens() {
         onDone={(goal, level) => {
           update((p) => setDailyGoal(p, goal));
           track({ name: 'onboarding_complete', props: { dailyGoal: goal, level } });
-          if (level === 'some') setScreen({ name: 'placement', exercises: placementQuestions() });
+          if (level === 'some') setScreen({ name: 'placement', ...startPlacement() });
         }}
         onSignIn={
           ACCOUNTS_ENABLED
@@ -607,9 +614,12 @@ function Screens() {
           </>
         }
         exercises={screen.exercises}
+        initialAnswers={screen.answers}
         stop={placementDone}
+        onAnswer={(answers) => savePlacement({ exercises: screen.exercises, answers })}
         onQuit={() => setScreen({ name: 'path' })}
         onFinish={(answers) => {
+          clearPlacement();
           const units = unitsPassed(answers);
           if (units > 0) {
             const after = applyPlacement(progress, units);
@@ -948,7 +958,7 @@ function Screens() {
             onStart={startLesson}
             onReview={startReview}
             onIntro={showIntro}
-            onPlacement={() => setScreen({ name: 'placement', exercises: placementQuestions() })}
+            onPlacement={() => setScreen({ name: 'placement', ...startPlacement() })}
             onUnitTest={startUnitTest}
           />
         )}

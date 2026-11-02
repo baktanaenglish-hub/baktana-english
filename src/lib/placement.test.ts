@@ -3,6 +3,7 @@ import { course } from '../data/course';
 import { checkTyped } from './typing';
 import {
   applyPlacement,
+  parsePlacement,
   placementDone,
   placementQuestions,
   QUESTIONS_PER_UNIT,
@@ -57,5 +58,23 @@ describe('applyPlacement', () => {
   it('keeps lessons already done more than once', () => {
     const p = { ...initialProgress(), completed: { [course[0].lessons[0].id]: 3 } };
     expect(applyPlacement(p, 1).completed[course[0].lessons[0].id]).toBe(3);
+  });
+});
+
+describe('resuming a placement test', () => {
+  const exercises = placementQuestions(seededRng(2));
+  const raw = (answers: boolean[]) => JSON.stringify({ exercises, answers });
+
+  it('restores a test left in the middle', () => {
+    expect(parsePlacement(raw([true, true, false, true]))).toEqual({ exercises, answers: [true, true, false, true] });
+  });
+
+  it('ignores missing, malformed, finished or untouched tests', () => {
+    expect(parsePlacement(null)).toBeNull();
+    expect(parsePlacement('not json')).toBeNull();
+    expect(parsePlacement(raw([]))).toBeNull();
+    expect(parsePlacement(raw([true, false, false]))).toBeNull();
+    expect(parsePlacement(JSON.stringify({ exercises: exercises.slice(3), answers: [true] }))).toBeNull();
+    expect(parsePlacement(JSON.stringify({ exercises, answers: ['yes'] }))).toBeNull();
   });
 });
