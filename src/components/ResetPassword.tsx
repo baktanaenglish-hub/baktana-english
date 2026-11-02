@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import type { AuthResponse } from '../../shared/api';
 import { ApiRequestError, api, errorMessage } from '../lib/api';
 import { MIN_PASSWORD } from './AuthScreen';
+import { Icon } from './Icon';
 
 interface Props {
   onDone: (res: AuthResponse) => void;
@@ -47,7 +48,7 @@ export function ResetPassword({ onDone, onCancel, onNewLink }: Props) {
     <div className="auth">
       <header className="auth-header">
         <button type="button" className="icon-btn" onClick={onCancel} aria-label="חזרה">
-          ✕
+          <Icon name="x" />
         </button>
       </header>
       <form className="auth-form" onSubmit={submit} noValidate>

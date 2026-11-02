@@ -1,5 +1,5 @@
 /**
- * Supabase Edge Function: the AI video call, for the GitHub Pages site and the Android app (which
+ * Supabase Edge Function: the AI phone call, for the GitHub Pages site and the Android app (which
  * have no Express server). Same contract and logic as server/src/routes/call.ts (shared/call.ts),
  * errors are `ApiError` JSON (shared/api.ts).
  *
@@ -89,9 +89,9 @@ class HttpError extends Error {
 }
 
 const failed = () => new HttpError(502, 'call_failed', 'השיחה נתקעה לרגע, נסו לומר את זה שוב');
-const unavailable = () => new HttpError(503, 'call_unavailable', 'שיחות הווידאו לא זמינות כרגע');
+const unavailable = () => new HttpError(503, 'call_unavailable', 'שיחות הטלפון לא זמינות כרגע');
 const unauthorized = () => new HttpError(401, 'unauthorized', 'יש להתחבר כדי להמשיך');
-const premiumRequired = () => new HttpError(403, 'premium_required', 'שיחות וידאו זמינות רק למנויי פרימיום');
+const premiumRequired = () => new HttpError(403, 'premium_required', 'שיחות טלפון זמינות רק למנויי פרימיום');
 const callsLimit = (perDay: number) => new HttpError(429, 'daily_limit', callsLimitMessage(perDay));
 const turnsLimit = () => new HttpError(429, 'daily_limit', 'הגעתם למגבלת השיחות להיום. נתראה מחר!');
 

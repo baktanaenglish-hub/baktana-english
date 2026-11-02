@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 interface Props {
   due: number;
   onReview: () => void;
@@ -8,7 +9,7 @@ export function ReviewCard({ due, onReview }: Props) {
   return (
     <section className="review-card" aria-labelledby="review-card-title">
       <span className="review-icon" aria-hidden="true">
-        🧠
+        <Icon name="brain" />
       </span>
       <p id="review-card-title">
         יש לכם <strong>{due}</strong> מילים ומשפטים לחזרה

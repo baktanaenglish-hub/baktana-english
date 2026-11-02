@@ -68,9 +68,9 @@ const GOODBYE = {
   replyHe: 'היה ממש כיף לדבר איתך! נגמר לנו הזמן לשיחה הזאת. ביי בינתיים!',
 };
 
-const unavailable = () => new HttpError(503, 'call_unavailable', 'שיחות הווידאו לא זמינות כרגע');
+const unavailable = () => new HttpError(503, 'call_unavailable', 'שיחות הטלפון לא זמינות כרגע');
 const failed = () => new HttpError(502, 'call_failed', 'השיחה נתקעה לרגע, נסו לומר את זה שוב');
-const premiumRequired = () => new HttpError(403, 'premium_required', 'שיחות וידאו זמינות כרגע רק למנויי פרימיום');
+const premiumRequired = () => new HttpError(403, 'premium_required', 'שיחות טלפון זמינות כרגע רק למנויי פרימיום');
 const callsLimit = (perDay: number) => new HttpError(429, 'daily_limit', callsLimitMessage(perDay));
 const turnsLimit = () => new HttpError(429, 'daily_limit', 'הגעתם למגבלת השיחות להיום. נתראה מחר!');
 
@@ -206,7 +206,7 @@ export async function callTurn(
 }
 
 /**
- * AI video-call practice (shared/call.ts). Signed-in premium learners (PREMIUM_EMAILS allowlist) with
+ * AI phone-call practice (shared/call.ts). Signed-in premium learners (PREMIUM_EMAILS allowlist) with
  * CALL_LIMITS, and testers (TESTER_EMAILS) with the shorter TESTER_LIMITS, per local day (server TZ,
  * Asia/Jerusalem by default).
  * Message content is never logged or stored; only per-day counters are.

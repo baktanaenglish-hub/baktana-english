@@ -5,6 +5,7 @@ import type { DuelsState } from '../lib/duels';
 import type { GroupsState } from '../lib/groups';
 import { Duels } from './Duels';
 import { GroupBoard } from './GroupBoard';
+import { Icon, type IconName } from './Icon';
 import { Leaderboard } from './Leaderboard';
 import { MyGroups } from './MyGroups';
 
@@ -29,11 +30,11 @@ interface Props {
 }
 
 /** The icon goes above the label, so four tabs fit a phone without breaking a label in two. */
-const VIEWS: { view: LeagueView; icon: string; label: string }[] = [
-  { view: 'me', icon: '🏆', label: 'אישי' },
-  { view: 'groups', icon: '🏟️', label: 'קבוצות' },
-  { view: 'mine', icon: '👥', label: 'הקבוצות שלי' },
-  { view: 'duels', icon: '⚔️', label: 'ראש בראש' },
+const VIEWS: { view: LeagueView; icon: IconName; label: string }[] = [
+  { view: 'me', icon: 'trophy', label: 'אישי' },
+  { view: 'groups', icon: 'chart-column', label: 'קבוצות' },
+  { view: 'mine', icon: 'users', label: 'הקבוצות שלי' },
+  { view: 'duels', icon: 'swords', label: 'ראש בראש' },
 ];
 
 /** The league tab: the personal league, the group league, the learner's own groups and head-to-head duels. */
@@ -64,7 +65,10 @@ export function League({
             className={view === v ? 'active' : ''}
             onClick={() => setView(v)}
           >
-            <span className="league-tab-icon">{icon}</span> <span className="league-tab-label">{label}</span>
+            <span className="league-tab-icon">
+              <Icon name={icon} size={22} />
+            </span>{' '}
+            <span className="league-tab-label">{label}</span>
             {v === 'mine' && groups.unread > 0 && view !== 'mine' && (
               <span className="badge" aria-label={`${groups.unread} התראות חדשות`}>
                 {groups.unread}

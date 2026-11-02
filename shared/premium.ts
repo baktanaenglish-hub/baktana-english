@@ -1,5 +1,5 @@
 /**
- * Premium access for the AI video call (shared/call.ts). A learner is premium when their email is on
+ * Premium access for the AI phone call (shared/call.ts). A learner is premium when their email is on
  * the server-side allowlist in the PREMIUM_EMAILS environment variable (the owner, testers, gifts –
  * never hardcode an email here), or, on Supabase, when a paid subscription is still valid (isEntitled).
  * Pure TypeScript, no imports, so the Supabase Edge Function (Deno) can import it as is.

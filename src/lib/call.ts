@@ -11,7 +11,7 @@ import {
 } from '../../shared/call';
 
 /**
- * Conversation state of an AI "video call" (src/components/call/). Pure functions, so the
+ * Conversation state of an AI "phone call" (src/components/call/). Pure functions, so the
  * screen stays thin and the rules are tested in call.test.ts.
  */
 

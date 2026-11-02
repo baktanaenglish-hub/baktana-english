@@ -52,7 +52,7 @@ test('leaving a lesson half-way asks first; the back button does the same', asyn
   await openFresh(page);
   await openLesson(page, 'u1l1');
 
-  // Nothing answered yet: ✕ leaves at once.
+  // Nothing answered yet: the close button leaves at once.
   await page.getByRole('button', { name: 'יציאה מהשיעור' }).click();
   await expect(page.locator('.path')).toBeVisible();
 
@@ -110,7 +110,7 @@ test('"I know some English" in the onboarding starts the placement test', async 
   await page.getByRole('button', { name: 'המשך' }).click();
   await expect(page.getByRole('heading', { name: 'כמה אנגלית אתם כבר יודעים?' })).toBeVisible();
   await page.getByRole('button', { name: /כבר יודעים קצת/ }).click();
-  await expect(page.locator('.practice-badge')).toHaveText('🎯 מבחן מיקום');
+  await expect(page.locator('.practice-badge')).toHaveText('מבחן מיקום');
 });
 
 test('the shop opens from the gems, not from its own tab', async ({ page }) => {
@@ -137,7 +137,7 @@ test('out of hearts, a review starts right from the screen', async ({ page }) =>
   await answer(page, lesson('u1l2'), false);
   await next(page);
   await expect(page.getByRole('heading', { name: 'נגמרו הלבבות' })).toBeVisible();
-  await page.getByRole('button', { name: '🧠 לחזרה בלי לבבות' }).click();
-  await expect(page.locator('.practice-badge')).toHaveText('🧠 חזרה');
+  await page.getByRole('button', { name: 'לחזרה בלי לבבות' }).click();
+  await expect(page.locator('.practice-badge')).toHaveText('חזרה');
   await expect(page.locator('.exercise-title')).toBeVisible();
 });

@@ -1,5 +1,5 @@
 /**
- * The arcade 🎮: the word rush opens after unit 1, the memory game is bought with gems.
+ * The arcade: the word rush opens after unit 1, the memory game is bought with gems.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { course } from '../src/data/course';
@@ -62,7 +62,7 @@ test('the word rush counts right answers and a combo', async ({ page }) => {
     await expect(page.locator('.rush-word')).not.toHaveClass(/good/);
   }
   // 10 + 20 + 30 with the combo.
-  await expect(page.locator('.rush-score')).toHaveText('⭐ 60');
+  await expect(page.locator('.rush-score')).toHaveText('60');
   await expect(page.locator('.rush-combo')).toContainText('x3');
   await shot(page, '6-rush');
   await page.getByRole('button', { name: 'יציאה מהמשחק' }).click();

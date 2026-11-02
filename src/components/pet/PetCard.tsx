@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { greetingLine, type PetState } from '../../lib/pet';
 import { PetAvatar } from './PetAvatar';
+import { Icon } from '../Icon';
 
 interface CardProps {
   pet: PetState | null;
@@ -19,7 +20,7 @@ export function PetCard({ pet, xp, streak, practicedToday, onOpen }: CardProps) 
         <PetAvatar pet={pet} xp={xp} size="small" />
       ) : (
         <span className="arcade-card-icon" aria-hidden="true">
-          🥚
+          <Icon name="egg" />
         </span>
       )}
       <span className="arcade-card-text">

@@ -3,6 +3,7 @@ import type { Exercise } from '../../types';
 import { speak } from '../../lib/speech';
 import { CheckFooter } from '../CheckFooter';
 import { SpeakButton } from '../SpeakButton';
+import { Icon } from '../Icon';
 
 interface Props {
   exercise: Extract<Exercise, { kind: 'choice' }>;
@@ -49,7 +50,9 @@ export function ChoiceExercise({ exercise, locked, onCheck }: Props) {
           <>
             {/* Taught first, then asked: the card is the prompt, so the question is not repeated under it. */}
             <div className="new-word" role="note" aria-label={`מילה חדשה: ${english} – ${hebrew}`}>
-              <span className="new-word-badge">✨ מילה חדשה</span>
+              <span className="new-word-badge">
+                <Icon name="sparkles" /> מילה חדשה
+              </span>
               <div className="new-word-main">
                 <SpeakButton text={english} />
                 <span dir="ltr" className={`new-word-en${englishOptions ? '' : ' prompt-word'}`}>

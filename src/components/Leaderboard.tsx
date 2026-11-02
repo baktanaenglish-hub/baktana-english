@@ -3,6 +3,7 @@ import type { LeaderboardEntry, User } from '../../shared/api';
 import type { Period } from '../../shared/groups';
 import { api, errorMessage } from '../lib/api';
 import { endsInText } from '../lib/groups';
+import { Icon } from './Icon';
 import { PeriodPicker } from './PeriodPicker';
 
 interface Props {
@@ -17,12 +18,16 @@ type State =
   | { kind: 'error'; message: string }
   | { kind: 'ready'; entries: LeaderboardEntry[]; endsAt: number | null };
 
-export const MEDALS = ['🥇', '🥈', '🥉'];
+/** The rank in a board row: places 1–3 get a gold, silver or bronze disc, the rest a plain number. */
+export function RankMark({ rank }: { rank: number }) {
+  if (rank > 3) return <>{rank}</>;
+  return <span className={`rank-medal rank-${rank}`}>{rank}</span>;
+}
 
 const TITLES: Record<Period, string> = {
-  week: '🏆 הליגה השבועית',
-  month: '🏆 הליגה החודשית',
-  all: '🏆 הדירוג המצטבר',
+  week: 'הליגה השבועית',
+  month: 'הליגה החודשית',
+  all: 'הדירוג המצטבר',
 };
 
 const SUBTITLES: Record<Period, string> = {
@@ -53,7 +58,9 @@ export function Leaderboard({ user, onSignIn, guestXp = 0 }: Props) {
 
   return (
     <div className="leaderboard">
-      <h2>{TITLES[period]}</h2>
+      <h2>
+        <Icon name="trophy" /> {TITLES[period]}
+      </h2>
       <p className="muted">
         {SUBTITLES[period]}
         {endsIn && ` · ${endsIn}`}
@@ -64,7 +71,11 @@ export function Leaderboard({ user, onSignIn, guestXp = 0 }: Props) {
         <div className="panel center">
           {guestXp > 0 && (
             <p className="guest-xp">
-              כבר צברתם <bdi dir="ltr">⭐ {guestXp} XP</bdi>!
+              כבר צברתם{' '}
+              <bdi dir="ltr">
+                <Icon name="star" filled /> {guestXp} XP
+              </bdi>
+              !
             </p>
           )}
           <p>צרו פרופיל כדי להיכנס לליגה, להתחרות עם לומדים אחרים ולראות כמה XP צברתם השבוע.</p>
@@ -84,7 +95,9 @@ export function Leaderboard({ user, onSignIn, guestXp = 0 }: Props) {
 
       {state.kind === 'error' && (
         <div className="panel center">
-          <p>📡 {state.message}</p>
+          <p>
+            <Icon name="wifi-off" /> {state.message}
+          </p>
           <button type="button" className="btn ghost" onClick={load}>
             נסו שוב
           </button>
@@ -104,7 +117,9 @@ export function Leaderboard({ user, onSignIn, guestXp = 0 }: Props) {
               key={`${entry.rank}-${entry.displayName}`}
               className={`board-row${entry.isMe ? ' me' : ''}${i > 0 && entry.rank > state.entries[i - 1].rank + 1 ? ' gap' : ''}`}
             >
-              <span className="board-rank">{MEDALS[entry.rank - 1] ?? entry.rank}</span>
+              <span className="board-rank">
+                <RankMark rank={entry.rank} />
+              </span>
               <span className="board-avatar" aria-hidden="true">
                 {entry.displayName.trim().charAt(0).toUpperCase() || '?'}
               </span>

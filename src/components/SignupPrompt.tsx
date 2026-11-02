@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 interface Props {
   onAccept: () => void;
   onDismiss: () => void;
@@ -7,7 +8,9 @@ interface Props {
 export function SignupPrompt({ onAccept, onDismiss }: Props) {
   return (
     <section className="signup-prompt rise" aria-labelledby="signup-prompt-title" style={{ animationDelay: '0.4s' }}>
-      <h3 id="signup-prompt-title">שמרו את ההתקדמות שלכם 💾</h3>
+      <h3 id="signup-prompt-title">
+        <Icon name="save" /> שמרו את ההתקדמות שלכם
+      </h3>
       <p>
         חשבון חינמי שומר את ה־<bdi dir="ltr">XP</bdi> והרצף בכל מכשיר
       </p>

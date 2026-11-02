@@ -77,7 +77,7 @@ describe('DuelCard', () => {
     expect(html).toContain('🐲');
     expect(html).toContain('יוסי');
     expect(html).toContain('ניצחתם');
-    expect(html).toContain('קבלת 30 💎');
+    expect(html).toContain('קבלת 30 יהלומים');
   });
 
   it('shows who leads while it runs', () => {
@@ -94,7 +94,13 @@ describe('DuelCard', () => {
 
 describe('Duels notices', () => {
   it('shows that a friend accepted the invite', () => {
-    const notice = { id: 'd1|accepted', duelId: 'd1', icon: '⚔️', text: 'יוסי קיבל/ה את ההזמנה שלכם', at: 2 };
+    const notice = {
+      id: 'd1|accepted',
+      duelId: 'd1',
+      icon: 'swords' as const,
+      text: 'יוסי קיבל/ה את ההזמנה שלכם',
+      at: 2,
+    };
     const state = {
       duels: [],
       error: null,

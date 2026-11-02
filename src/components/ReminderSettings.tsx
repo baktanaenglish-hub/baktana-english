@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { downloadReminderCalendar, remindersNative, requestReminderPermission } from '../lib/reminders';
 import type { Settings } from '../lib/settings';
+import { Icon } from './Icon';
 
 interface Props {
   settings: Settings;
@@ -37,7 +38,9 @@ export function ReminderSettings({ settings, onSettings }: Props) {
 
   return (
     <section className="panel">
-      <h3>⏰ תזכורת יומית</h3>
+      <h3>
+        <Icon name="alarm-clock" /> תזכורת יומית
+      </h3>
       {remindersNative ? (
         <>
           <div className="setting-row">
@@ -78,7 +81,7 @@ export function ReminderSettings({ settings, onSettings }: Props) {
             className="btn secondary wide"
             onClick={() => downloadReminderCalendar(settings.reminderTime)}
           >
-            📅 הוספה ליומן
+            <Icon name="calendar-plus" /> הוספה ליומן
           </button>
         </>
       )}

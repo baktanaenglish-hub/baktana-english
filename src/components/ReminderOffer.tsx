@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { requestReminderPermission } from '../lib/reminders';
+import { Icon } from './Icon';
 
 interface Props {
   time: string;
@@ -20,7 +21,9 @@ export function ReminderOffer({ time, onAccept, onDismiss }: Props) {
 
   return (
     <section className="signup-prompt rise" aria-labelledby="reminder-offer-title" style={{ animationDelay: '0.4s' }}>
-      <h3 id="reminder-offer-title">רוצים תזכורת כל יום? ⏰</h3>
+      <h3 id="reminder-offer-title">
+        <Icon name="alarm-clock" /> רוצים תזכורת כל יום?
+      </h3>
       <p>
         {denied ? (
           'בלי הרשאה להתראות אי אפשר להזכיר. אפשר לאשר בהגדרות הטלפון ולהפעיל בפרופיל.'
