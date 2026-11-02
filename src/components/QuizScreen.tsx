@@ -16,6 +16,10 @@ interface Props {
   stop?: (answers: boolean[]) => boolean;
   onFinish: (answers: boolean[]) => void;
   onQuit: () => void;
+  /** Answers already given in an earlier visit: the quiz resumes at the next question. */
+  initialAnswers?: boolean[];
+  /** Called with all the answers so far each time one is given (e.g. to save the test). */
+  onAnswer?: (answers: boolean[]) => void;
 }
 
 interface Feedback {
@@ -29,16 +33,18 @@ interface Feedback {
  * repeats – and the answers, right or wrong, go to `onFinish`. Supports the exercise kinds
  * tests use: choice, build, type and blank.
  */
-export function QuizScreen({ badge, exercises, stop, onFinish, onQuit }: Props) {
-  const [position, setPosition] = useState(0);
-  const [answers, setAnswers] = useState<boolean[]>([]);
+export function QuizScreen({ badge, exercises, stop, onFinish, onQuit, initialAnswers = [], onAnswer }: Props) {
+  const [position, setPosition] = useState(initialAnswers.length);
+  const [answers, setAnswers] = useState<boolean[]>(initialAnswers);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const exercise = exercises[position];
 
   function check(correct: boolean, solution: string, _missed?: number[], note?: string) {
     if (correct) sounds.correct();
     else sounds.wrong();
-    setAnswers((a) => [...a, correct]);
+    const next = [...answers, correct];
+    setAnswers(next);
+    onAnswer?.(next);
     setFeedback({ correct, solution, ...(note ? { note } : {}) });
   }
 

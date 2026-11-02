@@ -55,3 +55,62 @@ export function applyPlacement(progress: Progress, units: number): Progress {
   }
   return { ...progress, completed };
 }
+
+/** A placement test left in the middle: the questions asked and the answers given so far. */
+export interface SavedPlacement {
+  exercises: Exercise[];
+  answers: boolean[];
+}
+
+export const PLACEMENT_KEY = 'baktana-english:placement:v1';
+
+/**
+ * Parses a stored test, or null when it is malformed, finished, or no longer matches the
+ * course (a unit was added or removed since it was saved).
+ */
+export function parsePlacement(raw: string | null): SavedPlacement | null {
+  if (!raw) return null;
+  try {
+    const data = JSON.parse(raw) as Partial<SavedPlacement> | null;
+    const exercises = data?.exercises;
+    const answers = data?.answers;
+    if (!Array.isArray(exercises) || !Array.isArray(answers)) return null;
+    if (exercises.length !== course.length * QUESTIONS_PER_UNIT) return null;
+    if (!exercises.every((e) => e && typeof e === 'object' && typeof (e as Exercise).kind === 'string')) return null;
+    if (!answers.every((a) => typeof a === 'boolean')) return null;
+    if (answers.length === 0 || answers.length >= exercises.length || placementDone(answers)) return null;
+    return { exercises, answers };
+  } catch {
+    return null;
+  }
+}
+
+export function loadPlacement(): SavedPlacement | null {
+  try {
+    return parsePlacement(localStorage.getItem(PLACEMENT_KEY));
+  } catch {
+    return null;
+  }
+}
+
+/** Stores the test after each answer. Storage errors are ignored – the test would just restart. */
+export function savePlacement(saved: SavedPlacement): void {
+  try {
+    localStorage.setItem(PLACEMENT_KEY, JSON.stringify(saved));
+  } catch {
+    // Ignore.
+  }
+}
+
+export function clearPlacement(): void {
+  try {
+    localStorage.removeItem(PLACEMENT_KEY);
+  } catch {
+    // Ignore.
+  }
+}
+
+/** The test to show: the one left in the middle if there is one, otherwise a new one. */
+export function startPlacement(rng: Rng = Math.random): SavedPlacement {
+  return loadPlacement() ?? { exercises: placementQuestions(rng), answers: [] };
+}
