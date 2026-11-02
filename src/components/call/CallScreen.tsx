@@ -29,7 +29,8 @@ import { isCallBlocked, sendTurn } from '../../lib/call-api';
 import { judgeTurn, paceFor, speechRate, type PaceSignal } from '../../lib/call-pace';
 import type { ApiRequestError } from '../../lib/api-error';
 import { canListen, listen, type ListenError, type Listening } from '../../lib/listen';
-import { speakAsync, stopSpeaking } from '../../lib/speech';
+import { speakAsync, stopSpeaking, warmUpVoices } from '../../lib/speech';
+import { PERSONA_VOICES } from '../../lib/voices';
 import type { CallResult } from './CallSummary';
 import { CorrectionView } from './CallSummary';
 import { Icon, type IconName } from '../Icon';
@@ -48,7 +49,6 @@ interface Props {
 }
 
 type Phase = 'connecting' | 'ready' | 'speaking' | 'listening' | 'thinking' | 'error' | 'blocked';
-type Camera = 'off' | 'starting' | 'on' | 'denied' | 'unavailable';
 /** What the microphone listens for: an English sentence, or a Hebrew word to ask "how do you say…?". */
 type ListenFor = 'sentence' | 'word';
 
@@ -74,8 +74,8 @@ const FLAG_NOTES: Record<NonNullable<CallTurnResponse['flagged']>, { icon: IconN
 };
 
 /**
- * A "video call" with an AI character: the character's animated face, live captions, push-to-talk
- * microphone (or typing), and an optional self-view that never leaves the device.
+ * A phone call with an AI character: the character's contact photo, a voice wave while someone
+ * speaks, live captions, and a push-to-talk microphone (or typing). No camera, no moving face.
  */
 export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: Props) {
   const [call, setCallState] = useState<CallState>(() => startCall(persona));
@@ -88,7 +88,6 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   const [showHe, setShowHe] = useState(false);
   const [keyboard, setKeyboard] = useState(!canListen);
   const [draft, setDraft] = useState('');
-  const [camera, setCamera] = useState<Camera>('off');
   const [listenFor, setListenFor] = useState<ListenFor>('sentence');
   /** How picky the teacher is; the learner can change it any time during the call (sent with every turn). */
   const [level, setLevel] = useState<CorrectionLevel>(loadCorrectionLevel);
@@ -99,22 +98,17 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   const speechToken = useRef(0);
   const listening = useRef<Listening | null>(null);
   const pending = useRef<AbortController | null>(null);
-  const stream = useRef<MediaStream | null>(null);
   const connectedRef = useRef<number | null>(null);
   const ended = useRef(false);
   const micBtn = useRef<HTMLButtonElement>(null);
   const input = useRef<HTMLInputElement>(null);
+  const captions = useRef<HTMLElement>(null);
   /** How the learner coped on each turn so far; slows the character down when they struggle (call-pace.ts). */
   const paceSignals = useRef<PaceSignal[]>([]);
 
   const setCall = useCallback((next: CallState) => {
     callRef.current = next;
     setCallState(next);
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    stream.current?.getTracks().forEach((t) => t.stop());
-    stream.current = null;
   }, []);
 
   /** Stops the character mid-sentence (the learner starts talking, mutes or hangs up). */
@@ -132,7 +126,6 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     listening.current?.stop();
     listening.current = null;
     pending.current?.abort();
-    stopCamera();
     const state = callRef.current;
     onEnd({
       persona: state.persona,
@@ -140,7 +133,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
       turns: learnerTurns(state),
       corrections: allCorrections(state),
     });
-  }, [onEnd, stopCamera]);
+  }, [onEnd]);
 
   /** The character says `text` (slowly for a correction, unless the speaker is muted); resolves when done. */
   const say = useCallback(async (text: string, slow = false) => {
@@ -151,13 +144,19 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     }
     setPhase('speaking');
     // A correction gets the slow "listen again" speed; otherwise the pace follows how the learner is coping.
-    await speakAsync(text, slow ? true : speechRate(paceFor(paceSignals.current)));
+    await speakAsync(
+      text,
+      slow ? true : speechRate(paceFor(paceSignals.current)),
+      PERSONA_VOICES[callRef.current.persona.id],
+    );
     if (alive.current && speechToken.current === token) setPhase((p) => (p === 'speaking' ? 'ready' : p));
   }, []);
 
   // Ring, then pick up with the greeting. Everything stops when the screen goes away.
   useEffect(() => {
     alive.current = true;
+    // The voice list loads while the call rings, so the greeting already has the character's voice.
+    warmUpVoices();
     const ring = setTimeout(() => {
       const at = Date.now();
       connectedRef.current = at;
@@ -172,9 +171,8 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
       listening.current?.stop();
       listening.current = null;
       pending.current?.abort();
-      stopCamera();
     };
-  }, [persona, say, stopCamera]);
+  }, [persona, say]);
 
   // The call timer.
   useEffect(() => {
@@ -190,6 +188,12 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     // Only on pick-up; toggling the keyboard moves focus itself.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectedAt]);
+
+  // Keep the newest caption in view (the character's reply sits below the learner's line and its corrections).
+  useEffect(() => {
+    const el = captions.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [call.lines.length, phase]);
 
   const request = useCallback(
     (req: CallTurnRequest) => {
@@ -288,32 +292,6 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
     if (next) interrupt();
   }
 
-  async function toggleCamera() {
-    if (stream.current || camera === 'on') {
-      stopCamera();
-      setCamera('off');
-      return;
-    }
-    if (camera === 'starting') return;
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      setCamera('unavailable');
-      return;
-    }
-    setCamera('starting');
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-      if (!alive.current) {
-        s.getTracks().forEach((t) => t.stop());
-        return;
-      }
-      stream.current = s;
-      setCamera('on');
-    } catch (e) {
-      if (!alive.current) return;
-      setCamera(e instanceof DOMException && e.name === 'NotAllowedError' ? 'denied' : 'unavailable');
-    }
-  }
-
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!draft.trim() || busy) return;
@@ -346,9 +324,20 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
   else if (phase === 'error' || blocked) status = '';
   else status = keyboard && !canListen ? 'כתבו באנגלית ולחצו על שליחה' : 'לחצו על המיקרופון ודברו באנגלית';
 
+  const wordListening = isListening && listenFor === 'word';
+  const sentenceListening = isListening && listenFor === 'sentence';
+
   return (
     <div className="call-screen" style={personaStyle(persona.color)}>
       <header className="call-top">
+        <span className="call-kind">
+          <Icon name="phone" />
+          שיחת תרגול באנגלית
+        </span>
+      </header>
+
+      <div className="call-stage">
+        <Avatar persona={persona} talking={phase === 'speaking'} ringing={connecting} />
         <div className="call-id">
           <span className="call-name" dir="ltr">
             {persona.name}
@@ -358,10 +347,11 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
           </span>
         </div>
         <div className="call-role">{persona.roleHe}</div>
-        <div className="call-timer" dir="ltr" aria-label={connecting ? 'מתקשרים' : 'משך השיחה'}>
-          {connecting || connectedAt === null ? 'מתקשר...' : formatDuration(now - connectedAt)}
+        <div className="call-timer" aria-label={connecting ? 'מתקשרים' : 'משך השיחה'}>
+          {connecting || connectedAt === null ? 'מתקשרים…' : <span dir="ltr">{formatDuration(now - connectedAt)}</span>}
         </div>
-      </header>
+        <VoiceWave active={phase === 'speaking' || isListening} you={isListening} />
+      </div>
 
       {persona.corrects && (
         <div className="call-level" role="radiogroup" aria-label="מה המורה מתקנת">
@@ -386,29 +376,7 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
         </div>
       )}
 
-      <div className="call-stage">
-        <Avatar persona={persona} talking={phase === 'speaking'} ringing={connecting} />
-
-        {camera === 'on' && (
-          <div className="self-view" aria-label="המצלמה שלכם – רק אצלכם, לא נשלחת לאף אחד">
-            <video
-              ref={(el) => {
-                if (el && el.srcObject !== stream.current) el.srcObject = stream.current;
-              }}
-              autoPlay
-              muted
-              playsInline
-            />
-          </div>
-        )}
-        {(camera === 'denied' || camera === 'unavailable') && (
-          <p className="self-view-note" role="status">
-            {camera === 'denied' ? 'אין גישה למצלמה – אפשר להמשיך בלעדיה.' : 'המצלמה לא זמינה במכשיר הזה.'}
-          </p>
-        )}
-      </div>
-
-      <section className="call-captions" aria-label="כתוביות" aria-live="polite">
+      <section ref={captions} className="call-captions" aria-label="כתוביות" aria-live="polite">
         {lastUser && (
           <div className="caption you">
             <span className="caption-who">אתם</span>
@@ -488,26 +456,6 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
         {status}
       </div>
 
-      {canListen && (
-        <button
-          type="button"
-          className={`call-word${isListening && listenFor === 'word' ? ' listening' : ''}`}
-          onClick={() => void toggleMic('word')}
-          disabled={!talkable || busy || (isListening && listenFor !== 'word')}
-          aria-pressed={isListening && listenFor === 'word'}
-        >
-          {isListening && listenFor === 'word' ? (
-            <>
-              <Icon name="hand" /> סיימתי
-            </>
-          ) : (
-            <>
-              <Icon name="message-circle-question" /> איך אומרים באנגלית? אמרו מילה בעברית
-            </>
-          )}
-        </button>
-      )}
-
       {keyboard && (
         <form className="call-type" dir="ltr" onSubmit={submit}>
           <input
@@ -530,57 +478,84 @@ export function CallScreen({ persona, onEnd, onBack, onCallsToday, onBlocked }: 
       )}
 
       <div className="call-controls">
-        <button
-          type="button"
-          className={`call-ctrl${camera === 'on' ? ' on' : ''}`}
-          onClick={() => void toggleCamera()}
-          aria-pressed={camera === 'on'}
-          aria-label={camera === 'on' ? 'כיבוי המצלמה' : 'הפעלת המצלמה (רק אצלכם)'}
-          disabled={camera === 'starting'}
-        >
-          <Icon name="video" />
-          {camera !== 'on' && <span className="ctrl-slash" aria-hidden="true" />}
-        </button>
-        <button
-          type="button"
-          className={`call-ctrl${muted ? '' : ' on'}`}
-          onClick={toggleMute}
-          aria-pressed={muted}
-          aria-label={muted ? 'הפעלת הרמקול' : 'השתקת הרמקול'}
-        >
-          <Icon name={muted ? 'volume-x' : 'volume-2'} />
-        </button>
-        {canListen && (
-          <button
-            ref={micBtn}
-            type="button"
-            className={`call-mic${isListening && listenFor === 'sentence' ? ' listening' : ''}`}
-            onClick={() => void toggleMic()}
-            disabled={!talkable || busy || (isListening && listenFor === 'word')}
-            aria-pressed={isListening && listenFor === 'sentence'}
-            aria-label={isListening && listenFor === 'sentence' ? 'סיום הדיבור' : 'לחצו ודברו'}
-          >
-            <Icon name="mic" />
-          </button>
-        )}
-        {canListen && (
+        <div className="call-actions">
           <button
             type="button"
-            className={`call-ctrl${keyboard ? ' on' : ''}`}
-            onClick={() => {
-              const next = !keyboard;
-              setKeyboard(next);
-              if (next) setTimeout(() => input.current?.focus(), 0);
-            }}
-            aria-pressed={keyboard}
-            aria-label={keyboard ? 'הסתרת המקלדת' : 'כתיבה במקלדת'}
+            className={`call-ctrl${muted ? ' on' : ''}`}
+            onClick={toggleMute}
+            aria-pressed={muted}
+            aria-label={muted ? 'הפעלת הרמקול' : 'השתקת הרמקול'}
           >
-            <Icon name="keyboard" />
+            <span className="call-ctrl-icon">
+              <Icon name={muted ? 'volume-x' : 'volume-2'} />
+            </span>
+            <span className="call-ctrl-label" aria-hidden="true">
+              {muted ? 'מושתק' : 'רמקול'}
+            </span>
           </button>
-        )}
-        <button type="button" className="call-hangup" onClick={finish} aria-label="ניתוק השיחה">
-          <Icon name="phone" />
-        </button>
+          {canListen && (
+            <button
+              type="button"
+              className={`call-ctrl${keyboard ? ' on' : ''}`}
+              onClick={() => {
+                const next = !keyboard;
+                setKeyboard(next);
+                if (next) setTimeout(() => input.current?.focus(), 0);
+              }}
+              aria-pressed={keyboard}
+              aria-label={keyboard ? 'הסתרת המקלדת' : 'כתיבה במקלדת'}
+            >
+              <span className="call-ctrl-icon">
+                <Icon name="keyboard" />
+              </span>
+              <span className="call-ctrl-label" aria-hidden="true">
+                מקלדת
+              </span>
+            </button>
+          )}
+          {canListen && (
+            <button
+              type="button"
+              className={`call-ctrl${wordListening ? ' on listening' : ''}`}
+              onClick={() => void toggleMic('word')}
+              disabled={!talkable || busy || sentenceListening}
+              aria-pressed={wordListening}
+              aria-label={wordListening ? 'סיימתי לומר את המילה' : 'איך אומרים באנגלית? אמרו מילה בעברית'}
+            >
+              <span className="call-ctrl-icon">
+                <Icon
+                  name={wordListening ? 'square' : 'languages'}
+                  className={wordListening ? 'icon-stop' : undefined}
+                />
+              </span>
+              <span className="call-ctrl-label" aria-hidden="true">
+                {wordListening ? 'סיימתי' : 'איך אומרים?'}
+              </span>
+            </button>
+          )}
+        </div>
+
+        <div className="call-main">
+          {canListen && (
+            <button
+              ref={micBtn}
+              type="button"
+              className={`call-mic${sentenceListening ? ' listening' : ''}`}
+              onClick={() => void toggleMic()}
+              disabled={!talkable || busy || wordListening}
+              aria-pressed={sentenceListening}
+              aria-label={sentenceListening ? 'סיום הדיבור' : 'לחצו ודברו'}
+            >
+              <Icon
+                name={sentenceListening ? 'square' : 'mic'}
+                className={sentenceListening ? 'icon-stop' : undefined}
+              />
+            </button>
+          )}
+          <button type="button" className="call-hangup" onClick={finish} aria-label="ניתוק השיחה">
+            <Icon name="phone" />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -591,11 +566,22 @@ function lastIndexOf(lines: CallLine[], role: CallLine['role']): number {
   return -1;
 }
 
-/** The character on the call: an animated portrait with call rings while ringing or speaking. */
+/** The character's contact photo, with soft rings while the phone rings or the character speaks. */
 function Avatar({ persona, talking, ringing }: { persona: Persona; talking: boolean; ringing: boolean }) {
   return (
     <div className={`call-avatar${talking ? ' talking' : ''}${ringing ? ' ringing' : ''}`} aria-hidden="true">
-      <PersonaPortrait persona={persona} talking={talking} className="call-face" />
+      <PersonaPortrait persona={persona} still className="call-face" />
+    </div>
+  );
+}
+
+/** Sound bars under the name: moving while someone speaks (the character, or the learner), flat otherwise. */
+function VoiceWave({ active, you }: { active: boolean; you: boolean }) {
+  return (
+    <div className={`call-wave${active ? ' active' : ''}${you ? ' you' : ''}`} aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <span key={i} />
+      ))}
     </div>
   );
 }

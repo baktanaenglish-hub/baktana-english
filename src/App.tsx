@@ -155,7 +155,7 @@ type Screen =
       /** What the pet says about the session (null without a pet). */
       petLine: string | null;
     }
-  /** An AI video call in progress, and its summary after hanging up. */
+  /** An AI phone call in progress, and its summary after hanging up. */
   | { name: 'call-active'; persona: Persona }
   | { name: 'call-summary'; result: CallResult }
   /** The premium screen (plans, buying, restoring). */

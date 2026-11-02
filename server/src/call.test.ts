@@ -190,7 +190,7 @@ describe('POST /api/call/turn', () => {
     await setup(fetchImpl, { anthropic: { apiKey: '', fetch: fetchImpl } });
     const res = await turn({ persona: 'teacher', history: [greeting('teacher')], message: 'Hello' });
     expect(res.status).toBe(503);
-    expect(res.body).toEqual({ error: 'call_unavailable', message: 'שיחות הווידאו לא זמינות כרגע' });
+    expect(res.body).toEqual({ error: 'call_unavailable', message: 'שיחות הטלפון לא זמינות כרגע' });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
@@ -266,7 +266,7 @@ describe('call access and daily limits', () => {
     const other = (await register('noa@example.com')).token;
     const res = await turn(start(), other);
     expect(res.status).toBe(403);
-    expect(res.body).toEqual({ error: 'premium_required', message: 'שיחות וידאו זמינות כרגע רק למנויי פרימיום' });
+    expect(res.body).toEqual({ error: 'premium_required', message: 'שיחות טלפון זמינות כרגע רק למנויי פרימיום' });
     expect(fetchImpl).not.toHaveBeenCalled();
     expect(usageRows()).toEqual([]);
   });

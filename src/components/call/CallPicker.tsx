@@ -71,14 +71,14 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
   return (
     <div className="call-picker">
       <h2>
-        <Icon name="phone" /> שיחת וידאו באנגלית
+        <Icon name="phone" /> שיחת טלפון באנגלית
       </h2>
       <p className="muted">בחרו דמות, התקשרו ודברו איתה באנגלית – כמו בשיחה אמיתית.</p>
 
       {load.kind === 'signed-out' && (
         <div className="panel center call-gate">
           <p>
-            <Icon name="star" filled /> שיחות וידאו זמינות למנויי פרימיום. התחברו כדי להמשיך
+            <Icon name="star" filled /> שיחות טלפון זמינות למנויי פרימיום. התחברו כדי להמשיך
           </p>
           <button type="button" className="btn primary" onClick={onSignIn}>
             התחברות
@@ -102,7 +102,7 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
           {onPremium ? (
             <>
               <p className="call-gate-title">
-                <Icon name="lock" /> שיחות וידאו הן חלק מפרימיום
+                <Icon name="lock" /> שיחות טלפון הן חלק מפרימיום
               </p>
               <p className="muted">הכירו את הדמויות שמחכות לכם, והצטרפו כדי לדבר איתן.</p>
               <button type="button" className="btn secondary" onClick={onPremium}>
@@ -112,7 +112,7 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
           ) : (
             <>
               <p className="call-gate-title">
-                <Icon name="lock" /> בקרוב! שיחות וידאו יהיו חלק מפרימיום
+                <Icon name="lock" /> בקרוב! שיחות טלפון יהיו חלק מפרימיום
               </p>
               <p className="muted">בינתיים אפשר להכיר את הדמויות שמחכות לכם.</p>
             </>
@@ -164,7 +164,7 @@ export function CallPicker({ user, status, onStatus, onSignIn, onCall, onPremium
           {PERSONAS.map((p) => (
             <li key={p.id} className="persona-card" style={personaStyle(p.color)}>
               <span className="persona-avatar" aria-hidden="true">
-                <PersonaPortrait persona={p} />
+                <PersonaPortrait persona={p} still />
               </span>
               <div className="persona-info">
                 <h3>

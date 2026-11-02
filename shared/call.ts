@@ -1,5 +1,5 @@
 /**
- * "Video call" practice: a spoken English conversation with an AI character.
+ * "Phone call" practice: a spoken English conversation with an AI character.
  * Contract between the web app (src/components/call/, src/lib/call-api.ts) and the
  * server (server/src/routes/call.ts, supabase/functions/call-turn). Pure TypeScript,
  * no imports, so the Supabase Edge Function (Deno) can import it as is.
@@ -45,7 +45,7 @@ export const PERSONAS: readonly Persona[] = [
     emoji: '😊',
     color: '#ff7aa8',
     corrects: false,
-    greeting: "Hey! It's Maya! So good to see you. What's new?",
+    greeting: "Hey! It's Maya! So good to hear from you. What's new?",
   },
   {
     id: 'barista',

@@ -17,6 +17,7 @@
    - **anon public key** (מפתח ארוך שמתחיל ב־`eyJ`, או מפתח publishable שמתחיל ב־`sb_publishable_`)
 
    שני הערכים האלה **ציבוריים** ומיועדים לאתר. ההגנה על הנתונים היא ב־Row Level Security שמוגדר ב־`schema.sql`. אסור להשתמש במפתח `service_role`, שהוא סודי.
+
 5. **שומרים אותם ב־GitHub:** ב־repo נכנסים ל־**Settings** ← **Secrets and variables** ← **Actions** ← לשונית **Variables** ← **New repository variable**, ויוצרים שני משתנים:
    - `VITE_SUPABASE_URL` = ה־Project URL
    - `VITE_SUPABASE_ANON_KEY` = ה־anon key
@@ -24,16 +25,16 @@
 
 ## מה נשמר ואיך זה מוגן
 
-| טבלה | תוכן | מי רואה |
-|---|---|---|
-| `profiles` | שם התצוגה | רק המשתמש עצמו |
-| `progress` | מסמך ההתקדמות (XP, שיעורים, רצף) | רק המשתמש עצמו |
-| `xp_events` | נקודות שנצברו, לליגה | אף אחד ישירות. הליגה נקראת דרך הפונקציה `weekly_leaderboard`, שמחזירה רק שם תצוגה ו־XP (אף פעם לא אימייל) |
-| `srs_state` (v2) | מצב החזרה המרווחת, שורה לכל מילה/משפט | רק המשתמש עצמו. הכתיבה דרך הפונקציה `merge_srs` (אותם כללי מיזוג כמו `PUT /api/srs`) |
-| `groups`, `group_members` | קבוצות וחברות בהן ([groups.md](groups.md)) | אף אחד ישירות. הכול דרך הפונקציות `create_group`, `join_group`, `leave_group`, `my_groups`, `group_member_stats`, `group_totals`, `xp_leaderboard`, שבודקות חברות ומחזירות רק שמות |
-| `duels` | תחרויות ראש בראש ([groups.md](groups.md)) | אף אחד ישירות. הכול דרך `create_duel`, `join_duel`, `cancel_duel`, `my_duels`, שמחזירות רק שמות תצוגה, חיות ו־XP של שני הצדדים |
-| `profiles.pet` | החיה האישית כפי שחברי הקבוצה רואים אותה ([pets.md](spec/pets.md)) | הלומד מעדכן את הפרופיל שלו. אחרים רואים אותה רק דרך `group_member_stats`. **דורש הרצה חוזרת של `schema.sql`** – עד אז החיות לא יופיעו בקבוצות, ושאר האפליקציה ממשיכה לעבוד |
-| `events` (v2) | אירועי אנליטיקה אנונימיים | אף לקוח לא יכול לקרוא (insert בלבד, גם לאורח). הדשבורדים קוראים עם ה־service role |
+| טבלה                      | תוכן                                                              | מי רואה                                                                                                                                                                            |
+| ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `profiles`                | שם התצוגה                                                         | רק המשתמש עצמו                                                                                                                                                                     |
+| `progress`                | מסמך ההתקדמות (XP, שיעורים, רצף)                                  | רק המשתמש עצמו                                                                                                                                                                     |
+| `xp_events`               | נקודות שנצברו, לליגה                                              | אף אחד ישירות. הליגה נקראת דרך הפונקציה `weekly_leaderboard`, שמחזירה רק שם תצוגה ו־XP (אף פעם לא אימייל)                                                                          |
+| `srs_state` (v2)          | מצב החזרה המרווחת, שורה לכל מילה/משפט                             | רק המשתמש עצמו. הכתיבה דרך הפונקציה `merge_srs` (אותם כללי מיזוג כמו `PUT /api/srs`)                                                                                               |
+| `groups`, `group_members` | קבוצות וחברות בהן ([groups.md](groups.md))                        | אף אחד ישירות. הכול דרך הפונקציות `create_group`, `join_group`, `leave_group`, `my_groups`, `group_member_stats`, `group_totals`, `xp_leaderboard`, שבודקות חברות ומחזירות רק שמות |
+| `duels`                   | תחרויות ראש בראש ([groups.md](groups.md))                         | אף אחד ישירות. הכול דרך `create_duel`, `join_duel`, `cancel_duel`, `my_duels`, שמחזירות רק שמות תצוגה, חיות ו־XP של שני הצדדים                                                     |
+| `profiles.pet`            | החיה האישית כפי שחברי הקבוצה רואים אותה ([pets.md](spec/pets.md)) | הלומד מעדכן את הפרופיל שלו. אחרים רואים אותה רק דרך `group_member_stats`. **דורש הרצה חוזרת של `schema.sql`** – עד אז החיות לא יופיעו בקבוצות, ושאר האפליקציה ממשיכה לעבוד         |
+| `events` (v2)             | אירועי אנליטיקה אנונימיים                                         | אף לקוח לא יכול לקרוא (insert בלבד, גם לאורח). הדשבורדים קוראים עם ה־service role                                                                                                  |
 
 כללי המיזוג והבדיקות (שיעור נעול, תקרת XP לשיעור, תאריך מקומי סביר) זהים לשרת ה־Express ומגיעים מאותו קובץ: `shared/progress-merge.ts`.
 **מגבלה ידועה:** בגרסת Supabase הכללים רצים בצד הלקוח, ולכן משתמש מתוחכם יכול לנפח את ה־XP שלו בליגה. ה־XP מוגבל ל־50 לכל רשומה, אבל זה לא מונע ניפוח. אם הליגה תהיה חשובה, אפשר להעביר את הלוגיקה ל־Edge Function.
@@ -48,6 +49,7 @@
 מריצים שוב את כל `supabase/schema.sql` ב־SQL Editor (בטוח להריץ שוב – הכול אידמפוטנטי). **הסדר בפריסה:** קודם ה־SQL, אחר כך שרת ה־Express, ורק אז האתר וה־APK.
 
 מה נוסף:
+
 - **`keep_completed_lessons`** – טריגר על `progress`: כשלקוח ישן שומר התקדמות בלי שיעורים שנוספו בגרסה חדשה (למשל `u7l1`), המפתחות האלה נשמרים. כך APK ישן לא מוחק התקדמות.
 - **`srs_state` + `merge_srs(items jsonb)`** – מצב החזרה המרווחת. `merge_srs` ממזג פריט־פריט (ה־`last` החדש מנצח; ב־`last` שווה – הקופסה הנמוכה; `seen`/`wrong` – מקסימום), מדלג על פריטים לא תקינים, מוגבל ל־1000 פריטים לקריאה ול־3000 ללומד (פריטים חדשים מעבר לתקרה לא נשמרים), ומחזיר את המצב המלא.
 - **`events`** – אירועי אנליטיקה. RLS מאפשר רק insert (ל־anon ול־authenticated, עם `user_id` ריק או של המשתמש עצמו). טריגר `events_rate_limit` מדלג בשקט על יותר מ־600 אירועים בשעה לאותו `anon_id`.
@@ -58,6 +60,7 @@
   בלי `pg_cron` אפשר להריץ ידנית מדי פעם: `select public.purge_old_events();`
 
 **בדיקה ידנית אחרי ההרצה (US-U1 AC7, US-T1 AC6):**
+
 1. שורת `progress` עם `completed.u7l1` → `update progress set data = jsonb_set(data, '{completed}', '{"u1l1":1}') where ...` → `u7l1` עדיין קיים.
 2. עם ה־anon key: `insert` ל־`events` מצליח, `select` מחזיר 0 שורות.
 3. משתמש אחד לא רואה שורות `srs_state` של משתמש אחר.
@@ -68,9 +71,9 @@
 DATABASE_URL=postgres://postgres@localhost:5432/scratch npm run test:supabase
 ```
 
-## שיחות וידאו עם AI (Edge Function)
+## שיחות טלפון עם AI (Edge Function)
 
-באתר ובאפליקציה אין שרת Express, לכן שיחות הווידאו עם דמות ה־AI רצות דרך Supabase Edge Function בשם `call-turn` ([`supabase/functions/call-turn/index.ts`](../supabase/functions/call-turn/index.ts)). היא מממשת בדיוק את `POST /api/call/turn` ואת `GET /api/call/status` (ראו [api.md](api.md)) עם אותם קבצים משותפים מ־`shared/`. מפתח ה־API נשמר כסוד ב־Supabase ולא מגיע לדפדפן.
+באתר ובאפליקציה אין שרת Express, לכן שיחות הטלפון עם דמות ה־AI רצות דרך Supabase Edge Function בשם `call-turn` ([`supabase/functions/call-turn/index.ts`](../supabase/functions/call-turn/index.ts)). היא מממשת בדיוק את `POST /api/call/turn` ואת `GET /api/call/status` (ראו [api.md](api.md)) עם אותם קבצים משותפים מ־`shared/`. מפתח ה־API נשמר כסוד ב־Supabase ולא מגיע לדפדפן.
 
 **שיחות רק למנויי פרימיום, עד 10 ביום.** הפונקציה דורשת משתמש מחובר: היא מאמתת את ה־access token שלו מול Supabase Auth (`/auth/v1/user`), בודקת שהאימייל ברשימת הסוד `PREMIUM_EMAILS` **או** שיש לו מנוי בתוקף בטבלה `entitlements` (ראו [מנוי בתשלום](#מנוי-בתשלום-billing-webhook) למטה), וסופרת שיחות ותורות בטבלה `call_usage` (לפי היום בשעון ישראל) דרך הפונקציה `increment_call_usage` ב־`schema.sql`. לטבלה ולפונקציה אין שום הרשאה ללקוחות – רק ה־service role (המפתח `SUPABASE_SERVICE_ROLE_KEY` זמין אוטומטית בכל Edge Function, אין צורך להגדיר אותו).
 
@@ -96,7 +99,7 @@ supabase functions deploy pet-design   # עיצוב חיה ייחודית עם A
 - CORS מותר רק מהאתר (`https://baktanaenglish-hub.github.io`), מהאפליקציה (`https://localhost`) ומ־localhost בפיתוח.
 - אימות JWT של ה־gateway נשאר פעיל (פורסים **בלי** `--no-verify-jwt`): הלקוח שולח ב־`Authorization` את ה־access token של המשתמש, שהוא JWT של הפרויקט – גם כשמפתח הפרויקט הוא `sb_publishable_…` (המפתח הולך ב־`apikey`). אם פרסתם בעבר עם `--no-verify-jwt`, פורסים שוב בלעדיו. (רק אם ה־gateway דוחה טוקנים תקינים – למשל בפרויקט שעבר למפתחות חתימה אסימטריים – אפשר לפרוס עם `--no-verify-jwt`; זה עדיין בטוח, כי הפונקציה עצמה מאמתת כל טוקן מול Supabase Auth.)
 - הגבלת קצב: 30 בקשות לדקה לכל IP, לכל מופע של הפונקציה, בנוסף למגבלה היומית למשתמש (10 שיחות ו־100 תורות ביום). מגבלת ההוצאה האמיתית מוגדרת ב־Anthropic Console.
-- בלי הסוד `ANTHROPIC_API_KEY` הפונקציה מחזירה `503 call_unavailable` והאפליקציה מציגה "שיחות הווידאו לא זמינות כרגע".
+- בלי הסוד `ANTHROPIC_API_KEY` הפונקציה מחזירה `503 call_unavailable` והאפליקציה מציגה "שיחות הטלפון לא זמינות כרגע".
 - בדיקה מקומית: `supabase functions serve call-turn --env-file .env`.
 - הסטטוס (`GET`) מחזיר גם `premiumUntil` ו־`willRenew` כשיש למשתמש מנוי (או היה לו), כדי שהאפליקציה תציג "מתחדש ב־…" / "בתוקף עד …".
 
@@ -135,14 +138,14 @@ supabase functions deploy billing-webhook --no-verify-jwt   # RevenueCat לא ש
 
 הגדרה, פעם אחת: ב־repo ← **Settings** ← **Secrets and variables** ← **Actions** ← **New repository secret**:
 
-| Secret | מה שמים |
-|---|---|
-| `SUPABASE_ACCESS_TOKEN` | טוקן אישי מ־supabase.com ← Account ← **Access Tokens** ← Generate new token |
-| `ANTHROPIC_API_KEY` | מפתח API מ־console.anthropic.com |
-| `PREMIUM_EMAILS` | האימיילים של משתמשי הפרימיום, מופרדים בפסיקים |
-| `TESTER_EMAILS` | האימיילים של הבודקים, מופרדים בפסיקים: שיחת ניסיון אחת ביום, עד 10 משפטים (`TESTER_LIMITS` ב־`shared/call.ts`) |
-| `REVENUECAT_WEBHOOK_SECRET` | מחרוזת אקראית ארוכה; אותה מחרוזת בשדה Authorization של ה־webhook ב־RevenueCat |
-| `REVENUECAT_API_KEY` | מפתח **Secret** מ־RevenueCat ← Project settings ← API keys (מתחיל ב־`sk_`) |
+| Secret                      | מה שמים                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN`     | טוקן אישי מ־supabase.com ← Account ← **Access Tokens** ← Generate new token                                    |
+| `ANTHROPIC_API_KEY`         | מפתח API מ־console.anthropic.com                                                                               |
+| `PREMIUM_EMAILS`            | האימיילים של משתמשי הפרימיום, מופרדים בפסיקים                                                                  |
+| `TESTER_EMAILS`             | האימיילים של הבודקים, מופרדים בפסיקים: שיחת ניסיון אחת ביום, עד 10 משפטים (`TESTER_LIMITS` ב־`shared/call.ts`) |
+| `REVENUECAT_WEBHOOK_SECRET` | מחרוזת אקראית ארוכה; אותה מחרוזת בשדה Authorization של ה־webhook ב־RevenueCat                                  |
+| `REVENUECAT_API_KEY`        | מפתח **Secret** מ־RevenueCat ← Project settings ← API keys (מתחיל ב־`sk_`)                                     |
 
 את מזהה הפרויקט ה־workflow לוקח מהמשתנה `VITE_SUPABASE_URL` שכבר קיים. משתנה אופציונלי: `CALL_MODEL` (בלשונית Variables). למכירת המנוי באפליקציה צריך גם את המשתנה `VITE_REVENUECAT_ANDROID_KEY` (בלשונית Variables) – מפתח ה־**Public** SDK של אפליקציית ה־Play ב־RevenueCat (מתחיל ב־`goog_`). הוא ציבורי ונכנס לאפליקציה; ה־workflow ‏`android.yml` מעביר אותו לבנייה. עד שמגדירים גם את המשתנה `VITE_PREMIUM_PUBLIC` = `true` (בהשקה הציבורית), רק האפליקציה מ־Google Play מציעה את פרימיום. האתר וה־APK להורדה מציגים "בקרוב".
 
