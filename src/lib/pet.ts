@@ -6,6 +6,7 @@
  * Kept in localStorage only, like the gems, so the progress contract with the server stays unchanged.
  */
 import { useCallback, useEffect, useState } from 'react';
+import type { IconName } from '../components/Icon';
 import {
   PET_COLORS,
   PET_TRAITS,
@@ -55,7 +56,7 @@ export const EVOLVE_GEMS = 20;
 
 export interface Ability {
   id: string;
-  icon: string;
+  icon: IconName;
   title: string;
   description: string;
   /** The stage that unlocks it. */
@@ -63,11 +64,11 @@ export interface Ability {
 }
 
 export const ABILITIES: Ability[] = [
-  { id: 'cheer', icon: '👏', title: 'מחמאות', description: 'מגיבה לכל הישג שלכם', stage: 1 },
-  { id: 'remind', icon: '🔔', title: 'תזכורות אישיות', description: 'התזכורת היומית מגיעה ממנה', stage: 1 },
-  { id: 'challenge', icon: '⚡', title: 'אתגר יומי', description: 'מציעה כל יום אתגר עם פרס', stage: 2 },
-  { id: 'tricks', icon: '🎪', title: 'טריקים', description: 'הקישו עליה והיא עושה טריק', stage: 3 },
-  { id: 'aura', icon: '🌟', title: 'הילה אגדית', description: 'זוהרת בזהב ומכפילה את פרס האתגר', stage: 4 },
+  { id: 'cheer', icon: 'thumbs-up', title: 'מחמאות', description: 'מגיבה לכל הישג שלכם', stage: 1 },
+  { id: 'remind', icon: 'bell', title: 'תזכורות אישיות', description: 'התזכורת היומית מגיעה ממנה', stage: 1 },
+  { id: 'challenge', icon: 'zap', title: 'אתגר יומי', description: 'מציעה כל יום אתגר עם פרס', stage: 2 },
+  { id: 'tricks', icon: 'wand-sparkles', title: 'טריקים', description: 'הקישו עליה והיא עושה טריק', stage: 3 },
+  { id: 'aura', icon: 'sparkles', title: 'הילה אגדית', description: 'זוהרת בזהב ומכפילה את פרס האתגר', stage: 4 },
 ];
 
 export type Slot = 'head' | 'face' | 'neck';
@@ -146,7 +147,7 @@ export type ChallengeKind = 'lessons' | 'flawless' | 'review' | 'xp';
 export interface Challenge {
   id: string;
   kind: ChallengeKind;
-  icon: string;
+  icon: IconName;
   title: string;
   goal: number;
   gems: number;
@@ -154,11 +155,11 @@ export interface Challenge {
 
 /** One of these is offered each day (from stage 2). */
 export const CHALLENGES: Challenge[] = [
-  { id: 'lessons3', kind: 'lessons', icon: '📚', title: '3 שיעורים היום', goal: 3, gems: 25 },
-  { id: 'flawless2', kind: 'flawless', icon: '🎯', title: '2 שיעורים בלי אף טעות', goal: 2, gems: 30 },
-  { id: 'review2', kind: 'review', icon: '🧠', title: '2 חזרות או תרגולים', goal: 2, gems: 20 },
-  { id: 'xp60', kind: 'xp', icon: '⚡', title: '60 XP היום', goal: 60, gems: 25 },
-  { id: 'lessons2', kind: 'lessons', icon: '📘', title: '2 שיעורים היום', goal: 2, gems: 15 },
+  { id: 'lessons3', kind: 'lessons', icon: 'book-open', title: '3 שיעורים היום', goal: 3, gems: 25 },
+  { id: 'flawless2', kind: 'flawless', icon: 'target', title: '2 שיעורים בלי אף טעות', goal: 2, gems: 30 },
+  { id: 'review2', kind: 'review', icon: 'brain', title: '2 חזרות או תרגולים', goal: 2, gems: 20 },
+  { id: 'xp60', kind: 'xp', icon: 'zap', title: '60 XP היום', goal: 60, gems: 25 },
+  { id: 'lessons2', kind: 'lessons', icon: 'book-marked', title: '2 שיעורים היום', goal: 2, gems: 15 },
 ];
 
 export interface PetState {

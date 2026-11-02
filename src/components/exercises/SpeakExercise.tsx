@@ -3,6 +3,7 @@ import type { Exercise } from '../../types';
 import { listen, type ListenError, type Listening } from '../../lib/listen';
 import { isSpokenCorrectly } from '../../lib/spoken';
 import { SpeakButton } from '../SpeakButton';
+import { Icon } from '../Icon';
 
 interface Props {
   exercise: Extract<Exercise, { kind: 'speak' }>;
@@ -90,7 +91,7 @@ export function SpeakExercise({ exercise, locked, onCheck, onSkip }: Props) {
             aria-pressed={listening}
             aria-label={listening ? 'סיום הקלטה' : 'לחצו ודברו'}
           >
-            <span aria-hidden="true">🎤</span>
+            <Icon name="mic" />
           </button>
           <div className="mic-status" role="status">
             {status.state === 'idle' && !locked && 'לחצו על המיקרופון ואמרו את המשפט'}

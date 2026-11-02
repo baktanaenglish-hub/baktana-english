@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Exercise } from '../types';
 import { sounds } from '../lib/sound';
 import { useEnterKey } from '../lib/useEnterKey';
+import { Icon } from './Icon';
 import { BuildExercise } from './exercises/BuildExercise';
 import { ChoiceExercise } from './exercises/ChoiceExercise';
 import { TypeExercise } from './exercises/TypeExercise';
 import { BlankExercise } from './exercises/BlankExercise';
 
 interface Props {
-  /** Shown in the header instead of hearts, e.g. "🎯 מבחן מיקום". */
-  badge: string;
+  /** Shown in the header instead of hearts, e.g. a target icon and "מבחן מיקום". */
+  badge: ReactNode;
   exercises: Exercise[];
   /** Called after each answer; true ends the quiz early (e.g. a placement unit was failed). */
   stop?: (answers: boolean[]) => boolean;
@@ -60,7 +61,7 @@ export function QuizScreen({ badge, exercises, stop, onFinish, onQuit }: Props) 
     <div className="lesson">
       <header className="lesson-header">
         <button type="button" className="icon-btn" onClick={onQuit} aria-label="יציאה מהמבחן">
-          ✕
+          <Icon name="x" />
         </button>
         <div
           className="progress-track"
@@ -91,7 +92,7 @@ export function QuizScreen({ badge, exercises, stop, onFinish, onQuit }: Props) 
           <div className="feedback-text">
             <strong>
               <span className="feedback-icon" aria-hidden="true">
-                {feedback.correct ? '✓' : '✕'}
+                <Icon name={feedback.correct ? 'check' : 'x'} />
               </span>
               {feedback.correct ? 'נכון!' : 'לא בדיוק…'}
             </strong>

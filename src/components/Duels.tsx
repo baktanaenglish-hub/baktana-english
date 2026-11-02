@@ -14,6 +14,7 @@ import { INVITE_CODE_LENGTH } from '../../shared/groups';
 import { api, errorMessage } from '../lib/api';
 import { authRedirectUrl } from '../lib/config';
 import { timeLeftText, type DuelsState } from '../lib/duels';
+import { Icon, isIconName, type IconName } from './Icon';
 import { MemberPet } from './MyGroups';
 
 interface Props {
@@ -27,10 +28,10 @@ interface Props {
   onDuelCodeUsed: () => void;
 }
 
-const RESULT_TEXT: Record<DuelResult, string> = {
-  won: '🏆 ניצחתם!',
-  lost: 'הפעם לא הלך. בפעם הבאה! 💪',
-  tie: '🤝 תיקו!',
+const RESULT_TEXT: Record<DuelResult, { icon: IconName; text: string }> = {
+  won: { icon: 'trophy', text: 'ניצחתם!' },
+  lost: { icon: 'dumbbell', text: 'הפעם לא הלך. בפעם הבאה!' },
+  tie: { icon: 'handshake', text: 'תיקו!' },
 };
 
 /** Head-to-head duels: a week-long XP race between two friends. */
@@ -38,7 +39,9 @@ export function Duels({ user, state, onSignIn, onPrize, duelCode, onDuelCodeUsed
   if (!user) {
     return (
       <div className="duels">
-        <h2>⚔️ ראש בראש</h2>
+        <h2>
+          <Icon name="swords" /> ראש בראש
+        </h2>
         <div className="panel center">
           {duelCode && <p>הוזמנתם לתחרות (קוד {duelCode}).</p>}
           <p>צרו פרופיל כדי להתחרות בחברים: מי יצבור יותר XP בשבוע?</p>
@@ -54,10 +57,12 @@ export function Duels({ user, state, onSignIn, onPrize, duelCode, onDuelCodeUsed
 
   return (
     <div className="duels">
-      <h2>⚔️ ראש בראש</h2>
+      <h2>
+        <Icon name="swords" /> ראש בראש
+      </h2>
       <p className="muted">
-        תחרות של {DUEL_DAYS} ימים בין שני חברים: מי שצובר יותר XP מנצח. למנצח {DUEL_PRIZES.won} 💎 ומדליית ניצחון לחיה,
-        בתיקו {DUEL_PRIZES.tie} 💎, ועל ההשתתפות {DUEL_PRIZES.lost} 💎.
+        תחרות של {DUEL_DAYS} ימים בין שני חברים: מי שצובר יותר XP מנצח. למנצח {DUEL_PRIZES.won} יהלומים ומדליית ניצחון
+        לחיה, בתיקו {DUEL_PRIZES.tie} יהלומים, ועל ההשתתפות {DUEL_PRIZES.lost} יהלומים.
       </p>
 
       <DuelNotices state={state} />
@@ -70,7 +75,9 @@ export function Duels({ user, state, onSignIn, onPrize, duelCode, onDuelCodeUsed
 
       {state.error && state.duels === null && (
         <div className="panel center">
-          <p>📡 {state.error}</p>
+          <p>
+            <Icon name="wifi-off" /> {state.error}
+          </p>
           <button type="button" className="btn ghost" onClick={() => void state.refresh()}>
             נסו שוב
           </button>
@@ -143,7 +150,9 @@ function DuelForms({ full, duelCode, onDone }: { full: boolean; duelCode: string
   return (
     <div className="group-forms">
       <form className="panel" onSubmit={(e) => run(e, () => api.joinDuel(code))}>
-        <h3>🔑 קיבלתם קוד?</h3>
+        <h3>
+          <Icon name="key-round" /> קיבלתם קוד?
+        </h3>
         <label htmlFor="duel-code">קוד התחרות</label>
         <div className="inline-form">
           <input
@@ -162,12 +171,14 @@ function DuelForms({ full, duelCode, onDone }: { full: boolean; duelCode: string
         </div>
       </form>
       <div className="panel">
-        <h3>✨ תחרות חדשה</h3>
+        <h3>
+          <Icon name="sparkles" /> תחרות חדשה
+        </h3>
         {full ? (
           <p className="muted">אפשר לנהל עד {MAX_OPEN_DUELS} תחרויות בבת אחת.</p>
         ) : (
           <button type="button" className="btn primary" disabled={busy} onClick={() => run(null, api.createDuel)}>
-            ⚔️ אתגרו חבר או חברה
+            <Icon name="swords" /> אתגרו חבר או חברה
           </button>
         )}
       </div>
@@ -198,7 +209,9 @@ function WaitingDuel({ duel, onCancelled }: { duel: DuelSummary; onCancelled: ()
 
   return (
     <section className="panel duel-card waiting">
-      <h3>⏳ מחכים ליריב/ה</h3>
+      <h3>
+        <Icon name="hourglass" /> מחכים ליריב/ה
+      </h3>
       <p>שלחו את הקוד לחבר או לחברה. התחרות מתחילה ברגע שהם מצטרפים.</p>
       <p className="invite-code" dir="ltr">
         {duel.inviteCode}
@@ -261,7 +274,7 @@ export function DuelCard({
       <div className="duel-vs">
         <Side side={duel.me} label="אני" />
         <span className="duel-vs-mark" aria-hidden="true">
-          ⚔️
+          <Icon name="swords" />
         </span>
         <Side side={opponent} label="יריב/ה" />
       </div>
@@ -279,13 +292,17 @@ export function DuelCard({
       ) : (
         duel.result && (
           <div className="duel-result">
-            <strong>{RESULT_TEXT[duel.result]}</strong>
+            <strong>
+              <Icon name={RESULT_TEXT[duel.result].icon} /> {RESULT_TEXT[duel.result].text}
+            </strong>
             {!claimed ? (
               <button type="button" className="btn primary claim-btn" onClick={() => setNote(onClaim())}>
-                קבלת {DUEL_PRIZES[duel.result]} 💎
+                קבלת {DUEL_PRIZES[duel.result]} יהלומים
               </button>
             ) : (
-              <span className="claimed">✓ נאסף</span>
+              <span className="claimed">
+                <Icon name="check" /> נאסף
+              </span>
             )}
           </div>
         )
@@ -309,11 +326,13 @@ function DuelNotices({ state }: { state: DuelsState }) {
   if (notices.length === 0) return null;
   return (
     <section className="panel notices" aria-label="התראות תחרויות">
-      <h3>🔔 התראות</h3>
+      <h3>
+        <Icon name="bell" /> התראות
+      </h3>
       <ul>
         {notices.slice(0, 5).map((n) => (
           <li key={n.id} className={n.at > seenUntil ? 'unread' : ''}>
-            <span aria-hidden="true">{n.icon}</span> {n.text}
+            <Icon name={isIconName(n.icon) ? n.icon : 'bell'} /> {n.text}
           </li>
         ))}
       </ul>

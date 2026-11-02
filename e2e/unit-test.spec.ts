@@ -28,7 +28,7 @@ async function openUnitTest(page: Page) {
   await seedProgress(page, { completed: Object.fromEntries(UNIT.lessons.map((l) => [l.id, 1])) });
   await page.goto('/');
   await page.getByRole('button', { name: 'מבחן יחידה', exact: true }).first().click();
-  await expect(page.locator('.practice-badge')).toHaveText('🏆 מבחן יחידה');
+  await expect(page.locator('.practice-badge')).toHaveText('מבחן יחידה');
 }
 
 test('the unit test is locked until every lesson of the unit is done', async ({ page }) => {
@@ -60,6 +60,6 @@ test('failing shows the score and offers a retry', async ({ page }) => {
   }
   await expect(page.locator('.lesson-complete')).toContainText('7 מתוך 10');
   await page.getByRole('button', { name: 'לנסות שוב' }).click();
-  await expect(page.locator('.practice-badge')).toHaveText('🏆 מבחן יחידה');
+  await expect(page.locator('.practice-badge')).toHaveText('מבחן יחידה');
   expect((await localProgress(page)).completed.u1cp).toBeUndefined();
 });

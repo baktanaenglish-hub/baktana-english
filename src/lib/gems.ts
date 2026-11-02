@@ -19,11 +19,13 @@ export const ALL_QUESTS_BONUS_GEMS = 20;
 export const MAX_BONUS_HEARTS = 10;
 export const MAX_FREEZES = 2;
 
+import type { IconName } from '../components/Icon';
+
 export type QuestId = 'lessons' | 'perfect' | 'review';
 
 export interface Quest {
   id: QuestId;
-  icon: string;
+  icon: IconName;
   title: string;
   goal: number;
   gems: number;
@@ -31,9 +33,9 @@ export interface Quest {
 
 /** The same three quests every day; progress starts over at midnight. */
 export const QUESTS: Quest[] = [
-  { id: 'lessons', icon: '📚', title: 'השלימו 2 שיעורים', goal: 2, gems: 10 },
-  { id: 'perfect', icon: '🎯', title: 'שיעור בלי אף טעות', goal: 1, gems: 15 },
-  { id: 'review', icon: '🧠', title: 'חזרה או תרגול אחד', goal: 1, gems: 10 },
+  { id: 'lessons', icon: 'book-open', title: 'השלימו 2 שיעורים', goal: 2, gems: 10 },
+  { id: 'perfect', icon: 'target', title: 'שיעור בלי אף טעות', goal: 1, gems: 15 },
+  { id: 'review', icon: 'brain', title: 'חזרה או תרגול אחד', goal: 1, gems: 10 },
 ];
 
 export interface Avatar {
@@ -59,7 +61,7 @@ export type ShopItemId = 'hearts' | 'freeze';
 
 export interface ShopItem {
   id: ShopItemId;
-  icon: string;
+  icon: IconName;
   title: string;
   description: string;
   price: number;
@@ -68,14 +70,14 @@ export interface ShopItem {
 export const SHOP_ITEMS: ShopItem[] = [
   {
     id: 'hearts',
-    icon: '❤️',
+    icon: 'heart',
     title: '3 לבבות בונוס',
     description: 'נוספים על הלבבות הרגילים ונגמרים ראשונים',
     price: 30,
   },
   {
     id: 'freeze',
-    icon: '🧊',
+    icon: 'snowflake',
     title: 'הקפאת רצף',
     description: 'יום שפספסתם לא ישבור את הרצף (עד 2 במלאי)',
     price: 50,
@@ -117,7 +119,7 @@ export interface GameStats {
 }
 
 export interface Reward {
-  icon: string;
+  icon: IconName;
   label: string;
   gems: number;
 }
@@ -208,7 +210,7 @@ function advanceQuests(s: GemState, add: Partial<Record<QuestId, number>>, rewar
       rewards.push({ icon: quest.icon, label: `משימה הושלמה: ${quest.title}`, gems: quest.gems });
       if (next.claimed.length === QUESTS.length) {
         next = earn(next, ALL_QUESTS_BONUS_GEMS);
-        rewards.push({ icon: '🏅', label: 'בונוס: כל המשימות של היום!', gems: ALL_QUESTS_BONUS_GEMS });
+        rewards.push({ icon: 'award', label: 'בונוס: כל המשימות של היום!', gems: ALL_QUESTS_BONUS_GEMS });
       }
     }
   }
@@ -232,12 +234,16 @@ export function rewardActivity(
   const rewards: Reward[] = [];
   let next = forToday(s, today);
   if (activity.kind === 'lesson') {
-    rewards.push({ icon: '📘', label: 'שיעור הושלם', gems: LESSON_GEMS });
-    if (activity.flawless) rewards.push({ icon: '✨', label: 'בלי אף טעות', gems: FLAWLESS_BONUS_GEMS });
+    rewards.push({ icon: 'book-open', label: 'שיעור הושלם', gems: LESSON_GEMS });
+    if (activity.flawless) rewards.push({ icon: 'sparkles', label: 'בלי אף טעות', gems: FLAWLESS_BONUS_GEMS });
   } else {
-    rewards.push({ icon: '🧠', label: activity.kind === 'review' ? 'חזרה הושלמה' : 'תרגול הושלם', gems: REVIEW_GEMS });
+    rewards.push({
+      icon: 'brain',
+      label: activity.kind === 'review' ? 'חזרה הושלמה' : 'תרגול הושלם',
+      gems: REVIEW_GEMS,
+    });
   }
-  if (activity.goalReached) rewards.push({ icon: '🎯', label: 'עמדתם ביעד היומי', gems: GOAL_GEMS });
+  if (activity.goalReached) rewards.push({ icon: 'target', label: 'עמדתם ביעד היומי', gems: GOAL_GEMS });
   next = earn(
     next,
     rewards.reduce((sum, r) => sum + r.gems, 0),
@@ -254,7 +260,7 @@ export function rewardActivity(
 export function rewardUnitTest(s: GemState): { state: GemState; rewards: Reward[] } {
   return {
     state: earn(s, UNIT_TEST_GEMS),
-    rewards: [{ icon: '👑', label: 'עברתם מבחן יחידה', gems: UNIT_TEST_GEMS }],
+    rewards: [{ icon: 'crown', label: 'עברתם מבחן יחידה', gems: UNIT_TEST_GEMS }],
   };
 }
 

@@ -12,6 +12,7 @@ import { MatchExercise } from './exercises/MatchExercise';
 import { SpeakExercise } from './exercises/SpeakExercise';
 import { TypeExercise } from './exercises/TypeExercise';
 import { BlankExercise } from './exercises/BlankExercise';
+import { Icon } from './Icon';
 import { TipCard } from './TipCard';
 
 /** XP and accuracy – what is reported to the server for a lesson. */
@@ -122,7 +123,7 @@ export function LessonScreen({
   const [mistakes, setMistakes] = useState(0);
   const [solved, setSolved] = useState(0);
   const [showTip, setShowTip] = useState(Boolean(tip));
-  /** "Leave the lesson?" is open (✕ or the back button after answering something). */
+  /** "Leave the lesson?" is open (the close button or the back button after answering something). */
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [startedAt] = useState(() => Date.now());
   const answers = useRef<ItemAnswer[]>([]);
@@ -221,7 +222,7 @@ export function LessonScreen({
     onQuit();
   }
 
-  /** ✕: leaving right away loses nothing, later the learner is asked first. */
+  /** The close button: leaving right away loses nothing, later the learner is asked first. */
   function requestQuit() {
     if (firstTry.current.answered > 0) setConfirmQuit(true);
     else quit();
@@ -248,26 +249,28 @@ export function LessonScreen({
   if (outOfHearts) {
     return (
       <div className="lesson out-of-hearts">
-        <div className="big-emoji pop">💔</div>
+        <div className="big-emoji pop" aria-hidden="true">
+          <Icon name="heart-crack" filled />
+        </div>
         <h2>נגמרו הלבבות</h2>
         {nextHeartAt !== undefined && (
           <p className="next-heart" role="timer">
-            ❤️ {heartCountdown(nextHeartAt - now)}
+            <Icon name="heart" filled /> {heartCountdown(nextHeartAt - now)}
           </p>
         )}
         <p>
-          לב חדש מתמלא כל 30 דקות. בינתיים אפשר לעשות חזרה על מה שלמדתם – בחזרה אין הורדת לבבות. ובחנות 💎 אפשר לקנות
-          לבבות בונוס.
+          לב חדש מתמלא כל 30 דקות. בינתיים אפשר לעשות חזרה על מה שלמדתם – בחזרה אין הורדת לבבות. ובחנות היהלומים אפשר
+          לקנות לבבות בונוס.
         </p>
         <div className="out-of-hearts-actions">
           {onReview && (
             <button type="button" className="btn primary" onClick={onReview} autoFocus>
-              🧠 לחזרה בלי לבבות
+              <Icon name="brain" /> לחזרה בלי לבבות
             </button>
           )}
           {onShop && (
             <button type="button" className="btn secondary" onClick={onShop}>
-              💎 לבבות בחנות
+              <Icon name="gem" /> לבבות בחנות
             </button>
           )}
           <button type="button" className="btn ghost" onClick={onQuit} autoFocus={!onReview}>
@@ -293,7 +296,7 @@ export function LessonScreen({
           onClick={requestQuit}
           aria-label={review ? 'יציאה מהחזרה' : 'יציאה מהשיעור'}
         >
-          ✕
+          <Icon name="x" />
         </button>
         <div
           className="progress-track"
@@ -306,13 +309,15 @@ export function LessonScreen({
           <div className="progress-fill" style={{ width: `${percent}%` }} />
         </div>
         {hearts === null ? (
-          <span className="hearts practice-badge">🧠 חזרה</span>
+          <span className="hearts practice-badge">
+            <Icon name="brain" /> חזרה
+          </span>
         ) : (
           <span
             className={`hearts${feedback && !feedback.correct ? ' hit' : ''}`}
             aria-label={hearts > MAX_HEARTS ? `${hearts} לבבות` : `${hearts} לבבות מתוך ${MAX_HEARTS}`}
           >
-            ❤️ {hearts}
+            <Icon name="heart" filled /> {hearts}
           </span>
         )}
       </header>
@@ -344,7 +349,7 @@ export function LessonScreen({
           <div className="feedback-text">
             <strong>
               <span className="feedback-icon" aria-hidden="true">
-                {feedback.correct ? '✓' : '✕'}
+                <Icon name={feedback.correct ? 'check' : 'x'} />
               </span>
               {feedback.correct ? praise : 'לא בדיוק…'}
             </strong>
@@ -376,7 +381,7 @@ export function LessonScreen({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="big-emoji" aria-hidden="true">
-              🥺
+              <Icon name="frown" />
             </div>
             <h2 id="quit-title">{review ? 'לצאת מהחזרה?' : 'לצאת מהשיעור?'}</h2>
             <p id="quit-text">

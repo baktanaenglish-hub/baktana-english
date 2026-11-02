@@ -46,12 +46,12 @@ export function reminderTimes(now: Date, time: string, practicedToday: boolean, 
 export function reminderText(streak: number, day: number): { title: string; body: string } {
   if (streak > 0) {
     const days = streak === 1 ? 'יום אחד' : `${streak} ימים`;
-    return { title: `🔥 הרצף שלך: ${days}`, body: 'כמה דקות של אנגלית היום, וממשיכים את הרצף!' };
+    return { title: `הרצף שלך: ${days}`, body: 'כמה דקות של אנגלית היום, וממשיכים את הרצף!' };
   }
   const bodies = [
-    'הגיע הזמן לשיעור קצר באנגלית 📚',
+    'הגיע הזמן לשיעור קצר באנגלית',
     'חמש דקות ביום עושות את ההבדל. נתרגל?',
-    'יש לכם כמה מילים לחזור עליהן 🧠',
+    'יש לכם כמה מילים לחזור עליהן',
   ];
   return { title: 'Baktana English', body: bodies[day % bodies.length] };
 }
@@ -125,7 +125,7 @@ export function reminderCalendar(time: string, now = new Date()): string {
     `DTSTART:${day}T${pad(h)}${pad(m)}00`,
     'DURATION:PT10M',
     'RRULE:FREQ=DAILY',
-    'SUMMARY:🔥 תרגול אנגלית – Baktana English',
+    'SUMMARY:תרגול אנגלית – Baktana English',
     'DESCRIPTION:כמה דקות של אנגלית: https://baktanaenglish-hub.github.io/baktana-english/',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',

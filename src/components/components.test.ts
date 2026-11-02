@@ -38,17 +38,17 @@ describe('validateAuth', () => {
 });
 
 describe('reviewButtonState (US-R1)', () => {
-  it('AC1: nothing due and a completed lesson → "💪 תרגול", enabled, no card', () => {
-    expect(reviewButtonState(0, true)).toEqual({ label: '💪 תרגול', disabled: false, pinned: false });
+  it('AC1: nothing due and a completed lesson → "תרגול", enabled, no card', () => {
+    expect(reviewButtonState(0, true)).toEqual({ icon: 'dumbbell', label: 'תרגול', disabled: false, pinned: false });
   });
 
-  it('AC2: 2 due → "🧠 חזרה (2)" without a pinned card', () => {
-    expect(reviewButtonState(2, true)).toEqual({ label: '🧠 חזרה (2)', disabled: false, pinned: false });
+  it('AC2: 2 due → "חזרה (2)" without a pinned card', () => {
+    expect(reviewButtonState(2, true)).toEqual({ icon: 'brain', label: 'חזרה (2)', disabled: false, pinned: false });
   });
 
   it('AC3: 3 or more due → the card is pinned', () => {
     expect(reviewButtonState(3, true).pinned).toBe(true);
-    expect(reviewButtonState(12, true)).toMatchObject({ label: '🧠 חזרה (12)', pinned: true });
+    expect(reviewButtonState(12, true)).toMatchObject({ label: 'חזרה (12)', pinned: true });
   });
 
   it('AC4: nothing completed → disabled', () => {

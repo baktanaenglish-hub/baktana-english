@@ -3,6 +3,7 @@ import type { Reward } from '../../lib/gems';
 import { REWARDED_PLAYS } from '../../lib/games';
 import { sounds } from '../../lib/sound';
 import { RewardList } from '../LessonComplete';
+import { Icon } from '../Icon';
 
 interface Props {
   title: string;
@@ -23,7 +24,7 @@ export function GameResult({ title, score, best, record, rewards, onAgain, onBac
   return (
     <div className="lesson-complete game-result">
       <div className="big-emoji pop" aria-hidden="true">
-        {record ? '🏆' : '🎮'}
+        <Icon name={record ? 'trophy' : 'gamepad-2'} filled={record} />
       </div>
       <h2 className="pop" role="status">
         {record ? 'שיא חדש!' : `${title} – סוף המשחק`}
@@ -31,20 +32,24 @@ export function GameResult({ title, score, best, record, rewards, onAgain, onBac
       <div className="stat-cards">
         <div className="stat-card xp rise">
           <span className="label">ניקוד</span>
-          <span className="value">⭐ {score}</span>
+          <span className="value">
+            <Icon name="star" filled /> {score}
+          </span>
         </div>
         <div className="stat-card streak rise" style={{ animationDelay: '0.1s' }}>
           <span className="label">שיא</span>
-          <span className="value">🏆 {best}</span>
+          <span className="value">
+            <Icon name="trophy" /> {best}
+          </span>
         </div>
       </div>
       {rewards.length > 0 ? (
         <RewardList rewards={rewards} />
       ) : (
-        <p className="muted">היום כבר קיבלתם פרסים על {REWARDED_PLAYS} משחקים – עכשיו משחקים בשביל השיא 😉</p>
+        <p className="muted">היום כבר קיבלתם פרסים על {REWARDED_PLAYS} משחקים – עכשיו משחקים בשביל השיא.</p>
       )}
       <button type="button" className="btn secondary" onClick={onAgain}>
-        🔁 עוד סיבוב
+        <Icon name="rotate-ccw" /> עוד סיבוב
       </button>
       <button type="button" className="btn primary" onClick={onBack} autoFocus>
         חזרה למשחקים

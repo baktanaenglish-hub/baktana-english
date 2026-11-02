@@ -17,6 +17,7 @@ import { Onboarding } from './components/Onboarding';
 import { Paywall } from './components/Paywall';
 import { Profile } from './components/Profile';
 import { SignupPrompt } from './components/SignupPrompt';
+import { Icon, type IconName } from './components/Icon';
 import { TopBar } from './components/TopBar';
 import { UnitIntro } from './components/UnitIntro';
 import { UpdatePrompt } from './components/UpdatePrompt';
@@ -109,7 +110,7 @@ import { useProgress } from './lib/store';
 import { useAppUpdate } from './lib/update';
 import type { Exercise, Unit } from './types';
 
-/** 'pet' is opened from the path and 'shop' from the 💎 in the top bar, not from the bottom bar. */
+/** 'pet' is opened from the path and 'shop' from the gem in the top bar, not from the bottom bar. */
 type Tab = 'path' | 'arcade' | 'shop' | 'league' | 'call' | 'profile' | 'pet';
 
 /** Where a sign-up started, reported with `signup_complete`. */
@@ -160,13 +161,13 @@ interface IntroState {
   lessonId?: string;
 }
 
-/** Five tabs at most; the shop opens from the 💎 in the top bar and from the profile. */
-const ALL_TABS: { name: Exclude<Tab, 'pet' | 'shop'>; icon: string; label: string }[] = [
-  { name: 'path', icon: '🏠', label: 'לימוד' },
-  { name: 'arcade', icon: '🎮', label: 'משחקים' },
-  { name: 'league', icon: '🏆', label: 'ליגה' },
-  { name: 'call', icon: '📞', label: 'שיחה' },
-  { name: 'profile', icon: '👤', label: 'פרופיל' },
+/** Five tabs at most; the shop opens from the gem in the top bar and from the profile. */
+const ALL_TABS: { name: Exclude<Tab, 'pet' | 'shop'>; icon: IconName; label: string }[] = [
+  { name: 'path', icon: 'house', label: 'לימוד' },
+  { name: 'arcade', icon: 'gamepad-2', label: 'משחקים' },
+  { name: 'league', icon: 'trophy', label: 'ליגה' },
+  { name: 'call', icon: 'phone', label: 'שיחה' },
+  { name: 'profile', icon: 'user', label: 'פרופיל' },
 ];
 
 // The league and AI calls need a backend, so static deploys without one leave them out.
@@ -436,10 +437,10 @@ function Screens() {
     const rewards: Reward[] = [];
     if (grown.gems) {
       const label = grown.evolvedTo === 1 ? `${pet.name} בקעה מהביצה!` : `${pet.name} התפתחה!`;
-      rewards.push({ icon: '🐣', label, gems: grown.gems });
+      rewards.push({ icon: 'egg', label, gems: grown.gems });
     }
     if (challenge.completed) {
-      rewards.push({ icon: '⚡', label: `האתגר של ${pet.name}: ${challenge.completed.title}`, gems: challenge.gems });
+      rewards.push({ icon: 'zap', label: `האתגר של ${pet.name}: ${challenge.completed.title}`, gems: challenge.gems });
     }
     const line = reactionLine(challenge.pet, {
       kind,
@@ -600,7 +601,11 @@ function Screens() {
   if (screen.name === 'placement') {
     return (
       <QuizScreen
-        badge="🎯 מבחן מיקום"
+        badge={
+          <>
+            <Icon name="target" /> מבחן מיקום
+          </>
+        }
         exercises={screen.exercises}
         stop={placementDone}
         onQuit={() => setScreen({ name: 'path' })}
@@ -625,7 +630,11 @@ function Screens() {
     const { unit } = screen;
     return (
       <QuizScreen
-        badge="🏆 מבחן יחידה"
+        badge={
+          <>
+            <Icon name="trophy" /> מבחן יחידה
+          </>
+        }
         exercises={screen.exercises}
         onQuit={() => setScreen({ name: 'path' })}
         onFinish={(answers) => {
@@ -865,7 +874,8 @@ function Screens() {
       <main className="content" key={screen.name}>
         {screen.name === 'path' && frozeDays > 0 && (
           <p className="freeze-banner pop" role="status">
-            🧊 הקפאת רצף שמרה על הרצף שלכם ({frozeDays === 1 ? 'יום אחד' : `${frozeDays} ימים`}). עכשיו תורכם!
+            <Icon name="snowflake" /> הקפאת רצף שמרה על הרצף שלכם ({frozeDays === 1 ? 'יום אחד' : `${frozeDays} ימים`}).
+            עכשיו תורכם!
           </p>
         )}
         {screen.name === 'path' && (
@@ -956,7 +966,7 @@ function Screens() {
               updateGems((s) => earn(s, amount + (shared?.gems ?? 0)));
               const accessory = shared?.newAccessories[0];
               if (!pet || !accessory) return null;
-              return `🐾 ${pet.name} קיבלה ${accessory.name} ${accessory.icon} – פרס משותף לכל הקבוצה!`;
+              return `${pet.name} קיבלה ${accessory.name} ${accessory.icon} – פרס משותף לכל הקבוצה!`;
             }}
             joinCode={joinCode}
             onJoinCodeUsed={() => setJoinCode(null)}
@@ -969,7 +979,7 @@ function Screens() {
               updateGems((s) => earn(s, gems + (won?.gems ?? 0)));
               const accessory = won?.newAccessories[0];
               if (!pet || !accessory) return null;
-              return `🐾 ${pet.name} קיבלה ${accessory.name} ${accessory.icon}!`;
+              return `${pet.name} קיבלה ${accessory.name} ${accessory.icon}!`;
             }}
             duelCode={duelCode}
             onDuelCodeUsed={() => setDuelCode(null)}
@@ -1044,7 +1054,7 @@ function Screens() {
                 setScreen({ name: tab.name });
               }}
             >
-              <span aria-hidden="true">{locked ? '🔒' : tab.icon}</span> <span>{tab.label}</span>
+              <Icon name={locked ? 'lock' : tab.icon} size={22} /> <span>{tab.label}</span>
               {tab.name === 'league' && leagueBadge > 0 && screen.name !== 'league' && (
                 <span className="badge nav-badge" aria-label={`${leagueBadge} עדכונים חדשים בליגה`}>
                   {leagueBadge}

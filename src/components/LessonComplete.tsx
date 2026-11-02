@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import type { Reward } from '../lib/gems';
 import { sounds } from '../lib/sound';
+import { Icon, type IconName } from './Icon';
 import type { LessonResult } from './LessonScreen';
 
 interface Props {
@@ -20,7 +21,11 @@ interface Props {
 }
 
 const TITLES = { lesson: 'השיעור הושלם!', review: 'החזרה הושלמה!', practice: 'התרגול הושלם!' };
-const EMOJIS = { lesson: '🎉', review: '🧠', practice: '💪' };
+const ICONS: Record<'lesson' | 'review' | 'practice', IconName> = {
+  lesson: 'party-popper',
+  review: 'brain',
+  practice: 'dumbbell',
+};
 
 const CONFETTI_COLORS = ['#1f7cf2', '#00a99d', '#ffc21a', '#ff4b4b', '#ce82ff', '#ff9600'];
 
@@ -55,30 +60,42 @@ export function LessonComplete({
         ))}
       </div>
       <div className="big-emoji pop" aria-hidden="true">
-        {EMOJIS[kind]}
+        <Icon name={ICONS[kind]} />
       </div>
       <h2 className="pop" role="status">
         {TITLES[kind]}
       </h2>
-      {goalReached && <p className="goal-banner pop">🎯 עמדתם ביעד היומי! כל הכבוד!</p>}
+      {goalReached && (
+        <p className="goal-banner pop">
+          <Icon name="target" /> עמדתם ביעד היומי! כל הכבוד!
+        </p>
+      )}
       {pet}
       <div className="stat-cards">
         <div className="stat-card xp rise" style={{ animationDelay: '0.1s' }}>
           <span className="label">נקודות XP</span>
-          <span className="value">⚡ +{result.xp}</span>
+          <span className="value">
+            <Icon name="zap" filled /> +{result.xp}
+          </span>
         </div>
         <div className="stat-card accuracy rise" style={{ animationDelay: '0.2s' }}>
           <span className="label">דיוק</span>
-          <span className="value">🎯 {result.accuracy}%</span>
+          <span className="value">
+            <Icon name="target" /> {result.accuracy}%
+          </span>
         </div>
         <div className="stat-card streak rise" style={{ animationDelay: '0.3s' }}>
           <span className="label">רצף ימים</span>
-          <span className="value">🔥 {streak}</span>
+          <span className="value">
+            <Icon name="flame" filled /> {streak}
+          </span>
         </div>
         {gems > 0 && (
           <div className="stat-card gems rise" style={{ animationDelay: '0.4s' }}>
             <span className="label">יהלומים</span>
-            <span className="value">💎 +{gems}</span>
+            <span className="value">
+              <Icon name="gem" filled /> +{gems}
+            </span>
           </div>
         )}
       </div>
@@ -97,9 +114,11 @@ export function RewardList({ rewards }: { rewards: Reward[] }) {
     <ul className="reward-list" aria-label="יהלומים שהרווחתם">
       {rewards.map((r, i) => (
         <li key={i} className="rise" style={{ animationDelay: `${0.5 + i * 0.12}s` }}>
-          <span aria-hidden="true">{r.icon}</span>
+          <Icon name={r.icon} />
           <span className="reward-label">{r.label}</span>
-          <span className="reward-gems">💎 +{r.gems}</span>
+          <span className="reward-gems">
+            <Icon name="gem" filled /> +{r.gems}
+          </span>
         </li>
       ))}
     </ul>

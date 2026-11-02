@@ -1029,6 +1029,8 @@ button:disabled {
 
 .big-emoji {
   font-size: 5rem;
+  line-height: 1;
+  color: var(--brand);
 }
 
 .lesson-complete h2 {
@@ -2495,6 +2497,7 @@ button:disabled {
   font-size: 3.2rem;
   text-align: center;
   line-height: 1;
+  color: var(--gold-dark);
 }
 
 .paywall-benefits {
@@ -3170,7 +3173,7 @@ button:disabled {
   box-shadow: 0 4px 0 var(--red-dark);
 }
 
-.call-hangup span {
+.call-hangup .icon {
   transform: rotate(135deg);
 }
 
@@ -4648,4 +4651,84 @@ button.pet-avatar {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* ---------- Line icons (components/Icon.tsx, from Lucide) ---------- */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+}
+
+.icon-flame {
+  color: var(--orange);
+}
+
+.icon-gold {
+  color: var(--gold-dark);
+}
+
+.icon-heart {
+  color: var(--red);
+}
+
+.icon-gem {
+  color: var(--select-text);
+}
+
+.icon-filled {
+  fill: currentColor;
+  fill-opacity: 0.2;
+}
+
+/* Large icons on result screens take the emoji's old size (.big-emoji sets font-size). */
+.big-emoji .icon {
+  stroke-width: 1.5;
+}
+
+/* Lesson bubbles: white symbols on the unit color (gray when locked). */
+.node-btn .icon {
+  color: inherit;
+  vertical-align: -0.2em;
+  stroke-width: 2.5;
+}
+
+.node-btn .icon-filled {
+  fill-opacity: 1;
+}
+
+/* Places 1–3 on a board: a gold, silver or bronze disc with the number. */
+.rank-medal {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  vertical-align: middle;
+}
+
+.rank-1 {
+  background: linear-gradient(145deg, #ffd54a, #e0a400);
+}
+
+.rank-2 {
+  background: linear-gradient(145deg, #cfd8dc, #90a4ae);
+}
+
+.rank-3 {
+  background: linear-gradient(145deg, #e0a070, #b06a34);
+}
+
+/* Tabs keep one color per state (gray, or blue when active), not the trophy's gold. */
+.bottom-nav .icon,
+.league-tabs .icon {
+  color: inherit;
+}
+
+.feedback-icon .icon {
+  stroke-width: 3;
+  vertical-align: 0;
 }

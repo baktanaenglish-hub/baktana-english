@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Word } from '../../types';
 import { MEMORY_PAIRS, memoryDeck, memoryScore, type MemoryCard } from '../../lib/games';
 import { sounds } from '../../lib/sound';
+import { Icon } from '../Icon';
 
 interface Props {
   pool: Word[];
@@ -48,7 +49,7 @@ export function MemoryGame({ pool, onFinish, onQuit }: Props) {
     <div className="game memory">
       <header className="lesson-header">
         <button type="button" className="icon-btn" onClick={onQuit} aria-label="יציאה מהמשחק">
-          ✕
+          <Icon name="x" />
         </button>
         <div
           className="progress-track"
@@ -60,7 +61,9 @@ export function MemoryGame({ pool, onFinish, onQuit }: Props) {
         >
           <div className="progress-fill gem" style={{ width: `${(matched.length / pairs) * 100}%` }} />
         </div>
-        <span className="memory-moves">👆 {moves}</span>
+        <span className="memory-moves">
+          <Icon name="pointer" /> {moves}
+        </span>
       </header>
       <main className="lesson-body">
         <h2 className="memory-title">מצאו את {MEMORY_PAIRS} הזוגות</h2>
@@ -78,7 +81,7 @@ export function MemoryGame({ pool, onFinish, onQuit }: Props) {
                 aria-pressed={shown}
               >
                 <span className="memory-face" dir={card.lang === 'en' ? 'ltr' : 'rtl'}>
-                  {shown ? card.text : '❓'}
+                  {shown ? card.text : <Icon name="circle-help" />}
                 </span>
               </button>
             );

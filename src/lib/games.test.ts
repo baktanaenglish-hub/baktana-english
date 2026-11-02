@@ -79,7 +79,7 @@ describe('finishGame', () => {
   it('pays the first games of the day and keeps the high score', () => {
     let s: GemState = initialGems();
     const first = finishGame(s, 'rush', 300, TODAY);
-    expect(first.rewards).toEqual([{ icon: '⚡', label: '300 נקודות', gems: 15 }]);
+    expect(first.rewards).toEqual([{ icon: 'zap', label: '300 נקודות', gems: 15 }]);
     expect(first.record).toBe(true);
     s = first.state;
     const better = finishGame(s, 'rush', 400, TODAY);

@@ -1,4 +1,5 @@
 import type { UpdateState } from '../lib/update';
+import { Icon } from './Icon';
 
 interface Props {
   state: UpdateState;
@@ -15,7 +16,7 @@ export function UpdatePrompt({ state, onInstall, onDismiss }: Props) {
     <div className="update-overlay">
       <div className="update-dialog" role="dialog" aria-modal="true" aria-labelledby="update-title">
         <div className="big-emoji" aria-hidden="true">
-          🚀
+          <Icon name="rocket" />
         </div>
         <h2 id="update-title">יש גרסה חדשה!</h2>
         <p className="muted">גרסה {state.version.versionName} מוכנה להתקנה. ההתקדמות שלכם נשמרת.</p>
