@@ -26,9 +26,9 @@ export interface AppOptions {
   eventsRateLimit?: { max: number; windowMs: number };
   /** Requests per window on POST /api/call/turn, per IP (default 30 per minute). */
   callRateLimit?: { max: number; windowMs: number };
-  /** Anthropic API settings for the AI video call (defaults: ANTHROPIC_API_KEY, CALL_MODEL env). */
+  /** Anthropic API settings for the AI phone call (defaults: ANTHROPIC_API_KEY, CALL_MODEL env). */
   anthropic?: CallModelOptions;
-  /** Comma-separated emails allowed to use the AI video call (defaults to the PREMIUM_EMAILS env). */
+  /** Comma-separated emails allowed to use the AI phone call (defaults to the PREMIUM_EMAILS env). */
   premiumEmails?: string;
   /** Comma-separated emails of testers, who get a short daily trial call (defaults to the TESTER_EMAILS env). */
   testerEmails?: string;

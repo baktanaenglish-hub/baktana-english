@@ -15,13 +15,13 @@ function render(onPremium?: () => void) {
 describe('the call tab before and after premium goes on sale', () => {
   it('says "coming soon" without a way to the premium screen', () => {
     const html = render();
-    expect(html).toContain('בקרוב! שיחות וידאו יהיו חלק מפרימיום');
+    expect(html).toContain('בקרוב! שיחות טלפון יהיו חלק מפרימיום');
     expect(html).not.toContain('לפרטים על פרימיום');
   });
 
   it('offers the premium screen once on sale', () => {
     const html = render(noop);
-    expect(html).toContain('שיחות וידאו הן חלק מפרימיום');
+    expect(html).toContain('שיחות טלפון הן חלק מפרימיום');
     expect(html).toContain('לפרטים על פרימיום');
   });
 });

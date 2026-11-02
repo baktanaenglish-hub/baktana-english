@@ -115,7 +115,7 @@ export function Profile(props: Props) {
               <Icon name="crown" filled /> {props.premium ? 'מנוי פרימיום' : 'פרימיום'}
             </h3>
             <p className="muted">
-              {props.premium ? props.subscription || 'המנוי שלכם פעיל' : 'שיחות וידאו באנגלית עם דמויות AI'}
+              {props.premium ? props.subscription || 'המנוי שלכם פעיל' : 'שיחות טלפון באנגלית עם דמויות AI'}
             </p>
           </div>
           <button

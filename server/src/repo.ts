@@ -331,7 +331,7 @@ export function createRepo(db: Db) {
         }
       });
     },
-    /** The learner's video-call usage on `day` (YYYY-MM-DD); zeros when there is no row. */
+    /** The learner's phone-call usage on `day` (YYYY-MM-DD); zeros when there is no row. */
     getCallUsage(userId: string, day: string): CallUsage {
       const row = q.getCallUsage.get(userId, day) as { calls: number; turns: number } | undefined;
       return { calls: Number(row?.calls ?? 0), turns: Number(row?.turns ?? 0) };

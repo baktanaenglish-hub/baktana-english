@@ -4,7 +4,7 @@ import type { Persona, PersonaId } from '../../../shared/call';
 /**
  * The face of a call character. Characters with photos (PHOTO_PERSONAS) are animated from frames
  * of the same picture; the others, and any whose photos fail to load, are drawn as an illustrated
- * portrait. Both breathe and blink, and move their mouth while `talking`.
+ * portrait. Both breathe and blink, and move their mouth while `talking` – unless `still`.
  */
 interface Look {
   skin: string;
@@ -24,6 +24,8 @@ const LOOKS: Record<PersonaId, Look> = {
 interface Props {
   persona: Persona;
   talking?: boolean;
+  /** A still contact photo: no breathing, blinking or mouth movement (the phone-call screen). */
+  still?: boolean;
   className?: string;
 }
 
@@ -56,13 +58,14 @@ const reducedMotion = () =>
 function PhotoPortrait({
   persona,
   talking = false,
+  still: stillPhoto = false,
   className,
   blinks,
   onError,
 }: Props & { blinks: boolean; onError: () => void }) {
   const [mouthOpen, setMouthOpen] = useState(false);
   const [blinking, setBlinking] = useState(false);
-  const still = reducedMotion();
+  const still = stillPhoto || reducedMotion();
 
   // While talking, open and close the mouth at an uneven, speech-like rhythm.
   useEffect(() => {
@@ -101,11 +104,11 @@ function PhotoPortrait({
     return () => window.clearTimeout(timer);
   }, [still, blinks]);
 
-  const open = talking && (still || mouthOpen);
+  const open = talking && !stillPhoto && (still || mouthOpen);
   const frame: Frame = blinking ? (open ? 'blink-talk' : 'blink') : open ? 'talk' : 'idle';
   return (
     <div
-      className={`portrait photo${talking ? ' talking' : ''}${className ? ` ${className}` : ''}`}
+      className={`portrait photo${talking && !stillPhoto ? ' talking' : ''}${stillPhoto ? ' still' : ''}${className ? ` ${className}` : ''}`}
       style={{ background: persona.color }}
       aria-hidden="true"
     >
@@ -126,13 +129,13 @@ function PhotoPortrait({
   );
 }
 
-function IllustratedPortrait({ persona, talking = false, className }: Props) {
+function IllustratedPortrait({ persona, talking = false, still = false, className }: Props) {
   const clip = useId();
   const look = LOOKS[persona.id];
   return (
     <svg
       viewBox="0 0 200 200"
-      className={`portrait${talking ? ' talking' : ''}${className ? ` ${className}` : ''}`}
+      className={`portrait${talking && !still ? ' talking' : ''}${still ? ' still' : ''}${className ? ` ${className}` : ''}`}
       aria-hidden="true"
     >
       <defs>

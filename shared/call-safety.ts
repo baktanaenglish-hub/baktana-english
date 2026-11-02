@@ -1,5 +1,5 @@
 /**
- * Deterministic guards for the AI "video call" (contract: shared/call.ts), used by the server before and after
+ * Deterministic guards for the AI "phone call" (contract: shared/call.ts), used by the server before and after
  * the model: keyword/regex checks in English and Hebrew, safe in-character replies, and request validation.
  * Pure TypeScript with no imports except './call', so it runs in Node, the browser and Deno.
  *
