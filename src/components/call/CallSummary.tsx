@@ -14,6 +14,8 @@ export interface CallResult {
 
 interface Props {
   result: CallResult;
+  /** Points this call added to the learner's score. */
+  xp: number;
   onNewCall: () => void;
   onBack: () => void;
 }
@@ -26,7 +28,7 @@ function encouragement(turns: number): string {
 }
 
 /** After hanging up: how long the call was, how much the learner said and what the teacher fixed. */
-export function CallSummary({ result, onNewCall, onBack }: Props) {
+export function CallSummary({ result, xp, onNewCall, onBack }: Props) {
   const { persona, durationMs, turns, corrections } = result;
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -41,6 +43,11 @@ export function CallSummary({ result, onNewCall, onBack }: Props) {
         השיחה עם <span dir="ltr">{persona.name}</span> הסתיימה
       </h1>
       <p className="call-summary-cheer">{encouragement(turns)}</p>
+      <p className="call-summary-points" role="status">
+        {xp > 0
+          ? `בשיחה זו צברתם ${xp} נקודות – על ${turns === 1 ? 'משפט אחד' : `${turns} משפטים`} שאמרתם!`
+          : 'בשיחה זו לא צברתם נקודות. כל משפט שתגידו בשיחה הבאה יזכה אתכם בנקודות.'}
+      </p>
 
       <div className="call-stats">
         <div className="call-stat">
@@ -52,6 +59,10 @@ export function CallSummary({ result, onNewCall, onBack }: Props) {
         <div className="call-stat">
           <span className="call-stat-value">{turns}</span>
           <span className="call-stat-label">משפטים שאמרתם</span>
+        </div>
+        <div className="call-stat call-stat-xp">
+          <span className="call-stat-value">+{xp}</span>
+          <span className="call-stat-label">נקודות</span>
         </div>
       </div>
 
