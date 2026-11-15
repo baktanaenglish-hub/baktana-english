@@ -2,7 +2,8 @@
 # pushes to main also publish it as the "android-latest" GitHub release, so it can be
 # downloaded straight to a phone.
 # When the upload-key secrets are set (docs/store-release.md), it also builds the signed
-# Google Play bundle (.aab, "play" flavor) and keeps it as an artifact to upload to Play Console.
+# Google Play bundle (.aab, "play" flavor), keeps it as an artifact and also attaches it to the
+# "android-latest" release as BaktanaEnglish-play.aab, so it can be downloaded from a phone.
 # Like GitHub Pages, sign-in and the league use Supabase when the repository variables
 # VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set (docs/supabase.md); otherwise guest-only.
 # The variable VITE_REVENUECAT_ANDROID_KEY turns on buying premium in the Play edition
@@ -92,7 +93,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete android-latest --yes --cleanup-tag || true
-          gh release create android-latest BaktanaEnglish.apk version.json \
+          files=(BaktanaEnglish.apk version.json)
+          if [ -f android/app/build/outputs/bundle/playRelease/app-play-release.aab ]; then
+            cp android/app/build/outputs/bundle/playRelease/app-play-release.aab BaktanaEnglish-play.aab
+            files+=(BaktanaEnglish-play.aab)
+          fi
+          gh release create android-latest "${files[@]}" \
             --target "$GITHUB_SHA" \
             --title "Baktana English לאנדרואיד (גרסה 1.0.${{ github.run_number }})" \
             --notes "להתקנה: מורידים את BaktanaEnglish.apk בטלפון, פותחים אותו ומאשרים התקנה ממקור לא ידוע. גרסה חדשה מותקנת מעל הישנה וההתקדמות נשמרת. מגרסה זו והלאה האפליקציה מציעה עדכון בעצמה כשיוצאת גרסה חדשה."
