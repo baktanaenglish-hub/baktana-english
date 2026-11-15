@@ -61,7 +61,9 @@ export function CallSummary({ result, xp, onNewCall, onBack }: Props) {
           <span className="call-stat-label">משפטים שאמרתם</span>
         </div>
         <div className="call-stat call-stat-xp">
-          <span className="call-stat-value">+{xp}</span>
+          <span className="call-stat-value" dir="ltr">
+            +{xp}
+          </span>
           <span className="call-stat-label">נקודות</span>
         </div>
       </div>
