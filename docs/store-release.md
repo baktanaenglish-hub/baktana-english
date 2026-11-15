@@ -56,6 +56,7 @@ base64 -w0 upload.jks > upload.jks.b64   # במק: base64 -i upload.jks -o uploa
 **שומרים את `upload.jks` והסיסמה במקום בטוח מחוץ ל־repo** (למשל במנהל סיסמאות), ולא מעלים אותם ל־git. ב־Play App Signing גוגל מחזיקה את מפתח החתימה הסופי, ואם מפתח ההעלאה אובד אפשר לבקש ממנה לאפס אותו.
 
 מהדחיפה הבאה ל־`main` (או בהרצה ידנית של ה־workflow ‏Android APK), הקובץ `BaktanaEnglish-play-bundle` (‏`app-play-release.aab`) מופיע ב־Artifacts של הריצה.
+אותו קובץ מצורף גם לגרסה `android-latest` בשם `BaktanaEnglish-play.aab`: https://github.com/baktanaenglish-hub/baktana-english/releases/download/android-latest/BaktanaEnglish-play.aab. הקישור עובד גם מהטלפון, ובלי zip. שימו לב שהגרסה ציבורית, כך שגם ה־`.aab` זמין לכל מי שמכיר את הקישור (הוא חתום במפתח ההעלאה, אבל המפתח עצמו לא כלול בו).
 
 > **שימו לב:** ה־APK מ־GitHub (`com.baktana.english.sideload`) וגרסת Play (`com.baktana.english`) הן שתי אפליקציות נפרדות בטלפון: מזהה שונה ומפתח חתימה שונה. אפשר להתקין את שתיהן, אבל ההתקדמות לא עוברת ביניהן לבד. מי שעובר ל־Play צריך חשבון מסונכרן כדי לשמור את ההתקדמות, ואז יכול להסיר את ה־APK.
 
