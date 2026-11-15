@@ -33,6 +33,7 @@ import { takeDuelCode, useDuels } from './lib/duels';
 import { takeJoinCode, useGroups } from './lib/groups';
 import { needsOnboarding, reachesGoal, setDailyGoal } from './lib/goals';
 import { loadIntroSeen, markIntroSeen, shouldAutoShowIntro } from './lib/intro-seen';
+import { callXp } from './lib/call';
 import { canPractice, completePractice } from './lib/practice';
 import {
   applyStreakFreeze,
@@ -157,7 +158,7 @@ type Screen =
     }
   /** An AI phone call in progress, and its summary after hanging up. */
   | { name: 'call-active'; persona: Persona }
-  | { name: 'call-summary'; result: CallResult }
+  | { name: 'call-summary'; result: CallResult; xp: number }
   /** The premium screen (plans, buying, restoring). */
   | { name: 'premium'; back: Tab };
 
@@ -767,7 +768,15 @@ function Screens() {
       <CallScreen
         key={screen.persona.id}
         persona={screen.persona}
-        onEnd={(result) => setScreen({ name: 'call-summary', result })}
+        onEnd={(result) => {
+          const xp = callXp(result.turns);
+          if (xp > 0) {
+            const after = completePractice(progress, xp);
+            update((p) => completePractice(p, xp));
+            void account.sync(after);
+          }
+          setScreen({ name: 'call-summary', result, xp });
+        }}
         onBack={() => setScreen({ name: 'call' })}
         onCallsToday={onCallsToday}
         onBlocked={(error) => {
@@ -787,6 +796,7 @@ function Screens() {
     return (
       <CallSummary
         result={screen.result}
+        xp={screen.xp}
         onNewCall={() => setScreen({ name: 'call' })}
         onBack={() => setScreen({ name: 'path' })}
       />

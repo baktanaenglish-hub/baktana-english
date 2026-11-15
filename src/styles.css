@@ -3320,9 +3320,14 @@ button:disabled {
   color: var(--muted);
 }
 
+.call-summary-points {
+  margin: 0;
+  font-weight: 700;
+}
+
 .call-stats {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
   width: 100%;
 }
@@ -3334,6 +3339,10 @@ button:disabled {
   padding: 14px;
   border: 2px solid var(--border);
   border-radius: 16px;
+}
+
+.call-stat-xp {
+  border-color: var(--brand);
 }
 
 .call-stat-value {
