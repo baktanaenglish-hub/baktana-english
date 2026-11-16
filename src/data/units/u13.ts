@@ -33,7 +33,7 @@ export const unit13: Unit = {
     {
       id: 'u13l2',
       title: 'משכורת וכסף',
-      tip: 'כסף הוא [[money]] – אין לו רבים ואין [[a]]: [[I have money]]. את המילה [[much]] משתמשים בשאלה: [[How much money?]]',
+      tip: 'כסף הוא [[money]] – אין לו רבים ואין [[a]]: [[I have money]]. [[much]] הולכת עם שם עצם שאי אפשר לספור: [[too much money]], [[How much money do you have?]]. שימו לב: [[too]] כאן פירושו "יותר מדי", לא "גם".',
       words: [
         { en: 'salary', he: 'משכורת', sound: 'סָלֶרִי' },
         { en: 'money', he: 'כסף', sound: 'מָאנִי' },
@@ -47,7 +47,6 @@ export const unit13: Unit = {
           en: 'I save money every month',
           he: 'אני חוסך כסף כל חודש',
           heAlt: ['אני חוסכת כסף כל חודש'],
-          errors: ['E7'],
         },
         {
           en: 'I spend too much money',
@@ -61,7 +60,7 @@ export const unit13: Unit = {
     {
       id: 'u13l3',
       title: 'ראיון עבודה',
-      tip: 'לפני שם עצם שמתחיל בקול תנועה אומרים [[an]]: [[an interview]]. ניסיון הוא [[experience]] – בלי [[a]] ובלי רבים.',
+      tip: 'לפני מילה שמתחילה בצליל של תנועה אומרים [[an]]: [[an interview]], [[an email]]. ניסיון הוא [[experience]] – בלי [[a]] ובלי רבים.',
       words: [
         { en: 'interview', he: 'ראיון', sound: 'אִינְטֶרְוְיוּ' },
         { en: 'experience', he: 'ניסיון', sound: 'אִיקְסְפִּירִיאֶנְס' },
@@ -71,7 +70,7 @@ export const unit13: Unit = {
       ],
       sentences: [
         { en: 'I have an interview tomorrow', he: 'יש לי ראיון מחר', errors: ['E2', 'E6'] },
-        { en: 'I have experience', he: 'יש לי ניסיון', errors: ['E2', 'E6'] },
+        { en: 'I have experience', he: 'יש לי ניסיון', errors: ['E6'] },
         { en: 'I want to apply for this job', he: 'אני רוצה להגיש מועמדות למשרה הזאת' },
         {
           en: 'Send me your CV, please',
@@ -119,7 +118,7 @@ export const unit13: Unit = {
         { en: 'I work in a team', he: 'אני עובד בצוות', heAlt: ['אני עובדת בצוות'], errors: ['E2', 'E15'] },
         { en: 'We have a new project', he: 'יש לנו פרויקט חדש', errors: ['E4', 'E6'] },
         { en: 'The manager is busy', he: 'המנהל עסוק', errors: ['E1'] },
-        { en: 'Let us take a break', he: 'בואו ניקח הפסקה', alt: ["Let's take a break"], errors: ['E2'] },
+        { en: "Let's take a break", he: 'בואו ניקח הפסקה', alt: ['Let us take a break'], errors: ['E2'] },
       ],
     },
   ],

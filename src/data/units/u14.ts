@@ -33,7 +33,7 @@ export const unit14: Unit = {
     {
       id: 'u14l2',
       title: 'אפליקציות וסיסמאות',
-      tip: 'את הסיסמה לא מגלים: [[Do not tell your password]] – ולא "תגיד". אפליקציה מורידים עם [[download]] ומעדכנים עם [[update]].',
+      tip: 'את הסיסמה לא מגלים: [[Do not share your password]]. אפליקציה מורידים עם [[download]] ומעדכנים עם [[update]].',
       words: [
         { en: 'app', he: 'אפליקציה', sound: 'אַפּ' },
         { en: 'download', he: 'להוריד', sound: 'דַאוּנְלוֹד' },
@@ -44,14 +44,14 @@ export const unit14: Unit = {
       sentences: [
         { en: 'I download an app', he: 'אני מוריד אפליקציה', heAlt: ['אני מורידה אפליקציה'], errors: ['E2'] },
         { en: 'This app needs an update', he: 'האפליקציה הזאת צריכה עדכון', errors: ['E2', 'E7'] },
-        { en: 'What is your password?', he: 'מה הסיסמה שלך?', alt: ["What's your password"], errors: ['E8', 'E14'] },
+        { en: 'What is your password?', he: 'מה הסיסמה שלך?', alt: ["What's your password"], errors: ['E1', 'E14'] },
         { en: 'I have an account', he: 'יש לי חשבון', errors: ['E2', 'E6'] },
       ],
     },
     {
       id: 'u14l3',
       title: 'רשתות חברתיות',
-      tip: 'משתפים תמונה עם [[share]]: [[I share a photo]]. מצלמים ומקבלים [[photo]] – ואומרים [[a photo of my family]].',
+      tip: 'משתפים תמונה עם [[share]]: [[I share a photo]]. תמונה היא [[photo]]. מצלמים: [[take a photo]]. תמונה של...: [[a photo of my family]].',
       words: [
         { en: 'photo', he: 'תמונה', sound: 'פוֹטוֹ' },
         { en: 'video', he: 'סרטון', sound: 'וִידֵיאוֹ' },
@@ -75,7 +75,7 @@ export const unit14: Unit = {
         { en: 'turn on', he: 'להדליק', sound: 'טֶרְן אוֹן' },
         { en: 'turn off', he: 'לכבות', sound: 'טֶרְן אוֹף' },
         { en: 'Wi-Fi', he: 'ווייפיי', sound: 'וַוייפַיי' },
-        { en: 'charge', he: 'לטעון', sound: 'צ׳ָארְג׳' },
+        { en: 'charge', he: 'להטעין', sound: 'צ׳ָארְג׳' },
       ],
       sentences: [
         { en: 'My phone is broken', he: 'הטלפון שלי שבור', alt: ["My phone's broken"], errors: ['E1'] },

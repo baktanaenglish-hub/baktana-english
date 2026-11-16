@@ -15,7 +15,7 @@ export const unit15: Unit = {
     {
       id: 'u15l1',
       title: 'נוף',
-      tip: 'באנגלית אומרים [[in the desert]], [[in the forest]], [[on the mountain]] ו־[[at the sea]]. מתארים עם [[There is]].',
+      tip: 'באנגלית אומרים [[in the desert]], [[in the forest]], [[on the mountain]] ו־[[by the sea]]. מתארים עם [[There is]].',
       words: [
         { en: 'mountain', he: 'הר', sound: 'מַאוּנְטֶן' },
         { en: 'sea', he: 'ים', sound: 'סִי' },
@@ -33,10 +33,10 @@ export const unit15: Unit = {
     {
       id: 'u15l2',
       title: 'חיות',
-      tip: 'חיה אחת: [[a dog]]; כמה חיות: [[two dogs]] עם [[s]]. אבל [[bird]] ו־[[horse]] הן כמו כל שם עצם: [[a bird]], [[two horses]].',
+      tip: 'חיה אחת: [[a dog]]; כמה חיות: [[two dogs]] עם [[s]]. לפני [[animal]] אומרים [[an]]: [[an animal]]. ו־[[horses]] נשמע "הורסיז".',
       words: [
         { en: 'dog', he: 'כלב', sound: 'דוֹג' },
-        { en: 'cat', he: 'חתול', sound: 'קָאט' },
+        { en: 'cat', he: 'חתול', sound: 'קֶט' },
         { en: 'bird', he: 'ציפור', sound: 'בֶּרְד' },
         { en: 'horse', he: 'סוס', sound: 'הוֹרְס' },
         { en: 'animal', he: 'חיה', sound: 'אָנִימֶל' },
@@ -45,7 +45,7 @@ export const unit15: Unit = {
         { en: 'I have a dog', he: 'יש לי כלב', errors: ['E2', 'E6'] },
         { en: 'My cat is small', he: 'החתול שלי קטן', alt: ["My cat's small"], errors: ['E1'] },
         { en: 'The bird is on the tree', he: 'הציפור על העץ', errors: ['E1', 'E15'] },
-        { en: 'I love animals', he: 'אני אוהב חיות', heAlt: ['אני אוהבת חיות'], errors: ['E10'] },
+        { en: 'I love animals', he: 'אני אוהב חיות', heAlt: ['אני אוהבת חיות'], errors: ['E3'] },
       ],
     },
     {
@@ -53,11 +53,11 @@ export const unit15: Unit = {
       title: 'ציוד לטיול',
       tip: 'מה לוקחים? [[I take a map]]. מה צריך? [[I need a tent]] – תמיד עם [[a]] לפני שם עצם יחיד.',
       words: [
-        { en: 'map', he: 'מפה', sound: 'מַאפּ' },
+        { en: 'map', he: 'מפה', sound: 'מֶפּ' },
         { en: 'tent', he: 'אוהל', sound: 'טֶנְט' },
-        { en: 'backpack', he: 'תרמיל', sound: 'בַּקְפַּאק' },
-        { en: 'camera', he: 'מצלמה', sound: 'קָמֶרָה' },
-        { en: 'flashlight', he: 'פנס', sound: 'פְלַאשְׁלַייט' },
+        { en: 'backpack', he: 'תרמיל', sound: 'בֶּקְפֶּק' },
+        { en: 'camera', he: 'מצלמה', sound: 'קֶמֶרָה' },
+        { en: 'flashlight', he: 'פנס', sound: 'פְלֶשְׁלַייט' },
       ],
       sentences: [
         { en: 'I need a map', he: 'אני צריך מפה', heAlt: ['אני צריכה מפה'], errors: ['E2'] },
@@ -74,7 +74,7 @@ export const unit15: Unit = {
         { en: 'dangerous', he: 'מסוכן', sound: 'דֵייְנְג׳רֶס' },
         { en: 'careful', he: 'זהיר', sound: 'קֶרְפוּל' },
         { en: 'sun', he: 'שמש', sound: 'סָאן' },
-        { en: 'hat', he: 'כובע', sound: 'הָאט' },
+        { en: 'hat', he: 'כובע', sound: 'הֶט' },
         { en: 'bottle', he: 'בקבוק', sound: 'בּוֹטֶל' },
       ],
       sentences: [
