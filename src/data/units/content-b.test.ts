@@ -17,9 +17,12 @@ import { unit6 } from './u06';
 import { unit10 } from './u10';
 import { unit11 } from './u11';
 import { unit12 } from './u12';
+import { unit13 } from './u13';
+import { unit14 } from './u14';
+import { unit15 } from './u15';
 
-const UNITS: Unit[] = [unit4, unit5, unit6, unit10, unit11, unit12];
-const LESSON_COUNT: Record<string, number> = { u4: 6, u5: 5, u6: 5, u10: 5, u11: 5, u12: 6 };
+const UNITS: Unit[] = [unit4, unit5, unit6, unit10, unit11, unit12, unit13, unit14, unit15];
+const LESSON_COUNT: Record<string, number> = { u4: 6, u5: 5, u6: 5, u10: 5, u11: 5, u12: 6, u13: 5, u14: 5, u15: 5 };
 const lessons = UNITS.flatMap((u) => u.lessons);
 const SEEDS = [1, 7, 42, 2026];
 
