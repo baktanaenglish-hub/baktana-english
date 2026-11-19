@@ -19,7 +19,7 @@ const FROZEN_LESSONS: Record<string, number> = {
 const ERROR_CODES = new Set<ErrorCode>(Array.from({ length: 27 }, (_, i) => `E${i + 1}` as ErrorCode));
 
 describe('content: structure', () => {
-  it('has units u1…u12 in order, each with a level and an intro tip', () => {
+  it('has units u1…u15 in order, each with a level and an intro tip', () => {
     expect(allUnits.map((u) => u.id)).toEqual(allUnits.map((_, i) => `u${i + 1}`));
     for (const unit of allUnits) {
       expect(unit.level, unit.id).toBeTruthy();

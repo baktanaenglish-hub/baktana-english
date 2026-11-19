@@ -87,16 +87,16 @@ describe('US-U1 AC6: unlock rule on the server', () => {
 
   it('PUT /api/progress keeps lesson ids of newer clients and drops junk', async () => {
     const { token } = await register();
-    const body = { ...initialProgress(), completed: { u1l1: 1, u13l1: 1, u12cp: 1, 'bad id': 1, __practice__: 2 } };
+    const body = { ...initialProgress(), completed: { u1l1: 1, u99l1: 1, u12cp: 1, 'bad id': 1, __practice__: 2 } };
     const res = await request(app).put('/api/progress').set(auth(token)).send(body);
     expect(res.status).toBe(200);
-    expect(res.body.progress.completed).toEqual({ u1l1: 1, u13l1: 1, u12cp: 1 });
-    // An older client uploading without u13l1 does not remove it.
+    expect(res.body.progress.completed).toEqual({ u1l1: 1, u99l1: 1, u12cp: 1 });
+    // An older client uploading without u99l1 does not remove it.
     const again = await request(app)
       .put('/api/progress')
       .set(auth(token))
       .send({ ...initialProgress(), completed: { u1l1: 1 } });
-    expect(again.body.progress.completed).toEqual({ u1l1: 1, u13l1: 1, u12cp: 1 });
+    expect(again.body.progress.completed).toEqual({ u1l1: 1, u99l1: 1, u12cp: 1 });
   });
 });
 
