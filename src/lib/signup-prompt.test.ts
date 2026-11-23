@@ -52,7 +52,7 @@ describe('signupRound (US-S1)', () => {
     let p = completeLesson(initialProgress(), allLessons[0].id, 10);
     p = completeLesson(p, allLessons[0].id, 10);
     p = completeLesson(p, '__practice__', 10);
-    p = { ...p, completed: { ...p.completed, u13l1: 1 } };
+    p = { ...p, completed: { ...p.completed, u99l1: 1 } };
     expect(lessonsCompleted(p)).toBe(1);
     expect(lessonsCompleted(completeLesson(p, allLessons[1].id, 10))).toBe(2);
   });

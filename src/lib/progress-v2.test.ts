@@ -41,11 +41,11 @@ describe('v2 unlock rule (docs/spec/v2.md §6.7.1, US-U1)', () => {
   });
 
   it('AC4: unknown ids in completed do not affect unlocking', () => {
-    const p = withCompleted(['u13l1', 'u99cp']);
+    const p = withCompleted(['u99l1', 'u99cp']);
     expect(ids.filter((id) => isUnlocked(p, id))).toEqual([ids[0]]);
     expect(currentLessonId(p)).toBe(ids[0]);
-    expect(isUnlocked(p, 'u13l1')).toBe(false);
-    expect(isCatchUp(p, 'u13l1')).toBe(false);
+    expect(isUnlocked(p, 'u99l1')).toBe(false);
+    expect(isCatchUp(p, 'u99l1')).toBe(false);
   });
 
   it('__practice__ is never a lesson', () => {
@@ -76,8 +76,8 @@ describe('tolerant sanitizeProgress (docs/spec/v2.md §6.7.2)', () => {
   const base: Progress = { ...initialProgress(NOW), xp: 10 };
 
   it('US-U1 AC4: keeps lesson ids of newer course versions', () => {
-    const p = sanitizeProgress({ ...base, completed: { u1l1: 1, u13l1: 2 } }, NOW)!;
-    expect(p.completed).toEqual({ u1l1: 1, u13l1: 2 });
+    const p = sanitizeProgress({ ...base, completed: { u1l1: 1, u99l1: 2 } }, NOW)!;
+    expect(p.completed).toEqual({ u1l1: 1, u99l1: 2 });
   });
 
   it('US-U1 AC5: keeps checkpoint ids, drops malformed ids and __practice__', () => {
@@ -98,8 +98,8 @@ describe('tolerant sanitizeProgress (docs/spec/v2.md §6.7.2)', () => {
   });
 
   it('a lesson completed by a newer client survives a merge with an older upload', () => {
-    const stored = { ...base, completed: { u1l1: 1, u13l1: 1 } };
+    const stored = { ...base, completed: { u1l1: 1, u99l1: 1 } };
     const merged = mergeProgress(stored, sanitizeProgress({ ...base, completed: { u1l1: 2 } }, NOW)!, NOW);
-    expect(merged.completed).toEqual({ u1l1: 2, u13l1: 1 });
+    expect(merged.completed).toEqual({ u1l1: 2, u99l1: 1 });
   });
 });

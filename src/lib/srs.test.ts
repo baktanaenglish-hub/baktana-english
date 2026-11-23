@@ -192,7 +192,7 @@ describe('seedFromProgress (US-R5 AC3)', () => {
   });
 
   it('ignores unknown lesson ids', () => {
-    const s = seedFromProgress(emptySrs(), { ...initialProgress(NOW), completed: { u13l1: 1 } }, NOW);
+    const s = seedFromProgress(emptySrs(), { ...initialProgress(NOW), completed: { u99l1: 1 } }, NOW);
     expect(s.items).toEqual({});
   });
 });
