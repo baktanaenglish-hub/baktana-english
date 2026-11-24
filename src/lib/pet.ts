@@ -16,6 +16,7 @@ import {
   type PetDesign,
 } from '../../shared/pet-design';
 import { dateKey } from './progress';
+import { initialHome, parseHome, type HomeState } from './pet-home';
 
 export const PET_KEY = 'baktana-english:pet:v1';
 
@@ -183,6 +184,8 @@ export interface PetState {
   groupChallenges: number;
   /** Head-to-head duels won. */
   duelWins: number;
+  /** The home and clothes built over time (src/lib/pet-home.ts). */
+  home: HomeState;
 }
 
 const SLOTS: Slot[] = ['head', 'face', 'neck'];
@@ -205,6 +208,7 @@ export function adoptPet(speciesId: string, name: string, now = Date.now()): Pet
     challengeClaimed: false,
     groupChallenges: 0,
     duelWins: 0,
+    home: initialHome(),
   };
 }
 
@@ -240,6 +244,7 @@ export function parsePet(raw: string | null): PetState | null {
       challengeClaimed: d.challengeClaimed === true,
       groupChallenges: count(d.groupChallenges),
       duelWins: count(d.duelWins),
+      home: parseHome(d.home),
     };
   } catch {
     return null;

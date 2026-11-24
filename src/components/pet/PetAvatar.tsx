@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from 'react';
+import { homeItem } from '../../lib/pet-home';
 import { accessoryById, hasAbility, petLook, STAGES, type PetState } from '../../lib/pet';
 
 interface Props {
@@ -17,7 +18,8 @@ export function PetAvatar({ pet, xp, size = 'medium', interactive = false }: Pro
   const worn = (['head', 'face', 'neck'] as const)
     .map((slot) => pet.worn[slot] && accessoryById(pet.worn[slot]!))
     .filter((a) => !!a);
-  const label = `${pet.name} – ${STAGES[look.stage].name}${worn.length ? `, עם ${worn.map((a) => a.name).join(', ')}` : ''}`;
+  const outfit = pet.home.outfit ? homeItem(pet.home.outfit) : undefined;
+  const label = `${pet.name} – ${STAGES[look.stage].name}${worn.length ? `, עם ${worn.map((a) => a.name).join(', ')}` : ''}${outfit && look.stage > 0 ? `, לובשת ${outfit.name}` : ''}`;
   const className = `pet-avatar ${size} stage-${look.stage}${trick ? ` trick-${trick % 3}` : ''}`;
   const style = { '--pet-color': look.color } as CSSProperties;
   const body = (
@@ -31,6 +33,11 @@ export function PetAvatar({ pet, xp, size = 'medium', interactive = false }: Pro
       <span className="pet-body" aria-hidden="true">
         {look.emoji}
       </span>
+      {look.stage > 0 && outfit && (
+        <span className="pet-acc body" aria-hidden="true">
+          {outfit.icon}
+        </span>
+      )}
       {look.stage > 0 &&
         worn.map((a) => (
           <span key={a.id} className={`pet-acc ${a.slot}`} aria-hidden="true">

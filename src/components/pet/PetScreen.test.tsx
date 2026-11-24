@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { adoptPet, growPet } from '../../lib/pet';
+import { startProject } from '../../lib/pet-home';
 import { DuelCard, Duels } from '../Duels';
 import { MemberPet } from '../MyGroups';
 import { PetScreen } from './PetScreen';
@@ -38,6 +39,19 @@ describe('PetScreen', () => {
     expect(html).toContain('צעיף');
     expect(html).toContain('🧢');
     expect(html).toContain('שתפו את שלהבת');
+  });
+
+  it('shows the home with what is being built and what can be built next', () => {
+    const hatched = growPet(adoptPet('dragon', 'שלהבת', 0)!, { xp: 250, lessons: 3, streak: 0 }).pet;
+    const started = startProject(hatched.home, 'tent', 50, true, Date.now())!;
+    const pet = { ...hatched, home: started.home };
+    const html = renderToStaticMarkup(
+      <PetScreen {...base} xp={250} pet={pet} gems={50} onStartProject={noop} onRushProject={noop} onWear={noop} />,
+    );
+    expect(html).toContain('הבית של שלהבת');
+    expect(html).toContain('בונים: אוהל');
+    expect(html).toContain('חולצה');
+    expect(html).toContain('דורש: אוהל');
   });
 
   it('locks the designer for non-premium learners and opens it for premium', () => {
