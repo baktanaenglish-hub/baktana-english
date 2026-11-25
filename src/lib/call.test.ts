@@ -5,6 +5,8 @@ import {
   appendReply,
   appendUser,
   callsLeft,
+  callXp,
+  CALL_XP_MAX,
   canTalk,
   cleanMessage,
   formatDuration,
@@ -157,5 +159,21 @@ describe('daily calls', () => {
   it('says how many are left, with the singular for one', () => {
     expect(remainingText(7, 10)).toBe('נשארו לכם 7 מתוך 10 שיחות היום');
     expect(remainingText(1, 10)).toBe('נשארה לכם שיחה אחת מתוך 10 היום');
+  });
+});
+
+describe('callXp', () => {
+  it('pays nothing for a call without sentences', () => {
+    expect(callXp(0)).toBe(0);
+    expect(callXp(-3)).toBe(0);
+  });
+
+  it('pays a couple of points per sentence', () => {
+    expect(callXp(1)).toBe(2);
+    expect(callXp(5)).toBe(10);
+  });
+
+  it('caps what one call can pay', () => {
+    expect(callXp(1000)).toBe(CALL_XP_MAX);
   });
 });

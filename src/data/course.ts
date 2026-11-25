@@ -11,6 +11,9 @@ import { unit9 } from './units/u09';
 import { unit10 } from './units/u10';
 import { unit11 } from './units/u11';
 import { unit12 } from './units/u12';
+import { unit13 } from './units/u13';
+import { unit14 } from './units/u14';
+import { unit15 } from './units/u15';
 
 /**
  * The course content, one file per unit in ./units (owners in ./units/README.md and
@@ -19,9 +22,9 @@ import { unit12 } from './units/u12';
  *
  * Course order = this list, then each unit's lesson order. Units that have no lessons yet
  * are left out, so a unit file can be merged before its lessons are written.
- * This file is frozen for v2 – nobody edits it during the parallel round.
+ * Units 13–15 were added after v2.
  */
-export const allUnits: Unit[] = [unit1, unit2, unit3, unit4, unit5, unit6, unit7, unit8, unit9, unit10, unit11, unit12];
+export const allUnits: Unit[] = [unit1, unit2, unit3, unit4, unit5, unit6, unit7, unit8, unit9, unit10, unit11, unit12, unit13, unit14, unit15];
 
 export const course: Unit[] = allUnits.filter((unit) => unit.lessons.length > 0);
 

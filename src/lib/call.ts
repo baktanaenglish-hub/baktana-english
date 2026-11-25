@@ -132,6 +132,15 @@ export function allCorrections(state: CallState): Correction[] {
   return state.lines.flatMap((l) => l.corrections ?? []);
 }
 
+/** XP for each sentence the learner said on a call, and the most one call can pay. */
+export const CALL_XP_PER_TURN = 2;
+export const CALL_XP_MAX = 30;
+
+/** Points earned by a finished call: a couple per sentence the learner said, capped. */
+export function callXp(turns: number): number {
+  return Math.min(CALL_XP_MAX, Math.max(0, Math.floor(turns)) * CALL_XP_PER_TURN);
+}
+
 /** `mm:ss` (minutes keep counting past 59). */
 export function formatDuration(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));

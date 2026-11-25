@@ -101,8 +101,8 @@ describe('content QA: answers', () => {
     expect(lesson('u4l5').sentences[3].alt ?? []).not.toContain('Is it too late');
   });
 
-  it('has 64 lessons (US-C2 AC2)', () => {
-    expect(allLessons).toHaveLength(64);
+  it('has 79 lessons (US-C2 AC2 + units 13–15)', () => {
+    expect(allLessons).toHaveLength(79);
   });
 });
 
