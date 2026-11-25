@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { REVIEW_PIN_THRESHOLD } from '../../shared/srs';
 import { allLessons, course } from '../data/course';
 import { dailyGoalOf } from '../lib/goals';
@@ -115,7 +123,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
       </section>
 
       {course.map((unit) => (
-        <section key={unit.id} className="unit">
+        <UnitSection key={unit.id} unit={unit}>
           <div className="unit-banner" style={{ background: unit.color }}>
             <div className="unit-banner-text">
               <h2>
@@ -128,6 +136,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                 )}
               </h2>
               <p>{unit.description}</p>
+              <UnitProgress unit={unit} progress={progress} />
             </div>
             <div className="unit-banner-side">
               {unit.level && (
@@ -148,7 +157,7 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
               )}
             </div>
           </div>
-          <div className="unit-lessons">
+          <UnitLessons unit={unit} progress={progress} current={current}>
             {unit.lessons.map((lesson, i) => {
               const done = (progress.completed[lesson.id] ?? 0) > 0;
               const open = isUnlocked(progress, lesson.id);
@@ -171,7 +180,8 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                     data-lesson-id={lesson.id}
                     aria-label={`${lesson.title}${done ? ' (הושלם)' : open ? '' : ' (נעול)'}${catchUp ? ' (חדש!)' : ''}`}
                   >
-                    <Icon name={done ? 'check' : open ? 'star' : 'lock'} filled={open && !done} className="node-icon" />
+                    {/* Locked bubbles show a grey star, like the rest of the path; the label and a tap say why. */}
+                    <Icon name={done ? 'check' : 'star'} filled={!done} className="node-icon" />
                   </button>
                   {catchUp && (
                     <span className="new-chip" aria-hidden="true">
@@ -191,8 +201,8 @@ export function LearningPath({ progress, due, onStart, onReview, onIntro, onPlac
                 onLocked={() => setLockedNote('המבחן נפתח אחרי שמסיימים את כל השיעורים ביחידה.')}
               />
             )}
-          </div>
-        </section>
+          </UnitLessons>
+        </UnitSection>
       ))}
       {lockedNote && (
         <p className="path-toast" role="status">
@@ -223,9 +233,111 @@ function UnitTestNode({ passed, open, color, onStart, onLocked }: UnitTestNodePr
         onClick={open ? onStart : onLocked}
         aria-label={`מבחן יחידה${passed ? ' (עברתם)' : open ? '' : ' (נעול – סיימו את כל השיעורים)'}`}
       >
-        <Icon name={passed ? 'crown' : open ? 'trophy' : 'lock'} filled={passed || open} className="node-icon" />
+        <Icon name={passed ? 'crown' : 'trophy'} filled className="node-icon" />
       </button>
       <span className="node-title">מבחן יחידה</span>
     </div>
   );
+}
+
+interface UnitPartProps {
+  unit: Unit;
+  progress: Progress;
+  current: string | undefined;
+  children: ReactNode;
+}
+
+/** A unit of the path; `--unit` lets the CSS tint the current bubble and the trail in the unit's color. */
+function UnitSection({ unit, children }: { unit: Unit; children: ReactNode }) {
+  return (
+    <section className="unit" style={{ '--unit': unit.color } as CSSProperties}>
+      {children}
+    </section>
+  );
+}
+
+/** "3/5" and a thin bar on the unit banner. */
+function UnitProgress({ unit, progress }: { unit: Unit; progress: Progress }) {
+  const total = unit.lessons.length;
+  if (total === 0) return null;
+  const done = unit.lessons.filter((l) => (progress.completed[l.id] ?? 0) > 0).length;
+  return (
+    <div className="unit-progress">
+      <div className="unit-progress-track" aria-hidden="true">
+        <div className="unit-progress-fill" style={{ width: `${(done / total) * 100}%` }} />
+      </div>
+      <span className="unit-progress-text">
+        <span dir="ltr">
+          {done}/{total}
+        </span>
+        <span className="sr-only"> שיעורים הושלמו</span>
+      </span>
+    </div>
+  );
+}
+
+/** The bubbles of a unit over a winding trail: solid up to where the learner is, dotted after. */
+function UnitLessons({ unit, progress, current, children }: UnitPartProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  // The last bubble the learner has reached: done, or the one to continue with.
+  let reached = -1;
+  unit.lessons.forEach((l, i) => {
+    if ((progress.completed[l.id] ?? 0) > 0 || l.id === current) reached = i;
+  });
+  if (reached === unit.lessons.length - 1 && unitTestOpen(progress, unit)) reached = unit.lessons.length;
+  const points = useNodeCenters(ref, `${current}:${reached}`);
+  return (
+    <div className="unit-lessons" ref={ref}>
+      {points.length > 1 && (
+        <svg className="path-trail" aria-hidden="true" focusable="false">
+          <path className="trail-rest" d={trailPath(points.slice(Math.max(reached, 0)))} />
+          {reached > 0 && <path className="trail-walked" d={trailPath(points.slice(0, reached + 1))} />}
+        </svg>
+      )}
+      {children}
+    </div>
+  );
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+/** Centers of the `.node-btn` bubbles inside `ref`, re-measured when its size changes. */
+function useNodeCenters(ref: RefObject<HTMLDivElement | null>, key: string): Point[] {
+  const [points, setPoints] = useState<Point[]>([]);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      const box = el.getBoundingClientRect();
+      const next = [...el.querySelectorAll('.node-btn')].map((b) => {
+        const r = b.getBoundingClientRect();
+        return { x: Math.round(r.left + r.width / 2 - box.left), y: Math.round(r.top + r.height / 2 - box.top) };
+      });
+      setPoints((prev) =>
+        prev.length === next.length && prev.every((p, i) => p.x === next[i].x && p.y === next[i].y) ? prev : next,
+      );
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref, key]);
+  return points;
+}
+
+/** A smooth S-curve through the points (vertical tangents at each bubble). */
+export function trailPath(points: Point[]): string {
+  if (points.length < 2) return '';
+  return points
+    .map((p, i) => {
+      if (i === 0) return `M ${p.x} ${p.y}`;
+      const prev = points[i - 1];
+      const midY = (prev.y + p.y) / 2;
+      return `C ${prev.x} ${midY} ${p.x} ${midY} ${p.x} ${p.y}`;
+    })
+    .join(' ');
 }

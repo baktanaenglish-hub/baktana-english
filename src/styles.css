@@ -475,10 +475,62 @@ button:disabled {
 }
 
 .unit-lessons {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 22px;
+}
+
+/* The winding trail behind the bubbles (LearningPath.tsx measures the bubbles and draws it). */
+.path-trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.path-trail path {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.trail-rest {
+  stroke: var(--locked);
+  stroke-dasharray: 14 12;
+}
+
+.trail-walked {
+  stroke: color-mix(in srgb, var(--unit, var(--brand)) 45%, transparent);
+}
+
+/* Progress on the unit banner. */
+.unit-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  max-width: 220px;
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.unit-progress-track {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 30%);
+  overflow: hidden;
+}
+
+.unit-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--on-color);
+  transition: width 0.4s ease;
 }
 
 .lesson-node {
@@ -540,7 +592,7 @@ button:disabled {
 }
 
 .node-btn.current {
-  outline: 6px solid rgba(31, 124, 242, 0.25);
+  outline: 6px solid color-mix(in srgb, var(--unit, var(--brand)) 25%, transparent);
   outline-offset: 4px;
   animation: glow 2s ease-in-out infinite;
 }
@@ -550,6 +602,10 @@ button:disabled {
 }
 
 .node-title {
+  /* Sits on the trail, so it gets the page background behind it. */
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
   font-weight: 700;
   font-size: var(--text-md);
   color: var(--muted);
@@ -2192,7 +2248,7 @@ button:disabled {
 
 @keyframes glow {
   50% {
-    outline-color: rgba(31, 124, 242, 0.45);
+    outline-color: color-mix(in srgb, var(--unit, var(--brand)) 50%, transparent);
   }
 }
 

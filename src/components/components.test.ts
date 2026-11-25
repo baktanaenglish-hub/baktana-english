@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { validateAuth } from './AuthScreen';
 import { validateNewPassword } from './ResetPassword';
 import { isPasswordRecoveryLink } from '../lib/config';
-import { reviewButtonState } from './LearningPath';
+import { reviewButtonState, trailPath } from './LearningPath';
 import { itemAnswers, lessonResult } from './LessonScreen';
 import { parseRichTip } from './RichTip';
 import type { Exercise } from '../types';
@@ -135,5 +135,21 @@ describe('password reset', () => {
     expect(isPasswordRecoveryLink('#access_token=x&expires_in=3600&type=recovery')).toBe(true);
     expect(isPasswordRecoveryLink('#access_token=x&type=signup')).toBe(false);
     expect(isPasswordRecoveryLink('')).toBe(false);
+  });
+});
+
+describe('trailPath', () => {
+  it('is empty for fewer than two bubbles', () => {
+    expect(trailPath([])).toBe('');
+    expect(trailPath([{ x: 10, y: 10 }])).toBe('');
+  });
+
+  it('joins the bubbles with S-curves that leave and enter each one vertically', () => {
+    expect(
+      trailPath([
+        { x: 100, y: 0 },
+        { x: 160, y: 100 },
+      ]),
+    ).toBe('M 100 0 C 100 50 160 50 160 100');
   });
 });
