@@ -17,6 +17,7 @@ import {
 import type { PetDesign } from '../../../shared/pet-design';
 import { PetAvatar } from './PetAvatar';
 import { PetDesigner } from './PetDesigner';
+import { PetHouse } from './PetHouse';
 import { Icon } from '../Icon';
 
 interface Props {
@@ -26,6 +27,12 @@ interface Props {
   practicedToday: boolean;
   today: string;
   premium: boolean;
+  /** The learner's gems, spent on the home. */
+  gems?: number;
+  /** Home projects: start one, rush the running one, put on a clothing item. */
+  onStartProject?: (id: string) => void;
+  onRushProject?: () => void;
+  onWear?: (id: string) => void;
   /** Signed in with a backend that can design with AI. */
   canDesignWithAi: boolean;
   onAdopt: (species: string, name: string) => void;
@@ -202,6 +209,18 @@ function PetHome(props: Props & { pet: PetState }) {
         <p className="muted">
           ב{STAGES[2].name} ({STAGES[2].xp} XP) {pet.name} תתחיל להציע לכם אתגר יומי עם פרס.
         </p>
+      )}
+
+      {props.onStartProject && props.onRushProject && props.onWear && (
+        <PetHouse
+          pet={pet}
+          xp={xp}
+          gems={props.gems ?? 0}
+          hatched={look.stage > 0}
+          onStart={props.onStartProject}
+          onRush={props.onRushProject}
+          onWear={props.onWear}
+        />
       )}
 
       <h3>

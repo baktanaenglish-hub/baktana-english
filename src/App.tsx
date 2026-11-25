@@ -67,6 +67,7 @@ import {
   usePet,
   type Milestones,
 } from './lib/pet';
+import { helpProject, rushProject, settleHome, startProject, toggleOutfit } from './lib/pet-home';
 import { Shop } from './components/Shop';
 import { Arcade } from './components/Arcade';
 import { GameResult } from './components/games/GameResult';
@@ -257,6 +258,26 @@ function Screens() {
 
   // Progress made outside lessons (placement, unit tests, another device) also grows the pet.
   const milestones: Milestones = { xp: progress.xp, lessons: lessonsCompleted(progress), streak };
+  // The home project finishes by the clock, even if the app was closed meanwhile.
+  const [homeNotice, setHomeNotice] = useState<string | null>(null);
+  const building = pet?.home.project?.id ?? null;
+  useEffect(() => {
+    if (!building) return;
+    const tick = () => {
+      const settled = pet ? settleHome(pet.home) : null;
+      if (!settled?.finished) return;
+      const item = settled.finished;
+      updatePet((p) => (p ? { ...p, home: settleHome(p.home).home } : p));
+      setHomeNotice(`${item.icon} ${item.name} מוכן! ${pet!.name} מזמינה אתכם לראות`);
+      sounds.gem();
+    };
+    tick();
+    const id = setInterval(tick, 15_000);
+    return () => clearInterval(id);
+    // The pet object changes with every update; only a new project needs a new timer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [building]);
+
   useEffect(() => {
     if (!pet) return;
     const grown = growPet(pet, milestones);
@@ -441,7 +462,8 @@ function Screens() {
     if (!pet) return { rewards: [] as Reward[], gems: 0, line: null };
     const grown = growPet(pet, { xp: after.xp, lessons: lessonsCompleted(after), streak: visibleStreak(after) });
     const challenge = recordChallenge(grown.pet, { kind, flawless, xpToday: after.xpToday }, after.xp);
-    updatePet(() => challenge.pet);
+    // The builders work faster with every finished lesson.
+    updatePet(() => ({ ...challenge.pet, home: helpProject(challenge.pet.home) }));
     const rewards: Reward[] = [];
     if (grown.gems) {
       const label = grown.evolvedTo === 1 ? `${pet.name} בקעה מהביצה!` : `${pet.name} התפתחה!`;
@@ -917,7 +939,11 @@ function Screens() {
             xp={progress.xp}
             streak={streak}
             practicedToday={practicedToday}
-            onOpen={() => setScreen({ name: 'pet' })}
+            notice={homeNotice}
+            onOpen={() => {
+              setHomeNotice(null);
+              setScreen({ name: 'pet' });
+            }}
           />
         )}
         {screen.name === 'pet' && (
@@ -928,6 +954,23 @@ function Screens() {
             practicedToday={practicedToday}
             today={today}
             premium={premium}
+            gems={gems.gems}
+            onStartProject={(id) => {
+              if (!pet) return;
+              const started = startProject(pet.home, id, gems.gems, stageFor(progress.xp) > 0);
+              if (!started) return;
+              updateGems((s) => ({ ...s, gems: s.gems - started.cost }));
+              updatePet((p) => (p ? { ...p, home: started.home } : p));
+            }}
+            onRushProject={() => {
+              if (!pet) return;
+              const rushed = rushProject(pet.home, gems.gems);
+              if (!rushed) return;
+              sounds.gem();
+              updateGems((s) => ({ ...s, gems: s.gems - rushed.cost }));
+              updatePet((p) => (p ? { ...p, home: rushed.home } : p));
+            }}
+            onWear={(id) => updatePet((p) => (p ? { ...p, home: toggleOutfit(p.home, id) } : p))}
             canDesignWithAi={CALLS_ENABLED && account.user !== null}
             onAdopt={(species, name) => {
               const adopted = adoptPet(species, name);
