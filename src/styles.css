@@ -4905,7 +4905,7 @@ button.pet-avatar {
   height: 210px;
   overflow: hidden;
   border: 2px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   background: var(--surface);
 }
 .home-sky {
@@ -4948,12 +4948,12 @@ button.pet-avatar {
   font-size: 6.4rem;
 }
 .home-decor {
-  font-size: 1.7rem;
+  font-size: var(--text-2xl);
 }
 .home-decor.d-bed {
   bottom: 38%;
   inset-inline-start: 38%;
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
 }
 .home-decor.d-plant {
   bottom: 24%;
@@ -4966,12 +4966,12 @@ button.pet-avatar {
 .home-decor.d-books {
   bottom: 40%;
   inset-inline-start: 44%;
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
 }
 .home-decor.d-fire {
   bottom: 36%;
   inset-inline-start: 50%;
-  font-size: 1.3rem;
+  font-size: var(--text-xl);
 }
 .home-decor.d-tree {
   bottom: 22%;
@@ -4985,12 +4985,12 @@ button.pet-avatar {
 .home-decor.d-pool {
   bottom: 4%;
   inset-inline-start: 62%;
-  font-size: 2.2rem;
+  font-size: var(--text-3xl);
 }
 .home-works {
   top: 10%;
   inset-inline-end: 12%;
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   animation: home-bob 1.4s ease-in-out infinite;
 }
 .home-pet {
@@ -5006,7 +5006,7 @@ button.pet-avatar {
 .home-count,
 .home-tip {
   margin: 6px 0;
-  font-size: 0.9rem;
+  font-size: var(--text-md);
 }
 .home-project {
   display: flex;
@@ -5015,7 +5015,7 @@ button.pet-avatar {
   margin: 10px 0;
   padding: 12px 14px;
   border: 2px solid var(--gem);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
 }
 .home-group h4 {
   margin: 14px 0 6px;
@@ -5035,7 +5035,7 @@ button.pet-avatar {
   min-height: 52px;
   padding: 6px 12px;
   border: 2px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
 }
 .home-item.built {
   border-color: var(--gem);
@@ -5048,7 +5048,7 @@ button.pet-avatar {
   flex: none;
   width: 2rem;
   text-align: center;
-  font-size: 1.6rem;
+  font-size: var(--text-2xl);
 }
 .home-item-text {
   flex: 1;
